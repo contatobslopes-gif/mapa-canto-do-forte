@@ -7,6 +7,8 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <style>
 body {margin:0;}
@@ -37,9 +39,16 @@ maxZoom:19
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 attribution:'© OpenStreetMap'
 }).addTo(map);
+L.Control.geocoder({
+defaultMarkGeocode: true
+}).addTo(map);
 
-
-var imoveis = [
+var iconeImovel = L.icon({
+iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+iconSize: [32,32],
+iconAnchor: [16,32],
+popupAnchor: [0,-32]
+});var imoveis = [
 
 {
 nome:"Imóvel 001",
