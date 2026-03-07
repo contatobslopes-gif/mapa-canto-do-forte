@@ -26,9 +26,41 @@ maxZoom: 19
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  var imovel1 = L.marker([-24.0055, -46.4028]).addTo(map);
-  imovel1.bindPopup("<b>Endereço:</b> Rua Exemplo, 123<br><b>Quadra:</b> 12<br><b>Lote:</b> 08<br><br><a href='https://wa.me/5519999493684?text=Olá,%20gostaria%20de%20solicitar%20o%20número%20da%20matrícula%20deste%20imóvel.%20Endereço:%20Rua%20Exemplo%20123%20Quadra%2012%20Lote%2008' target='_blank'><button>Solicitar número da matrícula<br>📄 Retorno em até 24h</button></a>");
-</script>
+  var imoveis = [
+
+{
+nome: "Imóvel 001",
+lat: -24.0055,
+lng: -46.4028,
+endereco: "Rua Exemplo, 123",
+quadra: "12",
+lote: "08"
+},
+
+{
+nome: "Imóvel 002",
+lat: -24.0035,
+lng: -46.4010,
+endereco: "Rua Teste, 50",
+quadra: "05",
+lote: "02"
+}
+
+];
+
+imoveis.forEach(function(imovel){
+
+var marcador = L.marker([imovel.lat, imovel.lng]).addTo(map);
+
+marcador.bindPopup(
+"<b>"+imovel.nome+"</b><br>"+
+"<b>Endereço:</b> "+imovel.endereco+"<br>"+
+"<b>Quadra:</b> "+imovel.quadra+"<br>"+
+"<b>Lote:</b> "+imovel.lote+"<br><br>"+
+"<a href='https://wa.me/5519999493684?text=Olá,%20gostaria%20de%20solicitar%20o%20número%20da%20matrícula%20deste%20imóvel.%20Endereço:%20"+imovel.endereco+"%20Quadra%20"+imovel.quadra+"%20Lote%20"+imovel.lote+"' target='_blank'><button>Solicitar número da matrícula<br>📄 Retorno em até 24h</button></a>"
+);
+
+});
 
 </body>
 </html>
