@@ -18,7 +18,18 @@
 <div id="map"></div>
 
 <script>
-  var imoveis = [
+  
+var map = L.map('map', {
+minZoom:3,
+maxZoom:19
+}).setView([-24.0055, -46.4028], 15);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+attribution: '© OpenStreetMap'
+}).addTo(map);
+
+
+var imoveis = [
 
 {
 nome: "Imóvel 001",
@@ -40,6 +51,7 @@ lote: "02"
 
 ];
 
+
 imoveis.forEach(function(imovel){
 
 var marcador = L.marker([imovel.lat, imovel.lng]).addTo(map);
@@ -51,6 +63,7 @@ marcador.bindPopup(
 "<b>Lote:</b> "+imovel.lote
 );
 
+});
 });
 
 });
