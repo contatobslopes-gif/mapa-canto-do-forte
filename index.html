@@ -1,52 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <title>Mapa - Canto do Forte</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<title>Mapa de Imóveis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <style>
-    body { margin: 0; }
-    #map { height: 100vh; }
-  </style>
+<style>
+body {margin:0;}
+#map {height:100vh;}
+button{
+background:#25D366;
+border:none;
+padding:8px;
+color:white;
+border-radius:5px;
+cursor:pointer;
+}
+</style>
+
 </head>
+
 <body>
 
 <div id="map"></div>
 
 <script>
-  
+
 var map = L.map('map', {
 minZoom:3,
 maxZoom:19
-}).setView([-24.0055, -46.4028], 15);
+}).setView([-24.0055,-46.4028],15);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-attribution: '© OpenStreetMap'
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+attribution:'© OpenStreetMap'
 }).addTo(map);
 
 
 var imoveis = [
 
 {
-nome: "Imóvel 001",
-lat: -24.0055,
-lng: -46.4028,
-endereco: "Rua Exemplo, 123",
-quadra: "12",
-lote: "08"
+nome:"Imóvel 001",
+lat:-24.0055,
+lng:-46.4028,
+endereco:"Rua Exemplo, 123",
+quadra:"12",
+lote:"08"
 },
 
 {
-nome: "Imóvel 002",
-lat: -24.0035,
-lng: -46.4010,
-endereco: "Rua Teste, 50",
-quadra: "05",
-lote: "02"
+nome:"Imóvel 002",
+lat:-24.0035,
+lng:-46.4010,
+endereco:"Rua Teste, 50",
+quadra:"05",
+lote:"02"
 }
 
 ];
@@ -54,19 +64,22 @@ lote: "02"
 
 imoveis.forEach(function(imovel){
 
-var marcador = L.marker([imovel.lat, imovel.lng]).addTo(map);
+var marcador = L.marker([imovel.lat,imovel.lng]).addTo(map);
 
 marcador.bindPopup(
 "<b>"+imovel.nome+"</b><br>"+
 "<b>Endereço:</b> "+imovel.endereco+"<br>"+
 "<b>Quadra:</b> "+imovel.quadra+"<br>"+
-"<b>Lote:</b> "+imovel.lote
+"<b>Lote:</b> "+imovel.lote+
+"<br><br>"+
+"<a href='https://wa.me/5519999493684?text=Olá,%20gostaria%20de%20solicitar%20o%20número%20da%20matrícula%20deste%20imóvel.%20Endereço:%20"+imovel.endereco+"%20Quadra%20"+imovel.quadra+"%20Lote%20"+imovel.lote+"' target='_blank'>"+
+"<button>Solicitar número da matrícula<br>📄 Retorno em até 24h</button>"+
+"</a>"
 );
 
 });
-});
 
-});
+</script>
 
 </body>
 </html>
