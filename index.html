@@ -18,14 +18,6 @@
 <div id="map"></div>
 
 <script>
-  var map = L.map('map', {
-minZoom: 3,
-maxZoom: 19
-}).setView([-22.9056, -47.0608], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
-
   var imoveis = [
 
 {
@@ -56,9 +48,10 @@ marcador.bindPopup(
 "<b>"+imovel.nome+"</b><br>"+
 "<b>Endereço:</b> "+imovel.endereco+"<br>"+
 "<b>Quadra:</b> "+imovel.quadra+"<br>"+
-"<b>Lote:</b> "+imovel.lote+"<br><br>"+
-"<a href='https://wa.me/5519999493684?text=Olá,%20gostaria%20de%20solicitar%20o%20número%20da%20matrícula%20deste%20imóvel.%20Endereço:%20"+imovel.endereco+"%20Quadra%20"+imovel.quadra+"%20Lote%20"+imovel.lote+"' target='_blank'><button>Solicitar número da matrícula<br>📄 Retorno em até 24h</button></a>"
+"<b>Lote:</b> "+imovel.lote
 );
+
+});
 
 });
 
