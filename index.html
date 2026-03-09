@@ -71,7 +71,9 @@ download:true,
 header:true,
 
 complete:function(results){
-
+  
+console.log(results.data);
+  
 results.data.forEach(function(imovel){
 
 if(imovel.lat && imovel.lng){
