@@ -7,22 +7,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
-
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <style>
 
-body {
+body{
 margin:0;
 }
 
-#map {
+#map{
 height:100vh;
 }
 
@@ -70,6 +68,8 @@ Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ
 download:true,
 header:true,
 
+complete:function(results){
+
 console.log(results.data);
 
 var geocoder = L.Control.Geocoder.nominatim();
@@ -78,7 +78,7 @@ results.data.forEach(function(imovel){
 
 if(imovel.endereco){
 
-geocoder.geocode(imovel.endereco, function(resultado){
+geocoder.geocode(imovel.endereco,function(resultado){
 
 if(resultado.length > 0){
 
@@ -104,3 +104,12 @@ marcador.bindPopup(
 }
 
 });
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
