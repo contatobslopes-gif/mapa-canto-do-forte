@@ -72,19 +72,16 @@ complete:function(results){
 
 console.log(results.data);
 
-var geocoder = L.Control.Geocoder.nominatim();
-
 results.data.forEach(function(imovel){
 
-if(imovel.endereco){
+if(imovel.lat && imovel.lng){
 
-geocoder.geocode(imovel.endereco,function(resultado){
+var lat = parseFloat(imovel.lat);
+var lng = parseFloat(imovel.lng);
 
-if(resultado.length > 0){
+if(!isNaN(lat) && !isNaN(lng)){
 
-var posicao = resultado[0].center;
-
-var marcador = L.marker(posicao,{icon:iconeImovel}).addTo(map);
+var marcador = L.marker([lat,lng],{icon:iconeImovel}).addTo(map);
 
 marcador.bindPopup(
 "<b>"+imovel.nome+"</b><br>"+
@@ -98,8 +95,6 @@ marcador.bindPopup(
 );
 
 }
-
-});
 
 }
 
