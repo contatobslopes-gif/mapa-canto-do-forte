@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 <meta charset="utf-8"/>
 <title>Mapa de Imóveis</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-<head>
-<meta charset="utf-8"/>
-<title>Mapa de Imóveis</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <style>
-<style>
-body {margin:0;}
-#map {height:100vh;}
+
+body {
+margin:0;
+}
+
+#map {
+height:100vh;
+}
+
 button{
 background:#25D366;
 border:none;
@@ -28,6 +34,7 @@ color:white;
 border-radius:5px;
 cursor:pointer;
 }
+
 </style>
 
 </head>
@@ -38,7 +45,7 @@ cursor:pointer;
 
 <script>
 
-var map = L.map('map', {
+var map = L.map('map',{
 minZoom:3,
 maxZoom:19
 }).setView([-24.0055,-46.4028],13);
@@ -46,22 +53,30 @@ maxZoom:19
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 attribution:'© OpenStreetMap'
 }).addTo(map);
+
 L.Control.geocoder({
-defaultMarkGeocode: true
+defaultMarkGeocode:true
 }).addTo(map);
 
-Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv", {
+var iconeImovel = L.icon({
+iconUrl:'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+iconSize:[32,32],
+iconAnchor:[16,32],
+popupAnchor:[0,-32]
+});
 
-download: true,
-header: true,
+Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv",{
 
-complete: function(results) {
+download:true,
+header:true,
+
+complete:function(results){
 
 results.data.forEach(function(imovel){
 
 if(imovel.lat && imovel.lng){
 
-var marcador = L.marker([imovel.lat,imovel.lng], {icon: iconeImovel}).addTo(map);
+var marcador = L.marker([imovel.lat,imovel.lng],{icon:iconeImovel}).addTo(map);
 
 marcador.bindPopup(
 "<b>"+imovel.nome+"</b><br>"+
@@ -70,7 +85,7 @@ marcador.bindPopup(
 "<b>Lote:</b> "+imovel.lote+
 "<br><br>"+
 "<a href='https://wa.me/5519999493684?text=Olá,%20gostaria%20de%20solicitar%20o%20número%20da%20matrícula%20deste%20imóvel.%20Endereço:%20"+imovel.endereco+"%20Quadra%20"+imovel.quadra+"%20Lote%20"+imovel.lote+"' target='_blank'>"+
-"<button>Solicitar número da matrícula<br>📄 Retorno em até 24h</button>"+
+"<button>Solicitar número da matrícula por R$ 8,00<br>📄 Retorno em até 24hrs</button>"+
 "</a>"
 );
 
@@ -79,28 +94,11 @@ marcador.bindPopup(
 });
 
 }
-
-});
-
-
-imoveis.forEach(function(imovel){
-
-var marcador = L.marker([imovel.lat,imovel.lng]).addTo(map);
-
-marcador.bindPopup(
-"<b>"+imovel.nome+"</b><br>"+
-"<b>Endereço:</b> "+imovel.endereco+"<br>"+
-"<b>Quadra:</b> "+imovel.quadra+"<br>"+
-"<b>Lote:</b> "+imovel.lote+
-"<br><br>"+
-"<a href='https://wa.me/5519999493684?text=Olá,%20gostaria%20de%20solicitar%20o%20número%20da%20matrícula%20deste%20imóvel.%20Endereço:%20"+imovel.endereco+"%20Quadra%20"+imovel.quadra+"%20Lote%20"+imovel.lote+"' target='_blank'>"+
-"<button>Solicitar número da matrícula<br>📄 Retorno em até 24h</button>"+
-"</a>"
-);
 
 });
 
 </script>
 
 </body>
+
 </html>
