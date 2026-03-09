@@ -70,8 +70,6 @@ Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ
 download:true,
 header:true,
 
-complete:function(results){
-
 console.log(results.data);
 
 var geocoder = L.Control.Geocoder.nominatim();
@@ -106,5 +104,3 @@ marcador.bindPopup(
 }
 
 });
-
-}
