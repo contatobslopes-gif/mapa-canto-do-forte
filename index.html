@@ -71,10 +71,8 @@ download:true,
 header:true,
 
 complete:function(results){
-  
+
 console.log(results.data);
-  
-results.data.forEach(function(imovel){
 
 var geocoder = L.Control.Geocoder.nominatim();
 
@@ -89,21 +87,6 @@ if(resultado.length > 0){
 var posicao = resultado[0].center;
 
 var marcador = L.marker(posicao,{icon:iconeImovel}).addTo(map);
-
-marcador.bindPopup(
-"<b>"+imovel.nome+"</b><br>"+
-"<b>Endereço:</b> "+imovel.endereco+"<br>"+
-"<b>Quadra:</b> "+imovel.quadra+"<br>"+
-"<b>Lote:</b> "+imovel.lote
-);
-
-}
-
-});
-
-}
-
-});
 
 marcador.bindPopup(
 "<b>"+imovel.nome+"</b><br>"+
@@ -124,8 +107,4 @@ marcador.bindPopup(
 
 });
 
-</script>
-
-</body>
-
-</html>
+}
