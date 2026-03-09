@@ -50,32 +50,37 @@ L.Control.geocoder({
 defaultMarkGeocode: true
 }).addTo(map);
 
-var iconeImovel = L.icon({
-iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-iconSize: [32,32],
-iconAnchor: [16,32],
-popupAnchor: [0,-32]
-});var imoveis = [
+Papa.parse("https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv", {
 
-{
-nome:"Imóvel 001",
-lat:-24.0055,
-lng:-46.4028,
-endereco:"Rua Exemplo, 123",
-quadra:"12",
-lote:"08"
-},
+download: true,
+header: true,
 
-{
-nome:"Imóvel 002",
-lat:-24.0035,
-lng:-46.4010,
-endereco:"Rua Teste, 50",
-quadra:"05",
-lote:"02"
+complete: function(results) {
+
+results.data.forEach(function(imovel){
+
+if(imovel.lat && imovel.lng){
+
+var marcador = L.marker([imovel.lat,imovel.lng], {icon: iconeImovel}).addTo(map);
+
+marcador.bindPopup(
+"<b>"+imovel.nome+"</b><br>"+
+"<b>Endereço:</b> "+imovel.endereco+"<br>"+
+"<b>Quadra:</b> "+imovel.quadra+"<br>"+
+"<b>Lote:</b> "+imovel.lote+
+"<br><br>"+
+"<a href='https://wa.me/5519999493684?text=Olá,%20gostaria%20de%20solicitar%20o%20número%20da%20matrícula%20deste%20imóvel.%20Endereço:%20"+imovel.endereco+"%20Quadra%20"+imovel.quadra+"%20Lote%20"+imovel.lote+"' target='_blank'>"+
+"<button>Solicitar número da matrícula<br>📄 Retorno em até 24h</button>"+
+"</a>"
+);
+
 }
 
-];
+});
+
+}
+
+});
 
 
 imoveis.forEach(function(imovel){
