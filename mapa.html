@@ -9,6 +9,8 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
 <style>
 
 body{
@@ -38,24 +40,32 @@ maxZoom:19
 
 var sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
-fetch(sheetURL)
-.then(response => response.text())
-.then(data => {
+Papa.parse(sheetURL, {
 
-var linhas = data.split("\n");
+download:true,
+header:true,
 
-for(var i=1;i<linhas.length;i++){
+complete:function(results){
 
-var colunas = linhas[i].split(",");
+results.data.forEach(function(row){
 
-var lat = parseFloat(colunas[1]);
-var lng = parseFloat(colunas[2]);
+var lat = parseFloat(row.lat);
+var lng = parseFloat(row.lng);
 
 if(!isNaN(lat) && !isNaN(lng)){
 
-L.marker([lat,lng]).addTo(map);
+L.marker([lat,lng])
+.addTo(map)
+.bindPopup(
+
+"<b>"+row.cidade+"</b><br>"+
+row.rua+" "+row.numero
+
+);
 
 }
+
+});
 
 }
 
