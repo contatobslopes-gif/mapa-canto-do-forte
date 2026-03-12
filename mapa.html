@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
 <meta charset="utf-8">
@@ -40,10 +39,8 @@ maxZoom:19
 var sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
 fetch(sheetURL)
-.then(function(response){
-return response.text();
-})
-.then(function(data){
+.then(response => response.text())
+.then(data => {
 
 var linhas = data.split("\n");
 
@@ -54,16 +51,9 @@ var colunas = linhas[i].split(",");
 var lat = parseFloat(colunas[1]);
 var lng = parseFloat(colunas[2]);
 
-var cidade = colunas[4];
-var rua = colunas[7];
-var numero = colunas[8];
-
 if(!isNaN(lat) && !isNaN(lng)){
 
-L.marker([lat,lng]).addTo(map)
-.bindPopup(
-"<b>"+cidade+"</b><br>"+rua+", "+numero
-);
+L.marker([lat,lng]).addTo(map);
 
 }
 
