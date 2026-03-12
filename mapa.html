@@ -1,3 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<title>Matrimap</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+
+body{
+margin:0;
+}
+
+#map{
+height:100vh;
+width:100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="map"></div>
+
 <script>
 
 var map = L.map('map').setView([-22.19,-47.38],12);
@@ -9,40 +40,29 @@ maxZoom:19
 var sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
 fetch(sheetURL)
-.then(response => response.text())
-.then(data => {
+.then(function(response){
+return response.text();
+})
+.then(function(data){
 
 var linhas = data.split("\n");
-
-var cabecalho = linhas[0].split(",");
-
-var latIndex = cabecalho.indexOf("lat");
-var lngIndex = cabecalho.indexOf("lng");
-var cidadeIndex = cabecalho.indexOf("cidade");
-var ruaIndex = cabecalho.indexOf("rua");
-var numeroIndex = cabecalho.indexOf("numero");
-var matriculaIndex = cabecalho.indexOf("matricula");
 
 for(var i=1;i<linhas.length;i++){
 
 var colunas = linhas[i].split(",");
 
-var lat = parseFloat(colunas[latIndex]);
-var lng = parseFloat(colunas[lngIndex]);
+var lat = parseFloat(colunas[1]);
+var lng = parseFloat(colunas[2]);
 
-var cidade = colunas[cidadeIndex];
-var rua = colunas[ruaIndex];
-var numero = colunas[numeroIndex];
-var matricula = colunas[matriculaIndex];
+var cidade = colunas[4];
+var rua = colunas[7];
+var numero = colunas[8];
 
 if(!isNaN(lat) && !isNaN(lng)){
 
-L.marker([lat,lng])
-.addTo(map)
+L.marker([lat,lng]).addTo(map)
 .bindPopup(
-"<b>Matrícula:</b> "+matricula+
-"<br><b>Endereço:</b> "+rua+", "+numero+
-"<br><b>Cidade:</b> "+cidade
+"<b>"+cidade+"</b><br>"+rua+", "+numero
 );
 
 }
@@ -52,3 +72,6 @@ L.marker([lat,lng])
 });
 
 </script>
+
+</body>
+</html>
