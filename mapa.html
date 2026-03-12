@@ -33,6 +33,8 @@ width:100%;
 
 <script>
 
+<script>
+
 var map = L.map('map').setView([-22.19,-47.38],11);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
@@ -47,22 +49,26 @@ fetch(url)
 
 var linhas = data.split("\n");
 
-for(var i=1;i<linhas.length;i++){
+for(var i = 1; i < linhas.length; i++){
 
-var col = linhas[i].split(",");
+var linha = linhas[i].trim();
 
-var lat = parseFloat(col[1].replace(/"/g,"").trim());
-var lng = parseFloat(col[2].replace(/"/g,"").trim());
+if(linha === "") continue;
+
+var col = linha.split(",");
+
+var lat = parseFloat(col[1]);
+var lng = parseFloat(col[2]);
+
+if(isNaN(lat) || isNaN(lng)) continue;
 
 var cidade = col[4];
 var rua = col[6];
 var numero = col[7];
 var matricula = col[11];
 
-if(!isNaN(lat) && !isNaN(lng)){
-
-L.marker([lat,lng]).addTo(map)
-
+L.marker([lat,lng])
+.addTo(map)
 .bindPopup(
 "<b>Matrícula:</b> "+matricula+
 "<br>"+rua+", "+numero+
@@ -71,11 +77,10 @@ L.marker([lat,lng]).addTo(map)
 
 }
 
-}
-
 });
 
 </script>
+
 
 </body>
 </html>
