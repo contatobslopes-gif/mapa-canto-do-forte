@@ -48,7 +48,7 @@ var linhas = data.split("\n");
 
 for(var i=1;i<linhas.length;i++){
 
-var col = linhas[i].split(",");
+var col = linhas[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
 
 var lat = parseFloat(col[1]);
 var lng = parseFloat(col[2]);
