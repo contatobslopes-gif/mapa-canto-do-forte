@@ -3,25 +3,14 @@
 <head>
 
 <meta charset="utf-8">
-<title>Matrimap</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
 <style>
-
-body{
-margin:0;
-}
-
-#map{
-height:100vh;
-width:100%;
-}
-
+body{margin:0;}
+#map{height:100vh;}
 </style>
 
 </head>
@@ -32,40 +21,43 @@ width:100%;
 
 <script>
 
-var map = L.map('map').setView([-22.19,-47.38],12);
+var map = L.map('map').setView([-22.19,-47.38],11);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map);
 
-var sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
+var url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
-Papa.parse(sheetURL, {
+fetch(url)
+.then(response => response.text())
+.then(data => {
 
-download:true,
-header:true,
+var linhas = data.split("\n");
 
-complete:function(results){
+for(var i=1;i<linhas.length;i++){
 
-results.data.forEach(function(row){
+var col = linhas[i].split(",");
 
-var lat = parseFloat(row.lat);
-var lng = parseFloat(row.lng);
+var lat = parseFloat(col[1]);
+var lng = parseFloat(col[2]);
+
+var cidade = col[4];
+var rua = col[6];
+var numero = col[7];
+var matricula = col[11];
 
 if(!isNaN(lat) && !isNaN(lng)){
 
-L.marker([lat,lng])
-.addTo(map)
+L.marker([lat,lng]).addTo(map)
+
 .bindPopup(
-
-"<b>"+row.cidade+"</b><br>"+
-row.rua+" "+row.numero
-
+"<b>Matrícula:</b> "+matricula+
+"<br>"+rua+", "+numero+
+"<br>"+cidade
 );
 
 }
-
-});
 
 }
 
