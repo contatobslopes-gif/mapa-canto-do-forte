@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Matrimap - Mapa</title>
+
+<meta charset="utf-8" />
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+
+body{
+margin:0;
+}
+
+#map{
+height:100vh;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script>
+
+// criar mapa
+var map = L.map('map').setView([-23.5505,-46.6333], 10);
+
+// camada do mapa
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(map);
+
+// LINK DA SUA PLANILHA (substituir depois)
+var sheetURL = "COLE_AQUI_SEU_LINK_JSON";
+
+// carregar dados
+fetch(sheetURL)
+.then(response => response.json())
+.then(data => {
+
+data.forEach(function(imovel){
+
+if(imovel.lat && imovel.lng){
+
+L.marker([imovel.lat, imovel.lng])
+.addTo(map)
+.bindPopup(
+"<b>Matrícula:</b> "+imovel.matricula+
+"<br><b>Rua:</b> "+imovel.rua+
+"<br><b>Cidade:</b> "+imovel.cidade
+);
+
+}
+
+});
+
+});
+
+</script>
+
+</body>
+
+</html>
