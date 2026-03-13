@@ -22,31 +22,39 @@ width:100%;
 
 #buscaBox{
 position:absolute;
-top:10px;
+top:15px;
 left:50%;
 transform:translateX(-50%);
 z-index:1000;
 background:white;
-padding:8px;
+padding:10px;
 border-radius:8px;
-box-shadow:0 2px 6px rgba(0,0,0,0.3);
+box-shadow:0 3px 8px rgba(0,0,0,0.3);
 }
 
 #busca{
 padding:8px;
-width:300px;
+width:280px;
 border:1px solid #ccc;
 border-radius:4px;
 }
 
-#buscarBtn{
+button{
 padding:8px 12px;
-margin-left:5px;
-background:#0b3d91;
-color:white;
 border:none;
 border-radius:4px;
 cursor:pointer;
+}
+
+#buscarBtn{
+background:#0b3d91;
+color:white;
+}
+
+#limparBtn{
+background:#777;
+color:white;
+margin-left:5px;
 }
 
 </style>
@@ -57,9 +65,11 @@ cursor:pointer;
 
 <div id="buscaBox">
 
-<input id="busca" placeholder="Buscar cidade, rua, bairro ou matrícula">
+<input id="busca" placeholder="Buscar cidade, rua, bairro, matrícula">
 
 <button id="buscarBtn" onclick="buscar()">Buscar</button>
+
+<button id="limparBtn" onclick="limpar()">Limpar</button>
 
 </div>
 
@@ -80,7 +90,9 @@ var url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8
 var imoveis = [];
 
 fetch(url)
+
 .then(response => response.text())
+
 .then(function(data){
 
 var linhas = data.split("\n");
@@ -112,7 +124,9 @@ var marker = L.marker([lat,lng]).addTo(map)
 "<b>Matrícula:</b> "+matricula+
 "<br>"+rua+", "+numero+
 "<br>"+bairro+
-"<br>"+cidade+" - "+estado
+"<br>"+cidade+" - "+estado+
+"<br>Quadra: "+quadra+
+"<br>Lote: "+lote
 
 );
 
@@ -145,10 +159,26 @@ var texto =
 (i.cidade + i.bairro + i.rua + i.numero + i.matricula + i.quadra + i.lote).toLowerCase();
 
 if(texto.includes(termo)){
+
 i.marker.addTo(map);
+
 }else{
+
 map.removeLayer(i.marker);
+
 }
+
+});
+
+}
+
+function limpar(){
+
+document.getElementById("busca").value="";
+
+imoveis.forEach(function(i){
+
+i.marker.addTo(map);
 
 });
 
