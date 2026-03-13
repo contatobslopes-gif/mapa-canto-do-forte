@@ -54,16 +54,15 @@ function login(){
 
 var email = document.getElementById("email").value;
 var senha = document.getElementById("senha").value;
+var senhaSalva = localStorage.getItem(email);
 
-if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
-
-sessionStorage.setItem("logado","sim");
+if(senhaSalva && senhaSalva === senha){
 
 window.location.href="mapa.html";
 
 }else{
 
-alert("Login inválido");
+alert("Email ou senha incorretos");
 
 }
 
