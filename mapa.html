@@ -55,12 +55,13 @@ layers:[mapa]
 });
 
 var baseMaps = {
-"Mapa": mapa,
-"Satélite": satelite
+"🗺️ Mapa": mapa,
+"🛰️ Satélite": satelite
 };
 
-
-L.control.layers(baseMaps).addTo(map);
+var controleCamadas = L.control.layers(baseMaps, null, {
+collapsed:false
+}).addTo(map);
 
 var markersLayer = new L.LayerGroup();
 map.addLayer(markersLayer);
