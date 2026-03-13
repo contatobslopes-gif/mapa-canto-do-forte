@@ -4,14 +4,15 @@
 <head>
 
 <meta charset="utf-8">
-
 <title>Matrimap</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 <style>
 
 body{
 margin:0;
+font-family:Arial;
 }
 
 #map{
@@ -38,16 +39,14 @@ border:1px solid #ccc;
 border-radius:4px;
 }
 
-</style>
-<style>
-
-body{
-margin:0;
-}
-
-#map{
-height:100vh;
-width:100%;
+#buscarBtn{
+padding:8px 12px;
+margin-left:5px;
+background:#0b3d91;
+color:white;
+border:none;
+border-radius:4px;
+cursor:pointer;
 }
 
 </style>
@@ -55,16 +54,12 @@ width:100%;
 </head>
 
 <body>
-<div id="buscaBox">
 
-<input id="busca" placeholder="Buscar cidade, rua, bairro, matrícula..." />
-
-<button onclick="buscar()">Buscar</button>
 <div id="buscaBox">
 
 <input id="busca" placeholder="Buscar cidade, rua, bairro ou matrícula">
 
-<button onclick="buscar()">Buscar</button>
+<button id="buscarBtn" onclick="buscar()">Buscar</button>
 
 </div>
 
@@ -80,7 +75,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map);
 
-var url="https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
+var url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
+
+var imoveis = [];
+
 fetch(url)
 .then(response => response.text())
 .then(function(data){
@@ -89,24 +87,47 @@ var linhas = data.split("\n");
 
 for(var i=1;i<linhas.length;i++){
 
-var col = linhas[i].match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g);
+var col = linhas[i].split(",");
 
 var lat = parseFloat(col[1]);
 var lng = parseFloat(col[2]);
 
 if(!isNaN(lat) && !isNaN(lng)){
 
+var estado = col[3];
 var cidade = col[4];
+var bairro = col[5];
 var rua = col[6];
 var numero = col[7];
+var complemento = col[8];
+var quadra = col[9];
+var lote = col[10];
 var matricula = col[11];
+var cartorio = col[12];
 
-L.marker([lat,lng]).addTo(map)
+var marker = L.marker([lat,lng]).addTo(map)
+
 .bindPopup(
+
 "<b>Matrícula:</b> "+matricula+
 "<br>"+rua+", "+numero+
-"<br>"+cidade
+"<br>"+bairro+
+"<br>"+cidade+" - "+estado
+
 );
+
+imoveis.push({
+
+cidade:cidade,
+bairro:bairro,
+rua:rua,
+numero:numero,
+matricula:matricula,
+quadra:quadra,
+lote:lote,
+marker:marker
+
+});
 
 }
 
@@ -114,7 +135,27 @@ L.marker([lat,lng]).addTo(map)
 
 });
 
+function buscar(){
+
+var termo = document.getElementById("busca").value.toLowerCase();
+
+imoveis.forEach(function(i){
+
+var texto =
+(i.cidade + i.bairro + i.rua + i.numero + i.matricula + i.quadra + i.lote).toLowerCase();
+
+if(texto.includes(termo)){
+i.marker.addTo(map);
+}else{
+map.removeLayer(i.marker);
+}
+
+});
+
+}
+
 </script>
 
 </body>
+
 </html>
