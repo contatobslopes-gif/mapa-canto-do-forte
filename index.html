@@ -59,9 +59,27 @@ function login(){
 
 var email = document.getElementById("email").value;
 var senha = document.getElementById("senha").value;
+
+/* LOGIN ADMIN */
+
+if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
+
+localStorage.setItem("usuarioLogado",email);
+localStorage.setItem("tipoUsuario","admin");
+
+window.location.href="mapa.html";
+return;
+
+}
+
+/* LOGIN USUÁRIO */
+
 var senhaSalva = localStorage.getItem(email);
 
 if(senhaSalva && senhaSalva === senha){
+
+localStorage.setItem("usuarioLogado",email);
+localStorage.setItem("tipoUsuario","usuario");
 
 window.location.href="mapa.html";
 
@@ -72,7 +90,6 @@ alert("Email ou senha incorretos");
 }
 
 }
-
 </script>
 
 </body>
