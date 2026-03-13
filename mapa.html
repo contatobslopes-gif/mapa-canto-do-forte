@@ -7,7 +7,9 @@
 <title>Matrimap</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.css"/>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 
 <style>
 
@@ -21,31 +23,75 @@ height:100vh;
 width:100%;
 }
 
+#buscaBox{
+position:absolute;
+top:15px;
+left:50%;
+transform:translateX(-50%);
+z-index:1000;
+background:white;
+padding:10px;
+border-radius:8px;
+box-shadow:0 3px 10px rgba(0,0,0,0.3);
+}
+
+#busca{
+padding:8px;
+width:280px;
+border:1px solid #ccc;
+border-radius:4px;
+}
+
+button{
+padding:8px 12px;
+border:none;
+border-radius:4px;
+cursor:pointer;
+}
+
+#buscarBtn{
+background:#0b3d91;
+color:white;
+}
+
+#limparBtn{
+background:#777;
+color:white;
+margin-left:5px;
+}
+
 </style>
 
 </head>
 
 <body>
 
+<div id="buscaBox">
+
+<input id="busca" placeholder="Buscar cidade, rua, matrícula, quadra, lote">
+
+<button id="buscarBtn">Buscar</button>
+
+<button id="limparBtn">Limpar</button>
+
+</div>
+
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.js"></script>
+
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
 
 var mapa = L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-maxZoom:19
-}
+{maxZoom:19}
 );
 
 var satelite = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-{
-maxZoom:19
-}
+{maxZoom:19}
 );
 
 var map = L.map('map',{
@@ -54,23 +100,20 @@ zoom:11,
 layers:[mapa]
 });
 
-var baseMaps = {
-"🗺️ Mapa": mapa,
-"🛰️ Satélite": satelite
-};
-
-var controleCamadas = L.control.layers(baseMaps, null, {
-collapsed:false
+L.control.layers({
+"Mapa": mapa,
+"Satélite": satelite
 }).addTo(map);
 
-var markersLayer = new L.LayerGroup();
-map.addLayer(markersLayer);
+var cluster = L.markerClusterGroup();
+
+var imoveis = [];
 
 var url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
 fetch(url)
 
-.then(response => response.text())
+.then(res => res.text())
 
 .then(function(data){
 
@@ -80,11 +123,11 @@ for(var i=1;i<linhas.length;i++){
 
 var col = linhas[i].split(",");
 
-if(col.length < 13) continue;
+if(col.length < 12) continue;
 
-function limpar(txt){
-if(!txt) return "";
-return txt.replace(/"/g,"").trim();
+function limpar(t){
+if(!t) return "";
+return t.replace(/"/g,"").trim();
 }
 
 var lat = parseFloat(col[1]);
@@ -101,12 +144,17 @@ var quadra = limpar(col[9]);
 var lote = limpar(col[10]);
 var matricula = limpar(col[11]);
 
-var tituloBusca =
-cidade+" "+bairro+" "+rua+" "+numero+" "+matricula+" "+quadra+" "+lote;
+var textoBusca = (
+cidade+" "+
+bairro+" "+
+rua+" "+
+numero+" "+
+quadra+" "+
+lote+" "+
+matricula
+).toLowerCase();
 
-var marker = L.marker([lat,lng],{
-title: tituloBusca
-});
+var marker = L.marker([lat,lng]);
 
 marker.bindPopup(
 
@@ -119,23 +167,50 @@ marker.bindPopup(
 
 );
 
-markersLayer.addLayer(marker);
+cluster.addLayer(marker);
+
+imoveis.push({
+texto:textoBusca,
+marker:marker
+});
 
 }
 
-var searchControl = new L.Control.Search({
-
-layer: markersLayer,
-propertyName: 'title',
-zoom: 17,
-initial: false,
-marker: false
+map.addLayer(cluster);
 
 });
 
-map.addControl(searchControl);
+document.getElementById("buscarBtn").onclick=function(){
+
+var termo = document.getElementById("busca").value.toLowerCase().trim();
+
+cluster.clearLayers();
+
+imoveis.forEach(function(i){
+
+if(i.texto.includes(termo)){
+
+cluster.addLayer(i.marker);
+
+}
 
 });
+
+};
+
+document.getElementById("limparBtn").onclick=function(){
+
+document.getElementById("busca").value="";
+
+cluster.clearLayers();
+
+imoveis.forEach(function(i){
+
+cluster.addLayer(i.marker);
+
+});
+
+};
 
 </script>
 
