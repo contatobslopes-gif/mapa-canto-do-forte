@@ -34,11 +34,32 @@ width:100%;
 
 <script>
 
-var map = L.map('map').setView([-22.19,-47.38],11);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+var mapa = L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
 maxZoom:19
-}).addTo(map);
+}
+);
+
+var satelite = L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+{
+maxZoom:19
+}
+);
+
+var map = L.map('map',{
+center:[-22.19,-47.38],
+zoom:11,
+layers:[mapa]
+});
+
+var baseMaps = {
+"Mapa": mapa,
+"Satélite": satelite
+};
+
+L.control.layers(baseMaps).addTo(map);
 
 var markersLayer = new L.LayerGroup();
 map.addLayer(markersLayer);
