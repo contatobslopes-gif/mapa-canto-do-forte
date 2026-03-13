@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Criar conta</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0b3d91;
+color:white;
+text-align:center;
+padding-top:120px;
+}
+
+input{
+padding:10px;
+margin:10px;
+width:250px;
+border:none;
+border-radius:5px;
+}
+
+button{
+padding:10px 20px;
+border:none;
+border-radius:5px;
+background:white;
+color:#0b3d91;
+font-weight:bold;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Criar conta</h1>
+
+<input id="email" placeholder="Email"><br>
+<input id="senha" type="password" placeholder="Senha"><br>
+
+<button onclick="cadastrar()">Criar conta</button>
+
+<script>
+
+function cadastrar(){
+
+var email = document.getElementById("email").value;
+var senha = document.getElementById("senha").value;
+
+localStorage.setItem(email,senha);
+
+alert("Conta criada!");
+
+window.location.href="index.html";
+
+}
+
+</script>
+
+</body>
+
+</html>
