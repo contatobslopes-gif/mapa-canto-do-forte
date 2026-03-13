@@ -101,21 +101,26 @@ for(var i=1;i<linhas.length;i++){
 
 var col = linhas[i].split(",");
 
+if(col.length < 13) continue;
+
 var lat = parseFloat(col[1]);
 var lng = parseFloat(col[2]);
 
 if(!isNaN(lat) && !isNaN(lng)){
 
-var estado = col[3];
-var cidade = col[4];
-var bairro = col[5];
-var rua = col[6];
-var numero = col[7];
-var complemento = col[8];
-var quadra = col[9];
-var lote = col[10];
-var matricula = col[11];
-var cartorio = col[12];
+function limparTexto(txt){
+if(!txt) return "";
+return txt.replace(/"/g,"").trim();
+}
+
+var estado = limparTexto(col[3]);
+var cidade = limparTexto(col[4]);
+var bairro = limparTexto(col[5]);
+var rua = limparTexto(col[6]);
+var numero = limparTexto(col[7]);
+var quadra = limparTexto(col[9]);
+var lote = limparTexto(col[10]);
+var matricula = limparTexto(col[11]);
 
 var marker = L.marker([lat,lng]).addTo(map)
 
@@ -132,13 +137,13 @@ var marker = L.marker([lat,lng]).addTo(map)
 
 imoveis.push({
 
-cidade:cidade,
-bairro:bairro,
-rua:rua,
-numero:numero,
-matricula:matricula,
-quadra:quadra,
-lote:lote,
+cidade:cidade.toLowerCase(),
+bairro:bairro.toLowerCase(),
+rua:rua.toLowerCase(),
+numero:numero.toLowerCase(),
+matricula:matricula.toLowerCase(),
+quadra:quadra.toLowerCase(),
+lote:lote.toLowerCase(),
 marker:marker
 
 });
@@ -151,12 +156,18 @@ marker:marker
 
 function buscar(){
 
-var termo = document.getElementById("busca").value.toLowerCase();
+var termo = document.getElementById("busca").value.toLowerCase().trim();
 
 imoveis.forEach(function(i){
 
-var texto =
-(i.cidade + i.bairro + i.rua + i.numero + i.matricula + i.quadra + i.lote).toLowerCase();
+var texto = 
+i.cidade+" "+
+i.bairro+" "+
+i.rua+" "+
+i.numero+" "+
+i.matricula+" "+
+i.quadra+" "+
+i.lote;
 
 if(texto.includes(termo)){
 
