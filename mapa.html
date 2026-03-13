@@ -158,6 +158,11 @@ function buscar(){
 
 var termo = document.getElementById("busca").value.toLowerCase().trim();
 
+if(imoveis.length === 0){
+alert("Os imóveis ainda estão carregando, aguarde alguns segundos.");
+return;
+}
+
 imoveis.forEach(function(i){
 
 var texto = 
