@@ -7,6 +7,7 @@
 <title>Matrimap</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.css"/>
 
 <style>
 
@@ -20,62 +21,16 @@ height:100vh;
 width:100%;
 }
 
-#buscaBox{
-position:absolute;
-top:15px;
-left:50%;
-transform:translateX(-50%);
-z-index:1000;
-background:white;
-padding:10px;
-border-radius:8px;
-box-shadow:0 3px 8px rgba(0,0,0,0.3);
-}
-
-#busca{
-padding:8px;
-width:280px;
-border:1px solid #ccc;
-border-radius:4px;
-}
-
-button{
-padding:8px 12px;
-border:none;
-border-radius:4px;
-cursor:pointer;
-}
-
-#buscarBtn{
-background:#0b3d91;
-color:white;
-}
-
-#limparBtn{
-background:#777;
-color:white;
-margin-left:5px;
-}
-
 </style>
 
 </head>
 
 <body>
 
-<div id="buscaBox">
-
-<input id="busca" placeholder="Buscar cidade, rua, bairro, matrícula">
-
-<button id="buscarBtn" onclick="buscar()">Buscar</button>
-
-<button id="limparBtn" onclick="limpar()">Limpar</button>
-
-</div>
-
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.js"></script>
 
 <script>
 
@@ -85,9 +40,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map);
 
-var url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
+var markersLayer = new L.LayerGroup();
+map.addLayer(markersLayer);
 
-var imoveis = [];
+var url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
 fetch(url)
 
@@ -103,28 +59,33 @@ var col = linhas[i].split(",");
 
 if(col.length < 13) continue;
 
-var lat = parseFloat(col[1]);
-var lng = parseFloat(col[2]);
-
-if(!isNaN(lat) && !isNaN(lng)){
-
-function limparTexto(txt){
+function limpar(txt){
 if(!txt) return "";
 return txt.replace(/"/g,"").trim();
 }
 
-var estado = limparTexto(col[3]);
-var cidade = limparTexto(col[4]);
-var bairro = limparTexto(col[5]);
-var rua = limparTexto(col[6]);
-var numero = limparTexto(col[7]);
-var quadra = limparTexto(col[9]);
-var lote = limparTexto(col[10]);
-var matricula = limparTexto(col[11]);
+var lat = parseFloat(col[1]);
+var lng = parseFloat(col[2]);
 
-var marker = L.marker([lat,lng]).addTo(map)
+if(isNaN(lat) || isNaN(lng)) continue;
 
-.bindPopup(
+var estado = limpar(col[3]);
+var cidade = limpar(col[4]);
+var bairro = limpar(col[5]);
+var rua = limpar(col[6]);
+var numero = limpar(col[7]);
+var quadra = limpar(col[9]);
+var lote = limpar(col[10]);
+var matricula = limpar(col[11]);
+
+var tituloBusca =
+cidade+" "+bairro+" "+rua+" "+numero+" "+matricula+" "+quadra+" "+lote;
+
+var marker = L.marker([lat,lng],{
+title: tituloBusca
+});
+
+marker.bindPopup(
 
 "<b>Matrícula:</b> "+matricula+
 "<br>"+rua+", "+numero+
@@ -135,70 +96,23 @@ var marker = L.marker([lat,lng]).addTo(map)
 
 );
 
-imoveis.push({
+markersLayer.addLayer(marker);
 
-cidade:cidade.toLowerCase(),
-bairro:bairro.toLowerCase(),
-rua:rua.toLowerCase(),
-numero:numero.toLowerCase(),
-matricula:matricula.toLowerCase(),
-quadra:quadra.toLowerCase(),
-lote:lote.toLowerCase(),
-marker:marker
+}
+
+var searchControl = new L.Control.Search({
+
+layer: markersLayer,
+propertyName: 'title',
+zoom: 17,
+initial: false,
+marker: false
 
 });
 
-}
-
-}
+map.addControl(searchControl);
 
 });
-
-function buscar(){
-
-var termo = document.getElementById("busca").value.toLowerCase().trim();
-
-if(imoveis.length === 0){
-alert("Os imóveis ainda estão carregando, aguarde alguns segundos.");
-return;
-}
-
-imoveis.forEach(function(i){
-
-var texto = 
-i.cidade+" "+
-i.bairro+" "+
-i.rua+" "+
-i.numero+" "+
-i.matricula+" "+
-i.quadra+" "+
-i.lote;
-
-if(texto.includes(termo)){
-
-i.marker.addTo(map);
-
-}else{
-
-map.removeLayer(i.marker);
-
-}
-
-});
-
-}
-
-function limpar(){
-
-document.getElementById("busca").value="";
-
-imoveis.forEach(function(i){
-
-i.marker.addTo(map);
-
-});
-
-}
 
 </script>
 
