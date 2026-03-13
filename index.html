@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Matrimap</title>
+
 <meta charset="utf-8">
+<title>Matrimap Login</title>
 
 <style>
 
@@ -14,49 +16,68 @@ text-align:center;
 padding-top:120px;
 }
 
-h1{
-font-size:48px;
+input{
+padding:10px;
+margin:10px;
+width:250px;
 }
 
 button{
-padding:15px 30px;
-font-size:18px;
-border:none;
-border-radius:6px;
-margin:10px;
+padding:10px 20px;
 cursor:pointer;
 }
 
-.login{
-background:white;
-color:#0b3d91;
-}
-
-.assinar{
-background:#1e90ff;
-color:white;
-}
-
 </style>
+
 </head>
 
 <body>
 
 <h1>MATRIMAP</h1>
 
-<p>Base de matrículas imobiliárias pesquisáveis</p>
+<p>Acesso restrito</p>
 
-<p>
-Busque por cidade, rua, bairro, quadra, lote ou matrícula
-</p>
+<input id="email" placeholder="Email"><br>
 
-<button class="login" onclick="window.location.href='mapa.html'">
-Entrar
-</button>
+<input id="senha" type="password" placeholder="Senha"><br>
 
-<button class="assinar">
-Assinar acesso
-</button>
+<button onclick="login()">Entrar</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+
+const supabaseUrl = "COLE_AQUI_SEU_URL";
+const supabaseKey = "COLE_AQUI_SUA_KEY";
+
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+async function login(){
+
+const email = document.getElementById("email").value;
+const senha = document.getElementById("senha").value;
+
+const { data, error } = await supabase.auth.signInWithPassword({
+
+email: email,
+password: senha
+
+});
+
+if(error){
+
+alert("Login inválido");
+
+}else{
+
+window.location.href="mapa.html";
+
+}
+
+}
+
+</script>
 
 </body>
+
 </html>
