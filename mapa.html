@@ -67,7 +67,25 @@ margin-left:5px;
 <body>
 
 <div id="buscaBox">
+<body>
 
+<script>
+
+var logado = localStorage.getItem("logado");
+
+if(logado !== "sim"){
+
+alert("Você precisa fazer login para acessar o mapa.");
+
+window.location.href="index.html";
+
+}
+
+</script>
+
+<div id="buscaBox">
+
+<input id="busca" placeholder="Buscar cidade, rua, matrícula, quadra, lote">
 <input id="busca" placeholder="Buscar cidade, rua, matrícula, quadra, lote">
 
 <button id="buscarBtn">Buscar</button>
