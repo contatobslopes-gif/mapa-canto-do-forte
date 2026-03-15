@@ -41,8 +41,31 @@ cursor:pointer;
 
 <h1>Criar conta</h1>
 
+<input id="nome" placeholder="Nome completo"><br>
+
+<input id="cpf" placeholder="CPF"><br>
+
+<input id="endereco" placeholder="Endereço"><br>
+
 <input id="email" placeholder="Email"><br>
-<input id="senha" type="password" placeholder="Senha"><br>
+
+<div style="position:relative; display:inline-block;">
+
+<input id="senha" type="password" placeholder="Senha">
+
+<button type="button" onclick="mostrarSenha()" style="
+position:absolute;
+right:5px;
+top:5px;
+background:none;
+border:none;
+cursor:pointer;
+font-size:16px;
+">👁</button>
+
+</div>
+
+<br><br>
 
 <button onclick="cadastrar()">Criar conta</button>
 
@@ -50,14 +73,37 @@ cursor:pointer;
 
 function cadastrar(){
 
+var nome = document.getElementById("nome").value;
+var cpf = document.getElementById("cpf").value;
+var endereco = document.getElementById("endereco").value;
 var email = document.getElementById("email").value;
 var senha = document.getElementById("senha").value;
 
-localStorage.setItem(email,senha);
+var usuario = {
+nome:nome,
+cpf:cpf,
+endereco:endereco,
+email:email,
+senha:senha
+};
+
+localStorage.setItem(email, JSON.stringify(usuario));
 
 alert("Conta criada!");
 
 window.location.href="index.html";
+
+}
+
+function mostrarSenha(){
+
+var campo = document.getElementById("senha");
+
+if(campo.type === "password"){
+campo.type = "text";
+}else{
+campo.type = "password";
+}
 
 }
 
