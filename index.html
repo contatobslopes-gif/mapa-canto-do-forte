@@ -74,18 +74,31 @@ return;
 
 /* LOGIN USUÁRIO */
 
-var senhaSalva = localStorage.getItem(email);
+var usuario = localStorage.getItem(email);
 
-if(senhaSalva && senhaSalva === senha){
+if(usuario){
+
+var dados = JSON.parse(usuario);
+
+if(dados.senha === senha){
 
 localStorage.setItem("usuarioLogado",email);
 localStorage.setItem("tipoUsuario","usuario");
+localStorage.setItem("logado","sim");
 
 window.location.href="mapa.html";
 
 }else{
 
-alert("Email ou senha incorretos");
+alert("Senha incorreta");
+
+}
+
+}else{
+
+alert("Usuário não encontrado");
+
+}
 
 }
 
