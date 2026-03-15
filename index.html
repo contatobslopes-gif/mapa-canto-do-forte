@@ -48,11 +48,12 @@ cursor:pointer;
 
 <button onclick="login()">Entrar</button>
 
-  <p>Não tem conta?</p>
+<p>Não tem conta?</p>
 
 <a href="cadastro.html">
 <button>Criar conta</button>
 </a>
+
 <script>
 
 function login(){
@@ -66,6 +67,7 @@ if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
 
 localStorage.setItem("usuarioLogado",email);
 localStorage.setItem("tipoUsuario","admin");
+localStorage.setItem("logado","sim");
 
 window.location.href="mapa.html";
 return;
@@ -102,7 +104,6 @@ alert("Usuário não encontrado");
 
 }
 
-}
 </script>
 
 </body>
