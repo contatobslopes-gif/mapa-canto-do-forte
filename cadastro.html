@@ -3,7 +3,7 @@
 
 <head>
 <meta charset="utf-8">
-<title>Criar conta</title>
+<title>Matrimap - Cadastro</title>
 
 <style>
 
@@ -12,7 +12,7 @@ font-family:Arial;
 background:#0b3d91;
 color:white;
 text-align:center;
-padding-top:120px;
+padding-top:150px;
 }
 
 input{
@@ -20,13 +20,13 @@ padding:10px;
 margin:10px;
 width:250px;
 border:none;
-border-radius:5px;
+border-radius:4px;
 }
 
 button{
 padding:10px 20px;
 border:none;
-border-radius:5px;
+border-radius:4px;
 background:white;
 color:#0b3d91;
 font-weight:bold;
@@ -34,83 +34,63 @@ cursor:pointer;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<img src="bemvindo.png" style="width:450px;"><br>
-
-<h1>Criar conta</h1>
-
-<input id="nome" placeholder="Nome completo"><br>
-
-<input id="cpf" placeholder="CPF"><br>
-
-<input id="cidade" placeholder="Cidade"><br>
+<h1>Criar Conta</h1>
 
 <input id="email" placeholder="Email"><br>
 
-<div style="position:relative; display:inline-block;">
+<input id="senha" type="password" placeholder="Senha"><br>
 
-<input id="senha" type="password" placeholder="Senha">
-
-<button type="button" onclick="mostrarSenha()" style="
-position:absolute;
-right:5px;
-top:5px;
-background:none;
-border:none;
-cursor:pointer;
-font-size:16px;
-">👁</button>
-
-</div>
+<button onclick="criarConta()">Cadastrar</button>
 
 <br><br>
 
-<button onclick="cadastrar()">Criar conta</button>
+<a href="index.html">
+<button>Voltar para login</button>
+</a>
 
-<script>
+<script type="module">
 
-function cadastrar(){
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
-var nome = document.getElementById("nome").value;
-var cpf = document.getElementById("cpf").value;
-var endereco = document.getElementById("endereco").value;
+const firebaseConfig = {
+apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
+authDomain: "matrimap-899b3.firebaseapp.com",
+projectId: "matrimap-899b3",
+storageBucket: "matrimap-899b3.firebasestorage.app",
+messagingSenderId: "1094066148423",
+appId: "1:1094066148423:web:260b14f4e2259681554d62"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.criarConta = function(){
+
 var email = document.getElementById("email").value;
 var senha = document.getElementById("senha").value;
 
-var usuario = {
-nome:nome,
-cpf:cpf,
-endereco:endereco,
-email:email,
-senha:senha
-};
+createUserWithEmailAndPassword(auth, email, senha)
+.then((userCredential) => {
 
-localStorage.setItem(email, JSON.stringify(usuario));
-
-alert("Conta criada!");
+alert("Conta criada com sucesso!");
 
 window.location.href="index.html";
 
-}
+})
+.catch((error) => {
 
-function mostrarSenha(){
+alert(error.message);
 
-var campo = document.getElementById("senha");
-
-if(campo.type === "password"){
-campo.type = "text";
-}else{
-campo.type = "password";
-}
+});
 
 }
 
 </script>
 
 </body>
-
 </html>
