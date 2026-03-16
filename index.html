@@ -56,56 +56,41 @@ cursor:pointer;
 <button>Criar conta</button>
 </a>
 
-<script>
+<script type="module">
 
-function login(){
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
+authDomain: "matrimap-899b3.firebaseapp.com",
+projectId: "matrimap-899b3",
+storageBucket: "matrimap-899b3.firebasestorage.app",
+messagingSenderId: "1094066148423",
+appId: "1:1094066148423:web:260b14f4e2259681554d62"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.login = function(){
 
 var email = document.getElementById("email").value;
 var senha = document.getElementById("senha").value;
 
-/* LOGIN ADMIN */
+signInWithEmailAndPassword(auth, email, senha)
+.then((userCredential) => {
 
-if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
-
-localStorage.setItem("usuarioLogado","admin");
-localStorage.setItem("tipoUsuario","admin");
-localStorage.setItem("logado","sim");
-
-alert("Login administrador autorizado");
+alert("Login realizado com sucesso");
 
 window.location.href="mapa.html";
 
-return;
+})
+.catch((error) => {
 
-}
+alert("Email ou senha incorretos");
 
-/* LOGIN USUÁRIO */
-
-var usuario = localStorage.getItem(email);
-
-if(usuario){
-
-var dados = JSON.parse(usuario);
-
-if(dados.senha === senha){
-
-localStorage.setItem("usuarioLogado",email);
-localStorage.setItem("tipoUsuario","usuario");
-localStorage.setItem("logado","sim");
-
-window.location.href="mapa.html";
-
-}else{
-
-alert("Senha incorreta");
-
-}
-
-}else{
-
-alert("Usuário não encontrado");
-
-}
+});
 
 }
 
