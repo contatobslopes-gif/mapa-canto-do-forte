@@ -8,13 +8,30 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body{margin:0;font-family:Arial;}
-#map{height:100vh;}
+body{
+margin:0;
+font-family:Arial;
+}
+
+#map{
+height:100vh;
+width:100%;
+}
 </style>
 
 </head>
 
 <body>
+
+<script>
+// 🔒 PROTEÇÃO (igual ao urbano)
+var logado = localStorage.getItem("logado");
+
+if(logado !== "sim"){
+alert("Você precisa fazer login para acessar.");
+window.location.href="index.html";
+}
+</script>
 
 <div id="map"></div>
 
@@ -23,26 +40,22 @@ body{margin:0;font-family:Arial;}
 
 <script>
 
-// 🔒 PROTEÇÃO (igual ao mapa urbano)
-var logado = localStorage.getItem("logado");
+// 🗺️ MAPA (igual ao urbano)
+var mapa = L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{maxZoom:19}
+);
 
-if(logado !== "sim"){
-alert("Você precisa fazer login.");
-window.location.href="index.html";
-}
+var map = L.map('map',{
+center:[-22.19,-47.38],
+zoom:11,
+layers:[mapa]
+});
 
-// 🗺️ MAPA
-var map = L.map('map').setView([-22.19,-47.38], 11);
+// 🔥 LINK DA SUA PLANILHA (ALTERE O ID)
+var urlRural = "https://opensheet.elk.sh/SEU_ID_DA_PLANILHA/RURAL";
 
-L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-).addTo(map);
-
-
-// 🔥 COLE AQUI O LINK DA ABA RURAL
-var urlRural = "https://opensheet.elk.sh/RURAL";
-
-fetch(urlRural)
+// 🔄 BUSCAR DADOS
 fetch(urlRural)
 .then(res => res.json())
 .then(function(dados){
@@ -56,7 +69,7 @@ var cartorio = item.cartorio;
 
 if(!kml) return;
 
-// carregar KML
+// 📍 CARREGAR KML
 omnivore.kml(kml)
 .on('ready', function(){
 
@@ -64,6 +77,7 @@ var camada = this;
 
 camada.addTo(map);
 
+// clique no polígono
 camada.on("click", function(e){
 
 var popup = `
@@ -88,15 +102,8 @@ L.popup()
 });
 
 });
-});
 
-});
-
-}
-
-});
-
-// download
+// 📥 DOWNLOAD DO KML
 function baixarKML(link){
 var a = document.createElement("a");
 a.href = link;
