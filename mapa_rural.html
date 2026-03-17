@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -21,28 +21,31 @@ height:100vh;
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- plugin KML -->
-<script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+<!-- 🔥 DEPENDÊNCIAS CORRETAS -->
+<script src="https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 
 <script>
 
-var map = L.map('map').setView([-22.19, -47.38], 12);
+var map = L.map('map').setView([-22.19, -47.38], 5);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map);
 
-// 🔥 KML DE TESTE (FUNCIONA CERTO)
-var kml = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.kml";
+// 🔥 TESTE SIMPLES (GARANTIDO)
+var kml = "https://developers.google.com/maps/documentation/javascript/examples/kml/westcampus.kml";
 
 omnivore.kml(kml)
 .on('ready', function(){
 
 this.addTo(map);
 
-// zoom automático
 map.fitBounds(this.getBounds());
 
+})
+.on('error', function(e){
+console.log("ERRO KML:", e);
+alert("Erro ao carregar KML");
 });
 
 </script>
