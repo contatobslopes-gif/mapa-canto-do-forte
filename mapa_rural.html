@@ -8,44 +8,68 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-#map{
-height:100vh;
-}
+body{margin:0;}
+#map{height:100vh;}
 </style>
 
 </head>
 
 <body>
 
+<script>
+// 🔒 PROTEÇÃO (IGUAL AO URBANO)
+var logado = localStorage.getItem("logado");
+
+if(logado !== "sim"){
+alert("Você precisa fazer login");
+window.location.href="index.html";
+}
+</script>
+
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- 🔥 DEPENDÊNCIAS CORRETAS -->
-<script src="https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
-
 <script>
 
-var map = L.map('map').setView([-22.19, -47.38], 5);
+var map = L.map('map').setView([-22.19, -47.38], 10);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
 }).addTo(map);
 
-// 🔥 TESTE SIMPLES (GARANTIDO)
-var kml = "https://developers.google.com/maps/documentation/javascript/examples/kml/westcampus.kml";
+// 🔥 COLE SEU GEOJSON AQUI
+var url = "COLE_SEU_LINK_RAW_AQUI";
 
-omnivore.kml(kml)
-.on('ready', function(){
+fetch(url)
+.then(res => res.json())
+.then(function(data){
 
-this.addTo(map);
+var geo = L.geoJSON(data, {
 
-map.fitBounds(this.getBounds());
+onEachFeature: function (feature, layer) {
+
+var nome = feature.properties.nome || "Sem nome";
+var matricula = feature.properties.matricula || "Não informado";
+var cartorio = feature.properties.cartorio || "Não informado";
+var kml = feature.properties.kml || "#";
+
+layer.bindPopup(
+"<b>"+nome+"</b><br>"+
+"Matrícula: "+matricula+"<br>"+
+"Cartório: "+cartorio+"<br><br>"+
+"<a href='"+kml+"' target='_blank'>📥 Baixar KML</a>"
+);
+
+}
+
+}).addTo(map);
+
+map.fitBounds(geo.getBounds());
 
 })
-.on('error', function(e){
-console.log("ERRO KML:", e);
-alert("Erro ao carregar KML");
+.catch(function(){
+alert("Erro ao carregar mapa rural");
 });
 
 </script>
