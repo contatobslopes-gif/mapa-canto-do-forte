@@ -73,13 +73,14 @@ appId: "1:1094066148423:web:260b14f4e2259681554d62"
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-function login(){
+// 🔥 AGORA FUNCIONA NO BOTÃO
+window.login = function(){
 
 var email = document.getElementById("email").value;
 var senha = document.getElementById("senha").value;
 
 /* =========================
-   LOGIN ADMIN (PRIORIDADE)
+   LOGIN ADMIN
 ========================= */
 
 if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
@@ -91,17 +92,12 @@ localStorage.setItem("logado","sim");
 alert("Login administrador autorizado");
 
 window.location.href="mapa.html";
-return; // 🔥 ISSO AQUI É O SEGREDO (PARA O RESTO)
+return;
 }
 
 /* =========================
    LOGIN FIREBASE
 ========================= */
-
-import("https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js")
-.then(({ getAuth, signInWithEmailAndPassword }) => {
-
-const auth = getAuth();
 
 signInWithEmailAndPassword(auth, email, senha)
 .then(() => {
@@ -117,6 +113,6 @@ window.location.href="mapa.html";
 alert("Email ou senha incorretos");
 });
 
-});
-
 }
+
+</script>
