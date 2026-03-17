@@ -92,9 +92,6 @@ window.location.href="index.html";
 
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
-<!-- 🔥 NOVO (necessário para KML) -->
-<script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
-
 <script>
 
 var mapa = L.tileLayer(
@@ -188,90 +185,6 @@ map.addLayer(cluster);
 
 });
 
-
-// =============================
-// 🔥 NOVO BLOCO RURAL (KML)
-// =============================
-
-var urlRural = "COLE_AQUI_O_LINK_DA_ABA_RURAL";
-
-fetch(urlRural)
-.then(res => res.text())
-.then(function(data){
-
-var linhas = data.split("\n");
-
-for(var i=1;i<linhas.length;i++){
-
-var col = linhas[i].split(",");
-
-if(col.length < 5) continue;
-
-function limpar(t){
-if(!t) return "";
-return t.replace(/"/g,"").trim();
-}
-
-var nome = limpar(col[1]);
-var kml = limpar(col[2]);
-var matricula = limpar(col[3]);
-var cartorio = limpar(col[4]);
-
-if(!kml) continue;
-
-// 🔥 carregar KML
-omnivore.kml(kml)
-.on('ready', function(){
-
-var camada = this;
-
-camada.addTo(map);
-
-// clique no polígono
-camada.on("click", function(e){
-
-var popup = `
-<b>${nome}</b><br><br>
-Matrícula: ${matricula}<br>
-Cartório: ${cartorio}<br><br>
-
-<button onclick="baixarKML('${kml}')">
-📥 Baixar KML
-</button>
-`;
-
-L.popup()
-.setLatLng(e.latlng)
-.setContent(popup)
-.openOn(map);
-
-});
-
-});
-
-}
-
-});
-
-
-// =============================
-// 🔥 DOWNLOAD KML
-// =============================
-
-window.baixarKML = function(link){
-
-var a = document.createElement("a");
-a.href = link;
-a.download = "imovel.kml";
-a.click();
-
-};
-
-
-// =============================
-// BUSCA (NÃO MEXI)
-// =============================
-
 document.getElementById("buscarBtn").onclick=function(){
 
 var termo = document.getElementById("busca").value.toLowerCase().trim();
@@ -279,11 +192,9 @@ var termo = document.getElementById("busca").value.toLowerCase().trim();
 cluster.clearLayers();
 
 imoveis.forEach(function(i){
-
 if(i.texto.includes(termo)){
 cluster.addLayer(i.marker);
 }
-
 });
 
 };
@@ -300,6 +211,10 @@ cluster.addLayer(i.marker);
 
 };
 
+</script>
+
+</body>
+</html>
 </script>
 
 </body>
