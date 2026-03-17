@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Matrimap Rural</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+body{margin:0;font-family:Arial;}
+#map{height:100vh;}
+</style>
+
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+
+<script>
+
+// 🔒 PROTEÇÃO (igual ao mapa urbano)
+var logado = localStorage.getItem("logado");
+
+if(logado !== "sim"){
+alert("Você precisa fazer login.");
+window.location.href="index.html";
+}
+
+// 🗺️ MAPA
+var map = L.map('map').setView([-22.19,-47.38], 11);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+).addTo(map);
+
+
+// 🔥 COLE AQUI O LINK DA ABA RURAL
+var urlRural = "https://opensheet.elk.sh/SEU_ID_DA_PLANILHA/RURAL";
+
+fetch(urlRural)
+.then(res => res.text())
+.then(function(data){
+
+var linhas = data.split("\n");
+
+for(var i=1;i<linhas.length;i++){
+
+var col = linhas[i].split(",");
+
+if(col.length < 5) continue;
+
+function limpar(t){
+return t.replace(/"/g,"").trim();
+}
+
+var nome = limpar(col[1]);
+var kml = limpar(col[2]);
+var matricula = limpar(col[3]);
+var cartorio = limpar(col[4]);
+
+if(!kml) continue;
+
+// carregar KML
+omnivore.kml(kml)
+.on('ready', function(){
+
+var camada = this;
+
+camada.addTo(map);
+
+// clique no polígono
+camada.on("click", function(e){
+
+var popup = `
+<b>${nome}</b><br><br>
+Matrícula: ${matricula}<br>
+Cartório: ${cartorio}<br><br>
+
+<button onclick="baixarKML('${kml}')">
+📥 Baixar KML
+</button>
+`;
+
+L.popup()
+.setLatLng(e.latlng)
+.setContent(popup)
+.openOn(map);
+
+});
+
+});
+
+}
+
+});
+
+// download
+function baixarKML(link){
+var a = document.createElement("a");
+a.href = link;
+a.download = "imovel.kml";
+a.click();
+}
+
+</script>
+
+</body>
+</html>
