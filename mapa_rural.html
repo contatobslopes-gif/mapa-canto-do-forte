@@ -1,21 +1,15 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html>
 
 <head>
 <meta charset="utf-8">
-<title>Matrimap Rural</title>
+<title>Mapa Rural</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body{
-margin:0;
-font-family:Arial;
-}
-
 #map{
 height:100vh;
-width:100%;
 }
 </style>
 
@@ -23,93 +17,33 @@ width:100%;
 
 <body>
 
-<script>
-// 🔒 PROTEÇÃO (igual ao urbano)
-var logado = localStorage.getItem("logado");
-
-if(logado !== "sim"){
-alert("Você precisa fazer login para acessar.");
-window.location.href="index.html";
-}
-</script>
-
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- plugin KML -->
 <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 
 <script>
 
-// 🗺️ MAPA (igual ao urbano)
-var mapa = L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{maxZoom:19}
-);
+var map = L.map('map').setView([-22.19, -47.38], 12);
 
-var map = L.map('map',{
-center:[-22.19,-47.38],
-zoom:11,
-layers:[mapa]
-});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:19
+}).addTo(map);
 
-// 🔥 LINK DA SUA PLANILHA (ALTERE O ID)
-var urlRural = "https://opensheet.elk.sh/1Ey1-XnBAksowBfeiqUBtDHUIaGe6xvVrX3p6ODHpowA/RURAL";
+// 🔥 KML DE TESTE (FUNCIONA CERTO)
+var kml = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.kml";
 
-// 🔄 BUSCAR DADOS
-fetch(urlRural)
-.then(res => res.json())
-.then(function(dados){
-
-dados.forEach(function(item){
-
-var nome = item.nome;
-var kml = item.kml;
-var matricula = item.matricula;
-var cartorio = item.cartorio;
-
-if(!kml) return;
-
-// 📍 CARREGAR KML
 omnivore.kml(kml)
 .on('ready', function(){
 
-var camada = this;
+this.addTo(map);
 
-camada.addTo(map);
-
-// clique no polígono
-camada.on("click", function(e){
-
-var popup = `
-<b>${nome}</b><br><br>
-Matrícula: ${matricula}<br>
-Cartório: ${cartorio}<br><br>
-
-<button onclick="baixarKML('${kml}')">
-📥 Baixar KML
-</button>
-`;
-
-L.popup()
-.setLatLng(e.latlng)
-.setContent(popup)
-.openOn(map);
+// zoom automático
+map.fitBounds(this.getBounds());
 
 });
-
-});
-
-});
-
-});
-
-// 📥 DOWNLOAD DO KML
-function baixarKML(link){
-var a = document.createElement("a");
-a.href = link;
-a.download = "imovel.kml";
-a.click();
-}
 
 </script>
 
