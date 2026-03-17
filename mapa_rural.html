@@ -43,27 +43,18 @@ L.tileLayer(
 var urlRural = "https://opensheet.elk.sh/RURAL";
 
 fetch(urlRural)
-.then(res => res.text())
-.then(function(data){
+fetch(urlRural)
+.then(res => res.json())
+.then(function(dados){
 
-var linhas = data.split("\n");
+dados.forEach(function(item){
 
-for(var i=1;i<linhas.length;i++){
+var nome = item.nome;
+var kml = item.kml;
+var matricula = item.matricula;
+var cartorio = item.cartorio;
 
-var col = linhas[i].split(",");
-
-if(col.length < 5) continue;
-
-function limpar(t){
-return t.replace(/"/g,"").trim();
-}
-
-var nome = limpar(col[1]);
-var kml = limpar(col[2]);
-var matricula = limpar(col[3]);
-var cartorio = limpar(col[4]);
-
-if(!kml) continue;
+if(!kml) return;
 
 // carregar KML
 omnivore.kml(kml)
@@ -73,7 +64,6 @@ var camada = this;
 
 camada.addTo(map);
 
-// clique no polígono
 camada.on("click", function(e){
 
 var popup = `
@@ -91,6 +81,13 @@ L.popup()
 .setContent(popup)
 .openOn(map);
 
+});
+
+});
+
+});
+
+});
 });
 
 });
