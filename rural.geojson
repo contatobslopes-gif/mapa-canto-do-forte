@@ -1,0 +1,24 @@
+{
+"type": "FeatureCollection",
+"features": [
+{
+"type": "Feature",
+"properties": {
+"nome": "Área Teste Araras",
+"matricula": "0001",
+"cartorio": "Araras",
+"kml": "https://seusite.com/kml/teste.kml"
+},
+"geometry": {
+"type": "Polygon",
+"coordinates": [[
+[-47.3800,-22.1900],
+[-47.3700,-22.1900],
+[-47.3700,-22.1800],
+[-47.3800,-22.1800],
+[-47.3800,-22.1900]
+]]
+}
+}
+]
+}
