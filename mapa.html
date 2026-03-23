@@ -9,17 +9,39 @@
 <style>
 body{margin:0;font-family:Arial;}
 #map{height:100vh;width:100%;}
+
+/* 🔍 BUSCA */
 #buscaBox{
-position:absolute;top:15px;left:50%;
+position:absolute;top:10px;left:50%;
 transform:translateX(-50%);
 z-index:1000;background:white;padding:10px;
 border-radius:8px;
 box-shadow:0 3px 10px rgba(0,0,0,0.3);
 }
-#busca{padding:8px;width:280px;border:1px solid #ccc;border-radius:4px;}
-button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer;}
-#buscarBtn{background:#0b3d91;color:white;}
-#limparBtn{background:#777;color:white;margin-left:5px;}
+
+/* 📊 LEGENDA */
+#legenda{
+position:absolute;
+bottom:20px;
+left:20px;
+z-index:1000;
+background:white;
+padding:10px;
+border-radius:8px;
+box-shadow:0 3px 10px rgba(0,0,0,0.3);
+font-size:14px;
+}
+
+.itemLegenda{
+margin-bottom:5px;
+}
+
+.cor{
+display:inline-block;
+width:12px;
+height:12px;
+margin-right:5px;
+}
 </style>
 </head>
 
@@ -30,12 +52,21 @@ if(localStorage.getItem("logado")!=="sim"){
 alert("Faça login");
 window.location.href="index.html";
 }
+
+var tipoUsuario = localStorage.getItem("tipoUsuario");
 </script>
 
+<!-- BUSCA -->
 <div id="buscaBox">
-<input id="busca" placeholder="Buscar endereço ou matrícula">
-<button id="buscarBtn">Buscar</button>
-<button id="limparBtn">Limpar</button>
+<input id="busca" placeholder="Buscar endereço">
+<button onclick="buscar()">Buscar</button>
+</div>
+
+<!-- LEGENDA -->
+<div id="legenda">
+<div class="itemLegenda"><span class="cor" style="background:red"></span>Sem matrícula</div>
+<div class="itemLegenda"><span class="cor" style="background:yellow"></span>Dados parciais</div>
+<div class="itemLegenda"><span class="cor" style="background:green"></span>Com matrícula</div>
 </div>
 
 <div id="map"></div>
@@ -44,20 +75,17 @@ window.location.href="index.html";
 
 <script>
 
-var mapa = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-maxZoom:22
-});
+// MAPAS
+var mapa = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:22});
 
-// 🔥 SATÉLITE COM NOME DE RUAS
 var satelite = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
 {maxZoom:22}
 );
 
-// nomes por cima
 var rotulos = L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{maxZoom:22, opacity:0.5}
+{maxZoom:22,opacity:0.5}
 );
 
 var map = L.map('map',{
@@ -68,19 +96,23 @@ layers:[mapa]
 
 L.control.layers({
 "Mapa": mapa,
-"Satélite com nomes": L.layerGroup([satelite, rotulos])
+"Satélite": L.layerGroup([satelite,rotulos])
 }).addTo(map);
 
-// ================= BUSCA ENDEREÇO =================
+// PADRONIZAR ENDEREÇO
+function formatarEndereco(texto){
+return texto
+.toLowerCase()
+.replace(/\b\w/g, l => l.toUpperCase());
+}
 
-document.getElementById("buscarBtn").onclick=function(){
+// BUSCAR
+function buscar(){
 
-var termo = document.getElementById("busca").value.trim();
-
-if(!termo){ alert("Digite algo"); return; }
+var termo = document.getElementById("busca").value;
 
 fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(termo))
-.then(res=>res.json())
+.then(r=>r.json())
 .then(function(data){
 
 if(data.length==0){
@@ -91,31 +123,26 @@ return;
 var lat = parseFloat(data[0].lat);
 var lon = parseFloat(data[0].lon);
 
-map.setView([lat,lon],19);
+var endereco = formatarEndereco(termo);
 
-// popup com matrícula
-var chave = lat.toFixed(5)+"_"+lon.toFixed(5);
+map.setView([lat,lon],19);
 
 var marker = L.marker([lat,lon]).addTo(map);
 
-marker.bindPopup(
-"<b>"+termo+"</b><br><br>"+
-"Matrícula:<br>"+
-"<input id='m_"+chave+"'><br><br>"+
-"<button onclick='salvar("+lat+","+lon+",\""+termo+"\",\""+chave+"\")'>Salvar</button>"
-).openPopup();
+marker.on("click", function(){
 
-});
+if(tipoUsuario !== "admin"){
+alert("Apenas administrador pode salvar");
+return;
+}
 
-};
+// matrícula
+var matricula = prompt("Digite a matrícula:");
+if(!matricula) return;
 
-// ================= SALVAR =================
-
-function salvar(lat,lon,endereco,chave){
-
-var valor = document.getElementById("m_"+chave).value;
-
-if(!valor){ alert("Digite a matrícula"); return; }
+// cartório
+var cartorio = prompt("Digite o cartório:");
+if(!cartorio) return;
 
 var dados = JSON.parse(localStorage.getItem("dados")||"[]");
 
@@ -123,7 +150,9 @@ dados.push({
 lat:lat,
 lon:lon,
 endereco:endereco,
-matricula:valor
+matricula:matricula,
+cartorio:cartorio,
+status:"verde"
 });
 
 localStorage.setItem("dados",JSON.stringify(dados));
@@ -131,21 +160,34 @@ localStorage.setItem("dados",JSON.stringify(dados));
 alert("Salvo!");
 
 carregarSalvos();
+
+});
+
+marker.bindPopup("<b>"+endereco+"</b><br>Clique para cadastrar").openPopup();
+
+});
+
 }
 
-// ================= CARREGAR SALVOS =================
-
+// CARREGAR SALVOS
 function carregarSalvos(){
 
 var dados = JSON.parse(localStorage.getItem("dados")||"[]");
 
 dados.forEach(function(d){
 
-var marker = L.marker([d.lat,d.lon]).addTo(map);
+var cor = "green";
+
+var marker = L.circleMarker([d.lat,d.lon],{
+radius:6,
+color:cor,
+fillOpacity:0.7
+}).addTo(map);
 
 marker.bindPopup(
-"<b>Matrícula:</b>"+d.matricula+
-"<br>"+d.endereco
+"<b>Matrícula:</b> "+d.matricula+
+"<br>"+d.endereco+
+"<br><b>Cartório:</b> "+d.cartorio
 );
 
 });
@@ -154,8 +196,7 @@ marker.bindPopup(
 
 carregarSalvos();
 
-// ================= IMÓVEIS AUTOMÁTICOS =================
-
+// IMÓVEIS AUTOMÁTICOS
 var camadaOSM = L.layerGroup().addTo(map);
 
 function carregarOSM(){
@@ -175,7 +216,9 @@ data.elements.forEach(function(e){
 if(!e.center) return;
 
 L.circleMarker([e.center.lat,e.center.lon],{
-radius:4,color:"red",fillOpacity:0.5
+radius:4,
+color:"red",
+fillOpacity:0.5
 }).addTo(camadaOSM);
 
 });
