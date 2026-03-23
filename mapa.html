@@ -67,29 +67,23 @@ margin-left:5px;
 <body>
 
 <script>
-
 var logado = localStorage.getItem("logado");
 
 if(logado !== "sim"){
 alert("Você precisa fazer login para acessar o mapa.");
 window.location.href="index.html";
 }
-
 </script>
 
 <div id="buscaBox">
-
 <input id="busca" placeholder="Buscar cidade, rua, matrícula, quadra, lote">
-
 <button id="buscarBtn">Buscar</button>
 <button id="limparBtn">Limpar</button>
-
 </div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
@@ -182,23 +176,17 @@ marker:marker
 }
 
 map.addLayer(cluster);
-/* =========================
-   IMÓVEIS AUTOMÁTICOS (OSM)
-========================= */
+
+// ================= OSM =================
 
 var camadaOSM = L.layerGroup();
 
 function carregarOSM(){
 
-// área do mapa atual
 var bounds = map.getBounds();
 
-var bbox = bounds.getSouth()+","+
-bounds.getWest()+","+
-bounds.getNorth()+","+
-bounds.getEast();
+var bbox = bounds.getSouth()+","+bounds.getWest()+","+bounds.getNorth()+","+bounds.getEast();
 
-// consulta Overpass (OpenStreetMap)
 var urlOSM = "https://overpass-api.de/api/interpreter?data=[out:json];(way[\"building\"]("+bbox+"););out center;";
 
 fetch(urlOSM)
@@ -214,74 +202,13 @@ if(!el.center) return;
 var lat = el.center.lat;
 var lon = el.center.lon;
 
-// cor padrão: sem matrícula
-var cor = "red";
-
 var marker = L.circleMarker([lat,lon],{
 radius:5,
-color:cor,
+color:"red",
 fillOpacity:0.6
 });
 
-var chave = lat.toFixed(5)+"_"+lon.toFixed(5);
-
-// verifica se já tem matrícula salva
-var dadosSalvos = JSON.parse(localStorage.getItem("matriculas") || "{}");
-
-var matriculaSalva = dadosSalvos[chave];
-
-if(matriculaSalva){
-cor = "green";
-}
-
-var conteudo = "<b>Imóvel automático</b><br>";
-
-if(matriculaSalva){
-conteudo += "Matrícula: "+matriculaSalva+"<br>";
-conteudo += "<button onclick='removerMatricula(\""+chave+"\")'>Remover</button>";
-}else{
-conteudo += "Sem matrícula<br>";
-conteudo += "<input id='input_"+chave+"' placeholder='Digite matrícula'><br>";
-conteudo += "<button onclick='salvarMatricula(\""+chave+"\","+lat+","+lon+")'>Salvar</button>";
-}
-
-marker.setStyle({color:cor});
-
-marker.bindPopup(conteudo);
-);
-   function salvarMatricula(chave, lat, lon){
-
-var input = document.getElementById("input_"+chave);
-var valor = input.value.trim();
-
-if(!valor){
-alert("Digite uma matrícula");
-return;
-}
-
-var dados = JSON.parse(localStorage.getItem("matriculas") || "{}");
-
-dados[chave] = valor;
-
-localStorage.setItem("matriculas", JSON.stringify(dados));
-
-alert("Matrícula salva!");
-
-carregarOSM();
-}
-
-function removerMatricula(chave){
-
-var dados = JSON.parse(localStorage.getItem("matriculas") || "{}");
-
-delete dados[chave];
-
-localStorage.setItem("matriculas", JSON.stringify(dados));
-
-alert("Matrícula removida!");
-
-carregarOSM();
-}
+marker.bindPopup("Imóvel automático");
 
 camadaOSM.addLayer(marker);
 
@@ -291,15 +218,12 @@ camadaOSM.addLayer(marker);
 
 }
 
-// carregar ao abrir
 carregarOSM();
 
-// recarregar ao mover mapa
 map.on("moveend", function(){
 carregarOSM();
 });
 
-// adicionar no controle de camadas
 L.control.layers(null,{
 "Imóveis automáticos": camadaOSM
 }).addTo(map);
@@ -308,17 +232,51 @@ map.addLayer(camadaOSM);
 
 });
 
+// ================= BUSCA INTELIGENTE =================
+
 document.getElementById("buscarBtn").onclick=function(){
 
-var termo = document.getElementById("busca").value.toLowerCase().trim();
+var termo = document.getElementById("busca").value.trim();
+
+if(!termo){
+alert("Digite algo");
+return;
+}
 
 cluster.clearLayers();
 
+var encontrou = false;
+
 imoveis.forEach(function(i){
-if(i.texto.includes(termo)){
+if(i.texto.includes(termo.toLowerCase())){
 cluster.addLayer(i.marker);
+encontrou = true;
 }
 });
+
+if(!encontrou){
+
+fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(termo))
+.then(res => res.json())
+.then(function(data){
+
+if(data.length === 0){
+alert("Endereço não encontrado");
+return;
+}
+
+var lat = parseFloat(data[0].lat);
+var lon = parseFloat(data[0].lon);
+
+map.setView([lat, lon], 18);
+
+var marcadorBusca = L.marker([lat, lon]).addTo(map);
+
+marcadorBusca.bindPopup("Endereço encontrado:<br>"+termo).openPopup();
+
+});
+
+}
 
 };
 
@@ -334,10 +292,6 @@ cluster.addLayer(i.marker);
 
 };
 
-</script>
-
-</body>
-</html>
 </script>
 
 </body>
