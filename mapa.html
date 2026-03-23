@@ -223,10 +223,65 @@ color:cor,
 fillOpacity:0.6
 });
 
-marker.bindPopup(
-"<b>Imóvel automático</b><br>"+
-"Sem matrícula cadastrada"
+var chave = lat.toFixed(5)+"_"+lon.toFixed(5);
+
+// verifica se já tem matrícula salva
+var dadosSalvos = JSON.parse(localStorage.getItem("matriculas") || "{}");
+
+var matriculaSalva = dadosSalvos[chave];
+
+if(matriculaSalva){
+cor = "green";
+}
+
+var conteudo = "<b>Imóvel automático</b><br>";
+
+if(matriculaSalva){
+conteudo += "Matrícula: "+matriculaSalva+"<br>";
+conteudo += "<button onclick='removerMatricula(\""+chave+"\")'>Remover</button>";
+}else{
+conteudo += "Sem matrícula<br>";
+conteudo += "<input id='input_"+chave+"' placeholder='Digite matrícula'><br>";
+conteudo += "<button onclick='salvarMatricula(\""+chave+"\","+lat+","+lon+")'>Salvar</button>";
+}
+
+marker.setStyle({color:cor});
+
+marker.bindPopup(conteudo);
 );
+   function salvarMatricula(chave, lat, lon){
+
+var input = document.getElementById("input_"+chave);
+var valor = input.value.trim();
+
+if(!valor){
+alert("Digite uma matrícula");
+return;
+}
+
+var dados = JSON.parse(localStorage.getItem("matriculas") || "{}");
+
+dados[chave] = valor;
+
+localStorage.setItem("matriculas", JSON.stringify(dados));
+
+alert("Matrícula salva!");
+
+carregarOSM();
+}
+
+function removerMatricula(chave){
+
+var dados = JSON.parse(localStorage.getItem("matriculas") || "{}");
+
+delete dados[chave];
+
+localStorage.setItem("matriculas", JSON.stringify(dados));
+
+alert("Matrícula removida!");
+
+carregarOSM();
+}
 
 camadaOSM.addLayer(marker);
 
