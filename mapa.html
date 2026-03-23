@@ -1,82 +1,39 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
 <meta charset="utf-8">
 <title>Matrimap</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
-
 <style>
-
-body{
-margin:0;
-font-family:Arial;
-}
-
-#map{
-height:100vh;
-width:100%;
-}
-
+body{margin:0;font-family:Arial;}
+#map{height:100vh;width:100%;}
 #buscaBox{
-position:absolute;
-top:15px;
-left:50%;
+position:absolute;top:15px;left:50%;
 transform:translateX(-50%);
-z-index:1000;
-background:white;
-padding:10px;
+z-index:1000;background:white;padding:10px;
 border-radius:8px;
 box-shadow:0 3px 10px rgba(0,0,0,0.3);
 }
-
-#busca{
-padding:8px;
-width:280px;
-border:1px solid #ccc;
-border-radius:4px;
-}
-
-button{
-padding:8px 12px;
-border:none;
-border-radius:4px;
-cursor:pointer;
-}
-
-#buscarBtn{
-background:#0b3d91;
-color:white;
-}
-
-#limparBtn{
-background:#777;
-color:white;
-margin-left:5px;
-}
-
+#busca{padding:8px;width:280px;border:1px solid #ccc;border-radius:4px;}
+button{padding:8px 12px;border:none;border-radius:4px;cursor:pointer;}
+#buscarBtn{background:#0b3d91;color:white;}
+#limparBtn{background:#777;color:white;margin-left:5px;}
 </style>
-
 </head>
 
 <body>
 
 <script>
-var logado = localStorage.getItem("logado");
-
-if(logado !== "sim"){
-alert("Você precisa fazer login para acessar o mapa.");
+if(localStorage.getItem("logado")!=="sim"){
+alert("Faça login");
 window.location.href="index.html";
 }
 </script>
 
 <div id="buscaBox">
-<input id="busca" placeholder="Buscar cidade, rua, matrícula, quadra, lote">
+<input id="busca" placeholder="Buscar endereço ou matrícula">
 <button id="buscarBtn">Buscar</button>
 <button id="limparBtn">Limpar</button>
 </div>
@@ -84,213 +41,151 @@ window.location.href="index.html";
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
 <script>
 
-var mapa = L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{maxZoom:19}
-);
+var mapa = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom:22
+});
 
+// 🔥 SATÉLITE COM NOME DE RUAS
 var satelite = L.tileLayer(
 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
 {maxZoom:22}
 );
 
+// nomes por cima
+var rotulos = L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{maxZoom:22, opacity:0.5}
+);
+
 var map = L.map('map',{
 center:[-22.19,-47.38],
-zoom:11,
+zoom:13,
 layers:[mapa]
 });
 
 L.control.layers({
 "Mapa": mapa,
-"Satélite": satelite
+"Satélite com nomes": L.layerGroup([satelite, rotulos])
 }).addTo(map);
 
-var cluster = L.markerClusterGroup();
-var imoveis = [];
-
-var url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
-
-fetch(url)
-.then(res => res.text())
-.then(function(data){
-
-var linhas = data.split("\n");
-
-for(var i=1;i<linhas.length;i++){
-
-var col = linhas[i].split(",");
-
-if(col.length < 12) continue;
-
-function limpar(t){
-if(!t) return "";
-return t.replace(/"/g,"").trim();
-}
-
-var lat = parseFloat(col[1]);
-var lng = parseFloat(col[2]);
-
-if(isNaN(lat) || isNaN(lng)) continue;
-
-var estado = limpar(col[3]);
-var cidade = limpar(col[4]);
-var bairro = limpar(col[5]);
-var rua = limpar(col[6]);
-var numero = limpar(col[7]);
-var quadra = limpar(col[9]);
-var lote = limpar(col[10]);
-var matricula = limpar(col[11]);
-
-var textoBusca = (
-cidade+" "+
-bairro+" "+
-rua+" "+
-numero+" "+
-quadra+" "+
-lote+" "+
-matricula
-).toLowerCase();
-
-var marker = L.marker([lat,lng]);
-
-marker.bindPopup(
-"<b>Matrícula:</b> "+matricula+
-"<br>"+rua+", "+numero+
-"<br>"+bairro+
-"<br>"+cidade+" - "+estado+
-"<br>Quadra: "+quadra+
-"<br>Lote: "+lote
-);
-
-cluster.addLayer(marker);
-
-imoveis.push({
-texto:textoBusca,
-marker:marker
-});
-
-}
-
-map.addLayer(cluster);
-
-// ================= OSM =================
-
-var camadaOSM = L.layerGroup();
-
-function carregarOSM(){
-
-var bounds = map.getBounds();
-
-var bbox = bounds.getSouth()+","+bounds.getWest()+","+bounds.getNorth()+","+bounds.getEast();
-
-var urlOSM = "https://overpass-api.de/api/interpreter?data=[out:json];(way[\"building\"]("+bbox+"););out center;";
-
-fetch(urlOSM)
-.then(res => res.json())
-.then(function(data){
-
-camadaOSM.clearLayers();
-
-data.elements.forEach(function(el){
-
-if(!el.center) return;
-
-var lat = el.center.lat;
-var lon = el.center.lon;
-
-var marker = L.circleMarker([lat,lon],{
-radius:5,
-color:"red",
-fillOpacity:0.6
-});
-
-marker.bindPopup("Imóvel automático");
-
-camadaOSM.addLayer(marker);
-
-});
-
-});
-
-}
-
-carregarOSM();
-
-map.on("moveend", function(){
-carregarOSM();
-});
-
-L.control.layers(null,{
-"Imóveis automáticos": camadaOSM
-}).addTo(map);
-
-map.addLayer(camadaOSM);
-
-});
-
-// ================= BUSCA INTELIGENTE =================
+// ================= BUSCA ENDEREÇO =================
 
 document.getElementById("buscarBtn").onclick=function(){
 
 var termo = document.getElementById("busca").value.trim();
 
-if(!termo){
-alert("Digite algo");
-return;
-}
-
-cluster.clearLayers();
-
-var encontrou = false;
-
-imoveis.forEach(function(i){
-if(i.texto.includes(termo.toLowerCase())){
-cluster.addLayer(i.marker);
-encontrou = true;
-}
-});
-
-if(!encontrou){
+if(!termo){ alert("Digite algo"); return; }
 
 fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(termo))
-.then(res => res.json())
+.then(res=>res.json())
 .then(function(data){
 
-if(data.length === 0){
-alert("Endereço não encontrado");
+if(data.length==0){
+alert("Não encontrado");
 return;
 }
 
 var lat = parseFloat(data[0].lat);
 var lon = parseFloat(data[0].lon);
 
-map.setView([lat, lon], 18);
+map.setView([lat,lon],19);
 
-var marcadorBusca = L.marker([lat, lon]).addTo(map);
+// popup com matrícula
+var chave = lat.toFixed(5)+"_"+lon.toFixed(5);
 
-marcadorBusca.bindPopup("Endereço encontrado:<br>"+termo).openPopup();
+var marker = L.marker([lat,lon]).addTo(map);
+
+marker.bindPopup(
+"<b>"+termo+"</b><br><br>"+
+"Matrícula:<br>"+
+"<input id='m_"+chave+"'><br><br>"+
+"<button onclick='salvar("+lat+","+lon+",\""+termo+"\",\""+chave+"\")'>Salvar</button>"
+).openPopup();
+
+});
+
+};
+
+// ================= SALVAR =================
+
+function salvar(lat,lon,endereco,chave){
+
+var valor = document.getElementById("m_"+chave).value;
+
+if(!valor){ alert("Digite a matrícula"); return; }
+
+var dados = JSON.parse(localStorage.getItem("dados")||"[]");
+
+dados.push({
+lat:lat,
+lon:lon,
+endereco:endereco,
+matricula:valor
+});
+
+localStorage.setItem("dados",JSON.stringify(dados));
+
+alert("Salvo!");
+
+carregarSalvos();
+}
+
+// ================= CARREGAR SALVOS =================
+
+function carregarSalvos(){
+
+var dados = JSON.parse(localStorage.getItem("dados")||"[]");
+
+dados.forEach(function(d){
+
+var marker = L.marker([d.lat,d.lon]).addTo(map);
+
+marker.bindPopup(
+"<b>Matrícula:</b>"+d.matricula+
+"<br>"+d.endereco
+);
 
 });
 
 }
 
-};
+carregarSalvos();
 
-document.getElementById("limparBtn").onclick=function(){
+// ================= IMÓVEIS AUTOMÁTICOS =================
 
-document.getElementById("busca").value="";
+var camadaOSM = L.layerGroup().addTo(map);
 
-cluster.clearLayers();
+function carregarOSM(){
 
-imoveis.forEach(function(i){
-cluster.addLayer(i.marker);
+var b = map.getBounds();
+
+var url = "https://overpass-api.de/api/interpreter?data=[out:json];(way[\"building\"]("+b.getSouth()+","+b.getWest()+","+b.getNorth()+","+b.getEast()+"););out center;";
+
+fetch(url)
+.then(r=>r.json())
+.then(function(data){
+
+camadaOSM.clearLayers();
+
+data.elements.forEach(function(e){
+
+if(!e.center) return;
+
+L.circleMarker([e.center.lat,e.center.lon],{
+radius:4,color:"red",fillOpacity:0.5
+}).addTo(camadaOSM);
+
 });
 
-};
+});
+
+}
+
+carregarOSM();
+map.on("moveend",carregarOSM);
 
 </script>
 
