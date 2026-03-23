@@ -182,6 +182,74 @@ marker:marker
 }
 
 map.addLayer(cluster);
+/* =========================
+   IMÓVEIS AUTOMÁTICOS (OSM)
+========================= */
+
+var camadaOSM = L.layerGroup();
+
+function carregarOSM(){
+
+// área do mapa atual
+var bounds = map.getBounds();
+
+var bbox = bounds.getSouth()+","+
+bounds.getWest()+","+
+bounds.getNorth()+","+
+bounds.getEast();
+
+// consulta Overpass (OpenStreetMap)
+var urlOSM = "https://overpass-api.de/api/interpreter?data=[out:json];(way[\"building\"]("+bbox+"););out center;";
+
+fetch(urlOSM)
+.then(res => res.json())
+.then(function(data){
+
+camadaOSM.clearLayers();
+
+data.elements.forEach(function(el){
+
+if(!el.center) return;
+
+var lat = el.center.lat;
+var lon = el.center.lon;
+
+// cor padrão: sem matrícula
+var cor = "red";
+
+var marker = L.circleMarker([lat,lon],{
+radius:5,
+color:cor,
+fillOpacity:0.6
+});
+
+marker.bindPopup(
+"<b>Imóvel automático</b><br>"+
+"Sem matrícula cadastrada"
+);
+
+camadaOSM.addLayer(marker);
+
+});
+
+});
+
+}
+
+// carregar ao abrir
+carregarOSM();
+
+// recarregar ao mover mapa
+map.on("moveend", function(){
+carregarOSM();
+});
+
+// adicionar no controle de camadas
+L.control.layers(null,{
+"Imóveis automáticos": camadaOSM
+}).addTo(map);
+
+map.addLayer(camadaOSM);
 
 });
 
