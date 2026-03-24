@@ -27,6 +27,7 @@ box-shadow:0 3px 10px rgba(0,0,0,0.3);
 <body>
 
 <script>
+// 🔒 PROTEÇÃO LOGIN (melhorada)
 if(!localStorage.getItem("usuarioLogado")){
   alert("Faça login");
   window.location.href="index.html";
@@ -40,13 +41,36 @@ var tipoUsuario = localStorage.getItem("tipoUsuario");
 <button onclick="buscar()">Buscar</button>
 </div>
 
+<!-- 🔥 BOTÕES NOVOS -->
+<button onclick="backup()" style="position:absolute;top:60px;right:10px;z-index:1000;">💾 Backup</button>
+<input type="file" onchange="restore(event)" style="position:absolute;top:100px;right:10px;z-index:1000;">
+
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
-// MAPAS
+// =========================
+// FUNÇÕES SEGURAS
+// =========================
+
+function obterDados(){
+  try{
+    return JSON.parse(localStorage.getItem("dados")) || [];
+  }catch(e){
+    return [];
+  }
+}
+
+function salvarDados(dados){
+  localStorage.setItem("dados", JSON.stringify(dados));
+}
+
+// =========================
+// MAPA
+// =========================
+
 var mapa = L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 {maxZoom:22}
@@ -73,12 +97,18 @@ L.control.layers({
 "Satélite": L.layerGroup([satelite,rotulos])
 }).addTo(map);
 
-// FORMATAR ENDEREÇO
+// =========================
+// FORMATAÇÃO
+// =========================
+
 function formatarEndereco(texto){
 return texto.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
 }
 
+// =========================
 // BUSCA
+// =========================
+
 function buscar(){
 
 var termo = document.getElementById("busca").value;
@@ -94,7 +124,6 @@ return;
 
 var lat = parseFloat(data[0].lat);
 var lon = parseFloat(data[0].lon);
-
 var endereco = formatarEndereco(termo);
 
 map.setView([lat,lon],19);
@@ -114,7 +143,7 @@ if(!matricula) return;
 var cartorio = prompt("Digite o cartório:");
 if(!cartorio) return;
 
-var dados = JSON.parse(localStorage.getItem("dados")||"[]");
+var dados = obterDados();
 
 dados.push({
 lat:lat,
@@ -124,11 +153,11 @@ matricula:matricula,
 cartorio:cartorio
 });
 
-localStorage.setItem("dados",JSON.stringify(dados));
+salvarDados(dados);
 
 alert("Salvo!");
 
-location.reload();
+carregarSalvos(); // 🔥 atualiza sem reload
 
 });
 
@@ -138,10 +167,17 @@ marker.bindPopup("<b>"+endereco+"</b><br>Clique para cadastrar").openPopup();
 
 }
 
-// CARREGAR SALVOS
+// =========================
+// CARREGAR
+// =========================
+
+var camadaSalvos = L.layerGroup().addTo(map);
+
 function carregarSalvos(){
 
-var dados = JSON.parse(localStorage.getItem("dados")||"[]");
+camadaSalvos.clearLayers();
+
+var dados = obterDados();
 
 dados.forEach(function(d, index){
 
@@ -149,7 +185,7 @@ var marker = L.circleMarker([d.lat,d.lon],{
 radius:6,
 color:"green",
 fillOpacity:0.7
-}).addTo(map);
+}).addTo(camadaSalvos);
 
 marker.bindPopup(
 "<b>Endereço:</b> "+d.endereco+
@@ -166,10 +202,13 @@ marker.bindPopup(
 
 carregarSalvos();
 
+// =========================
 // EDITAR
+// =========================
+
 function editarImovel(index){
 
-var dados = JSON.parse(localStorage.getItem("dados")||"[]");
+var dados = obterDados();
 
 var novaMatricula = prompt("Editar matrícula:", dados[index].matricula);
 if(!novaMatricula) return;
@@ -180,15 +219,52 @@ if(!novoCartorio) return;
 dados[index].matricula = novaMatricula;
 dados[index].cartorio = novoCartorio;
 
-localStorage.setItem("dados", JSON.stringify(dados));
+salvarDados(dados);
 
 alert("Atualizado!");
 
-location.reload();
+carregarSalvos(); // 🔥 sem reload
 
 }
 
-// IMÓVEIS AUTOMÁTICOS
+// =========================
+// BACKUP
+// =========================
+
+function backup(){
+const dados = localStorage.getItem("dados") || "[]";
+
+const blob = new Blob([dados], {type:"application/json"});
+const url = URL.createObjectURL(blob);
+
+const a = document.createElement("a");
+a.href = url;
+a.download = "backup_matrimap.json";
+a.click();
+}
+
+// =========================
+// RESTORE
+// =========================
+
+function restore(event){
+
+const file = event.target.files[0];
+const reader = new FileReader();
+
+reader.onload = function(e){
+  localStorage.setItem("dados", e.target.result);
+  alert("Backup restaurado!");
+  carregarSalvos();
+};
+
+reader.readAsText(file);
+}
+
+// =========================
+// OSM
+// =========================
+
 var camadaOSM = L.layerGroup().addTo(map);
 
 function carregarOSM(){
