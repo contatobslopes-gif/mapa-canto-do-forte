@@ -27,7 +27,6 @@ box-shadow:0 3px 10px rgba(0,0,0,0.3);
 <body>
 
 <script>
-// 🔒 PROTEÇÃO LOGIN (melhorada)
 if(!localStorage.getItem("usuarioLogado")){
   alert("Faça login");
   window.location.href="index.html";
@@ -41,15 +40,24 @@ var tipoUsuario = localStorage.getItem("tipoUsuario");
 <button onclick="buscar()">Buscar</button>
 </div>
 
-<!-- 🔥 BOTÕES NOVOS -->
-<button onclick="backup()" style="position:absolute;top:60px;right:10px;z-index:1000;">💾 Backup</button>
-<input type="file" onchange="restore(event)" style="position:absolute;top:100px;right:10px;z-index:1000;">
+<!-- 🔒 AGORA SÓ ADMIN VÊ -->
+<div id="adminTools" style="position:absolute;top:60px;right:10px;z-index:1000;display:none;">
+  <button onclick="backup()">💾 Backup</button><br><br>
+  <input type="file" onchange="restore(event)">
+</div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+
+// MOSTRAR FERRAMENTAS ADMIN
+window.onload = function(){
+  if(tipoUsuario === "admin"){
+    document.getElementById("adminTools").style.display = "block";
+  }
+};
 
 // =========================
 // FUNÇÕES SEGURAS
@@ -128,7 +136,8 @@ var endereco = formatarEndereco(termo);
 
 map.setView([lat,lon],19);
 
-var marker = L.marker([lat,lon]).addTo(map);
+// 🔥 ALTERAÇÃO 1: marker arrastável
+var marker = L.marker([lat,lon], {draggable:true}).addTo(map);
 
 marker.on("click", function(){
 
@@ -143,11 +152,14 @@ if(!matricula) return;
 var cartorio = prompt("Digite o cartório:");
 if(!cartorio) return;
 
+// 🔥 ALTERAÇÃO 2: pegar posição ajustada
+var pos = marker.getLatLng();
+
 var dados = obterDados();
 
 dados.push({
-lat:lat,
-lon:lon,
+lat:pos.lat,
+lon:pos.lng,
 endereco:endereco,
 matricula:matricula,
 cartorio:cartorio
@@ -157,11 +169,11 @@ salvarDados(dados);
 
 alert("Salvo!");
 
-carregarSalvos(); // 🔥 atualiza sem reload
+carregarSalvos();
 
 });
 
-marker.bindPopup("<b>"+endereco+"</b><br>Clique para cadastrar").openPopup();
+marker.bindPopup("<b>"+endereco+"</b><br>Arraste o ponto e clique para cadastrar").openPopup();
 
 });
 
@@ -223,7 +235,7 @@ salvarDados(dados);
 
 alert("Atualizado!");
 
-carregarSalvos(); // 🔥 sem reload
+carregarSalvos();
 
 }
 
