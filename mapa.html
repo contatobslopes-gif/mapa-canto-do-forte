@@ -27,9 +27,9 @@ box-shadow:0 3px 10px rgba(0,0,0,0.3);
 <body>
 
 <script>
-if(localStorage.getItem("logado")!=="sim"){
-alert("Faça login");
-window.location.href="index.html";
+if(!localStorage.getItem("usuarioLogado")){
+  alert("Faça login");
+  window.location.href="index.html";
 }
 
 var tipoUsuario = localStorage.getItem("tipoUsuario");
