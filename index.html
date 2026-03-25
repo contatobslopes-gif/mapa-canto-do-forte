@@ -1,118 +1,113 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 <meta charset="utf-8">
-<title>Matrimap - Login</title>
+<title>Matrimap</title>
 
 <style>
-
 body{
+margin:0;
 font-family:Arial;
 background:#0b3d91;
 color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.box{
+background:white;
+color:black;
+padding:30px;
+border-radius:10px;
+width:300px;
 text-align:center;
-padding-top:150px;
 }
 
 input{
+width:100%;
 padding:10px;
-margin:10px;
-width:250px;
-border:none;
-border-radius:4px;
+margin:10px 0;
 }
 
 button{
-padding:10px 20px;
+padding:10px;
+width:100%;
+background:#0b3d91;
+color:white;
 border:none;
-border-radius:4px;
-background:white;
-color:#0b3d91;
-font-weight:bold;
 cursor:pointer;
 }
-
 </style>
 </head>
 
 <body>
 
-<img src="bemvindo.png" style="width:450px;"><br>
+<div class="box">
 
-<h1>MATRIMAP</h1>
+<h2>MATRIMAP</h2>
 
-<p>Buscando o número da matrícula imobiliaria? Solução ágil em segundos.</p>
-
-<input id="email" placeholder="Email"><br>
-
-<input id="senha" type="password" placeholder="Senha"><br>
+<input id="email" placeholder="Email">
+<input id="senha" type="password" placeholder="Senha">
 
 <button onclick="login()">Entrar</button>
 
-<p>Não tem conta?</p>
+<br><br>
 
-<a href="cadastro.html">
-<button>Criar conta</button>
-</a>
+<button onclick="resetSenha()">Esqueci a senha</button>
+
+</div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
-authDomain: "matrimap-899b3.firebaseapp.com",
-projectId: "matrimap-899b3",
-storageBucket: "matrimap-899b3.firebasestorage.app",
-messagingSenderId: "1094066148423",
-appId: "1:1094066148423:web:260b14f4e2259681554d62"
+apiKey: "SUA_KEY",
+authDomain: "SEU_DOMINIO",
+projectId: "matrimap-899b3"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// 🔥 AGORA FUNCIONA NO BOTÃO
 window.login = function(){
 
-var email = document.getElementById("email").value;
-var senha = document.getElementById("senha").value;
+let email = document.getElementById("email").value;
+let senha = document.getElementById("senha").value;
 
-/* =========================
-   LOGIN ADMIN
-========================= */
-
+// ADMIN
 if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
-
-localStorage.setItem("usuarioLogado","admin");
 localStorage.setItem("tipoUsuario","admin");
 localStorage.setItem("logado","sim");
-
-alert("Login administrador autorizado");
-
 window.location.href="mapa.html";
 return;
 }
 
-/* =========================
-   LOGIN FIREBASE
-========================= */
-
-signInWithEmailAndPassword(auth, email, senha)
-.then(() => {
-
-localStorage.setItem("usuarioLogado",email);
+// USER
+signInWithEmailAndPassword(auth,email,senha)
+.then(()=>{
 localStorage.setItem("tipoUsuario","usuario");
 localStorage.setItem("logado","sim");
 
-window.location.href="mapa.html";
+// 🔥 SIMULA PAGAMENTO (depois integra Mercado Pago)
+localStorage.setItem("pagamento","ok");
 
+window.location.href="mapa.html";
 })
-.catch(() => {
-alert("Email ou senha incorretos");
-});
+.catch(()=>alert("Erro login"));
 
 }
 
+window.resetSenha = function(){
+let email = document.getElementById("email").value;
+sendPasswordResetEmail(auth,email)
+.then(()=>alert("Email enviado"));
+}
+
 </script>
+
+</body>
+</html>
