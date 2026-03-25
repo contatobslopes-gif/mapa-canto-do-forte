@@ -7,27 +7,31 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body{margin:0;font-family:Arial;}
-#map{height:100vh;}
+body{margin:0;font-family:Arial;display:flex;}
 
-#buscaBox{
-position:absolute;
-top:10px;
-left:10px;
-z-index:1000;
-background:white;
-padding:10px;
-border-radius:8px;
+#sidebar{
+width:300px;
+background:#0b3d91;
+color:white;
+padding:15px;
 }
 
-#legenda{
-position:absolute;
-bottom:20px;
-left:10px;
-background:white;
-padding:10px;
-border-radius:8px;
-z-index:1000;
+#map{
+flex:1;
+height:100vh;
+}
+
+input{
+width:100%;
+padding:8px;
+margin:5px 0;
+}
+
+button{
+width:100%;
+padding:8px;
+margin-top:5px;
+cursor:pointer;
 }
 </style>
 </head>
@@ -49,15 +53,26 @@ window.location.href="index.html";
 }
 </script>
 
-<div id="buscaBox">
-<input id="busca" placeholder="Buscar endereço">
-<button onclick="buscar()">Buscar</button>
-</div>
+<div id="sidebar">
 
-<div id="legenda">
+<h3>Busca</h3>
+
+<input id="tipo" placeholder="Tipo (Rua, Av)">
+<input id="rua" placeholder="Rua">
+<input id="bairro" placeholder="Bairro">
+<input id="cidade" placeholder="Cidade">
+<input id="estado" placeholder="Estado">
+<input id="cep" placeholder="CEP">
+
+<button onclick="buscar()">Buscar</button>
+
+<hr>
+
+<h4>Legenda</h4>
 🔴 Sem matrícula<br>
 🟢 Com matrícula<br>
 🟡 Não localizada
+
 </div>
 
 <div id="map"></div>
@@ -66,7 +81,9 @@ window.location.href="index.html";
 
 <script>
 
-// 🔥 MAPTILER
+// MAPAS
+var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
 var streets = L.tileLayer(
 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=SUA_KEY',
 {tileSize:512,zoomOffset:-1}
@@ -75,10 +92,6 @@ var streets = L.tileLayer(
 var hybrid = L.tileLayer(
 'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=SUA_KEY',
 {tileSize:512,zoomOffset:-1}
-);
-
-var osm = L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 );
 
 var map = L.map('map',{
@@ -93,8 +106,8 @@ L.control.layers({
 "Híbrido": hybrid
 }).addTo(map);
 
-// 🔥 CARREGAR CSV DO GITHUB
-fetch("SEU_LINK_RAW_CSV")
+// CSV
+fetch("SEU_LINK_CSV")
 .then(r=>r.text())
 .then(text=>{
 
@@ -110,56 +123,44 @@ let endereco = col[0];
 let matricula = col[1];
 let cartorio = col[2];
 
-// GEOCODING
 let geo = await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(endereco));
 let data = await geo.json();
 
-if(data.length === 0) return;
+if(data.length===0) return;
 
-let lat = parseFloat(data[0].lat);
-let lon = parseFloat(data[0].lon);
+let lat = data[0].lat;
+let lon = data[0].lon;
 
-// COR
-let cor = "red";
-if(matricula) cor = "green";
+let cor = matricula ? "green" : "red";
 
-let marker = L.circleMarker([lat,lon],{
+L.circleMarker([lat,lon],{
 radius:6,
 color:cor
 }).addTo(map);
 
-marker.bindPopup(
-"<b>"+endereco+"</b><br>"+
-"Matrícula: "+matricula+"<br>"+
-"Cartório: "+cartorio
-);
-
-// ADMIN ARRASTAR
-if(localStorage.getItem("tipoUsuario")==="admin"){
-
-let m = L.marker([lat,lon],{draggable:true}).addTo(map);
-
-m.on("dragend",function(){
-let pos = m.getLatLng();
-console.log("Nova posição:",pos);
-});
-
-}
-
 });
 
 });
 
-// BUSCA
+// BUSCA PROFISSIONAL
 function buscar(){
 
-let termo = document.getElementById("busca").value;
+let termo =
+document.getElementById("tipo").value + " " +
+document.getElementById("rua").value + " " +
+document.getElementById("bairro").value + " " +
+document.getElementById("cidade").value + " " +
+document.getElementById("estado").value + " " +
+document.getElementById("cep").value;
 
 fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(termo))
 .then(r=>r.json())
 .then(data=>{
 
-if(data.length==0) return;
+if(data.length==0){
+alert("Não encontrado");
+return;
+}
 
 let lat = data[0].lat;
 let lon = data[0].lon;
@@ -171,9 +172,6 @@ map.setView([lat,lon],19);
 }
 
 </script>
-
-</body>
-</html>
 
 </body>
 </html>
