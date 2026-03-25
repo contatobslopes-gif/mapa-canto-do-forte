@@ -8,18 +8,26 @@
 
 <style>
 body{margin:0;font-family:Arial;}
-#map{height:100vh;width:100%;}
+#map{height:100vh;}
 
 #buscaBox{
 position:absolute;
 top:10px;
-left:50%;
-transform:translateX(-50%);
+left:10px;
 z-index:1000;
 background:white;
 padding:10px;
 border-radius:8px;
-box-shadow:0 3px 10px rgba(0,0,0,0.3);
+}
+
+#legenda{
+position:absolute;
+bottom:20px;
+left:10px;
+background:white;
+padding:10px;
+border-radius:8px;
+z-index:1000;
 }
 </style>
 </head>
@@ -27,12 +35,18 @@ box-shadow:0 3px 10px rgba(0,0,0,0.3);
 <body>
 
 <script>
-if(!localStorage.getItem("usuarioLogado")){
-  alert("Faça login");
-  window.location.href="index.html";
+// BLOQUEIOS
+if(!localStorage.getItem("logado")){
+alert("Faça login");
+window.location.href="index.html";
 }
 
-var tipoUsuario = localStorage.getItem("tipoUsuario");
+if(localStorage.getItem("tipoUsuario") !== "admin"){
+if(localStorage.getItem("pagamento") !== "ok"){
+alert("Pagamento necessário");
+window.location.href="index.html";
+}
+}
 </script>
 
 <div id="buscaBox">
@@ -40,10 +54,10 @@ var tipoUsuario = localStorage.getItem("tipoUsuario");
 <button onclick="buscar()">Buscar</button>
 </div>
 
-<!-- 🔒 AGORA SÓ ADMIN VÊ -->
-<div id="adminTools" style="position:absolute;top:60px;right:10px;z-index:1000;display:none;">
-  <button onclick="backup()">💾 Backup</button><br><br>
-  <input type="file" onchange="restore(event)">
+<div id="legenda">
+🔴 Sem matrícula<br>
+🟢 Com matrícula<br>
+🟡 Não localizada
 </div>
 
 <div id="map"></div>
@@ -52,265 +66,114 @@ var tipoUsuario = localStorage.getItem("tipoUsuario");
 
 <script>
 
-// MOSTRAR FERRAMENTAS ADMIN
-window.onload = function(){
-  if(tipoUsuario === "admin"){
-    document.getElementById("adminTools").style.display = "block";
-  }
-};
-
-// =========================
-// FUNÇÕES SEGURAS
-// =========================
-
-function obterDados(){
-  try{
-    return JSON.parse(localStorage.getItem("dados")) || [];
-  }catch(e){
-    return [];
-  }
-}
-
-function salvarDados(dados){
-  localStorage.setItem("dados", JSON.stringify(dados));
-}
-
-// =========================
-// MAPA
-// =========================
-
-var mapa = L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{maxZoom:22}
+// 🔥 MAPTILER
+var streets = L.tileLayer(
+'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=SUA_KEY',
+{tileSize:512,zoomOffset:-1}
 );
 
-var satelite = L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-{maxZoom:22}
+var hybrid = L.tileLayer(
+'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=SUA_KEY',
+{tileSize:512,zoomOffset:-1}
 );
 
-var rotulos = L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{maxZoom:22,opacity:0.5}
+var osm = L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 );
 
 var map = L.map('map',{
 center:[-22.19,-47.38],
 zoom:13,
-layers:[mapa]
+layers:[osm]
 });
 
 L.control.layers({
-"Mapa": mapa,
-"Satélite": L.layerGroup([satelite,rotulos])
+"OSM": osm,
+"Ruas": streets,
+"Híbrido": hybrid
 }).addTo(map);
 
-// =========================
-// FORMATAÇÃO
-// =========================
+// 🔥 CARREGAR CSV DO GITHUB
+fetch("SEU_LINK_RAW_CSV")
+.then(r=>r.text())
+.then(text=>{
 
-function formatarEndereco(texto){
-return texto.toLowerCase().replace(/\b\w/g,l=>l.toUpperCase());
+let linhas = text.split("\n");
+
+linhas.forEach(async (l,i)=>{
+
+if(i===0) return;
+
+let col = l.split(",");
+
+let endereco = col[0];
+let matricula = col[1];
+let cartorio = col[2];
+
+// GEOCODING
+let geo = await fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(endereco));
+let data = await geo.json();
+
+if(data.length === 0) return;
+
+let lat = parseFloat(data[0].lat);
+let lon = parseFloat(data[0].lon);
+
+// COR
+let cor = "red";
+if(matricula) cor = "green";
+
+let marker = L.circleMarker([lat,lon],{
+radius:6,
+color:cor
+}).addTo(map);
+
+marker.bindPopup(
+"<b>"+endereco+"</b><br>"+
+"Matrícula: "+matricula+"<br>"+
+"Cartório: "+cartorio
+);
+
+// ADMIN ARRASTAR
+if(localStorage.getItem("tipoUsuario")==="admin"){
+
+let m = L.marker([lat,lon],{draggable:true}).addTo(map);
+
+m.on("dragend",function(){
+let pos = m.getLatLng();
+console.log("Nova posição:",pos);
+});
+
 }
 
-// =========================
-// BUSCA
-// =========================
+});
 
+});
+
+// BUSCA
 function buscar(){
 
-var termo = document.getElementById("busca").value;
+let termo = document.getElementById("busca").value;
 
 fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(termo))
 .then(r=>r.json())
-.then(function(data){
+.then(data=>{
 
-if(data.length==0){
-alert("Não encontrado");
-return;
-}
+if(data.length==0) return;
 
-var lat = parseFloat(data[0].lat);
-var lon = parseFloat(data[0].lon);
-var endereco = formatarEndereco(termo);
+let lat = data[0].lat;
+let lon = data[0].lon;
 
 map.setView([lat,lon],19);
 
-// 🔥 ALTERAÇÃO 1: marker arrastável
-var marker = L.marker([lat,lon], {draggable:true}).addTo(map);
-
-marker.on("click", function(){
-
-if(tipoUsuario !== "admin"){
-alert("Apenas administrador pode salvar");
-return;
-}
-
-var matricula = prompt("Digite a matrícula:");
-if(!matricula) return;
-
-var cartorio = prompt("Digite o cartório:");
-if(!cartorio) return;
-
-// 🔥 ALTERAÇÃO 2: pegar posição ajustada
-var pos = marker.getLatLng();
-
-var dados = obterDados();
-
-dados.push({
-lat:pos.lat,
-lon:pos.lng,
-endereco:endereco,
-matricula:matricula,
-cartorio:cartorio
-});
-
-salvarDados(dados);
-
-alert("Salvo!");
-
-carregarSalvos();
-
-});
-
-marker.bindPopup("<b>"+endereco+"</b><br>Arraste o ponto e clique para cadastrar").openPopup();
-
 });
 
 }
-
-// =========================
-// CARREGAR
-// =========================
-
-var camadaSalvos = L.layerGroup().addTo(map);
-
-function carregarSalvos(){
-
-camadaSalvos.clearLayers();
-
-var dados = obterDados();
-
-dados.forEach(function(d, index){
-
-var marker = L.circleMarker([d.lat,d.lon],{
-radius:6,
-color:"green",
-fillOpacity:0.7
-}).addTo(camadaSalvos);
-
-marker.bindPopup(
-"<b>Endereço:</b> "+d.endereco+
-"<br><b>Matrícula:</b> "+d.matricula+
-"<br><b>Cartório:</b> "+d.cartorio+
-(tipoUsuario === "admin" ?
-"<br><br><button onclick='editarImovel("+index+")'>✏️ Editar</button>"
-: "")
-);
-
-});
-
-}
-
-carregarSalvos();
-
-// =========================
-// EDITAR
-// =========================
-
-function editarImovel(index){
-
-var dados = obterDados();
-
-var novaMatricula = prompt("Editar matrícula:", dados[index].matricula);
-if(!novaMatricula) return;
-
-var novoCartorio = prompt("Editar cartório:", dados[index].cartorio);
-if(!novoCartorio) return;
-
-dados[index].matricula = novaMatricula;
-dados[index].cartorio = novoCartorio;
-
-salvarDados(dados);
-
-alert("Atualizado!");
-
-carregarSalvos();
-
-}
-
-// =========================
-// BACKUP
-// =========================
-
-function backup(){
-const dados = localStorage.getItem("dados") || "[]";
-
-const blob = new Blob([dados], {type:"application/json"});
-const url = URL.createObjectURL(blob);
-
-const a = document.createElement("a");
-a.href = url;
-a.download = "backup_matrimap.json";
-a.click();
-}
-
-// =========================
-// RESTORE
-// =========================
-
-function restore(event){
-
-const file = event.target.files[0];
-const reader = new FileReader();
-
-reader.onload = function(e){
-  localStorage.setItem("dados", e.target.result);
-  alert("Backup restaurado!");
-  carregarSalvos();
-};
-
-reader.readAsText(file);
-}
-
-// =========================
-// OSM
-// =========================
-
-var camadaOSM = L.layerGroup().addTo(map);
-
-function carregarOSM(){
-
-var b = map.getBounds();
-
-var url = "https://overpass-api.de/api/interpreter?data=[out:json];(way[\"building\"]("+b.getSouth()+","+b.getWest()+","+b.getNorth()+","+b.getEast()+"););out center;";
-
-fetch(url)
-.then(r=>r.json())
-.then(function(data){
-
-camadaOSM.clearLayers();
-
-data.elements.forEach(function(e){
-
-if(!e.center) return;
-
-L.circleMarker([e.center.lat,e.center.lon],{
-radius:4,
-color:"red",
-fillOpacity:0.5
-}).addTo(camadaOSM);
-
-});
-
-});
-
-}
-
-carregarOSM();
-map.on("moveend",carregarOSM);
 
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
