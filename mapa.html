@@ -77,15 +77,18 @@ window.location.href="index.html";
 
 <div id="map"></div>
 
+<!-- 🔥 AQUI ESTAVA FALTANDO -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
 
-// 🔥 CONFIG
+// CONFIG
 const MAPTILER_KEY = "uu87SbOErvr1cRzcFL7E";
 
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
 
-// 🗺️ CAMADAS
+// MAPAS
 var osm = L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 { maxZoom:22 }
@@ -102,7 +105,7 @@ var hybrid = L.tileLayer(
 );
 
 
-// 🗺️ MAPA
+// MAPA
 var map = L.map('map',{
 center:[-22.19,-47.38],
 zoom:13,
@@ -110,7 +113,7 @@ layers:[osm]
 });
 
 
-// 🔄 CONTROLE DE CAMADAS
+// CONTROLE
 L.control.layers({
 "OSM": osm,
 "Ruas (MapTiler)": streets,
@@ -118,14 +121,19 @@ L.control.layers({
 }).addTo(map);
 
 
-// 📊 CARREGAR CSV
+// 🔥 CARREGAMENTO MAIS SEGURO (não trava o mapa)
 fetch(CSV_URL)
 .then(r=>r.text())
-.then(async text=>{
+.then(text=>{
 
 let linhas = text.split("\n");
 
-for(let i=1;i<linhas.length;i++){
+// processa aos poucos (evita travar)
+let i = 1;
+
+function processarLinha(){
+
+if(i >= linhas.length) return;
 
 let col = linhas[i].split(",");
 
@@ -133,56 +141,86 @@ let endereco = col[0];
 let matricula = col[1];
 let cartorio = col[2];
 
-if(!endereco) continue;
+i++;
 
-// 🌍 GEOCODING
-let geo = await fetch(
-"https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(endereco)
-);
+if(!endereco){
+setTimeout(processarLinha,50);
+return;
+}
 
-let data = await geo.json();
+fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(endereco))
+.then(r=>r.json())
+.then(data=>{
 
-if(data.length === 0) continue;
+if(data.length > 0){
 
 let lat = parseFloat(data[0].lat);
 let lon = parseFloat(data[0].lon);
 
-
-// 🎨 COR DO PONTO
 let cor = "red";
 if(matricula && matricula.trim() !== "") cor = "green";
 
-
-// 📍 MARCADOR
 let marker = L.circleMarker([lat,lon],{
 radius:6,
 color:cor,
 fillOpacity:0.8
 }).addTo(map);
 
-
-// 💬 POPUP
 marker.bindPopup(
 "<b>"+endereco+"</b><br>"+
 "Matrícula: "+matricula+"<br>"+
 "Cartório: "+cartorio
 );
 
-
-// 🔧 ADMIN ARRASTÁVEL
+// ADMIN DRAG
 if(localStorage.getItem("tipoUsuario")==="admin"){
-
 let drag = L.marker([lat,lon],{draggable:true}).addTo(map);
 
 drag.on("dragend",function(e){
-let pos = e.target.getLatLng();
-console.log("Nova posição:", pos);
+console.log("Nova posição:", e.target.getLatLng());
 });
-
 }
 
 }
 
+setTimeout(processarLinha,100);
+
 });
+
+}
+
+processarLinha();
+
+});
+
+
+// BUSCA (mantida)
+function buscar(){
+
+let termo =
+document.getElementById("tipo").value + " " +
+document.getElementById("rua").value + " " +
+document.getElementById("bairro").value + " " +
+document.getElementById("cidade").value + " " +
+document.getElementById("estado").value + " " +
+document.getElementById("cep").value;
+
+fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(termo))
+.then(r=>r.json())
+.then(data=>{
+
+if(data.length==0){
+alert("Não encontrado");
+return;
+}
+
+map.setView([data[0].lat,data[0].lon],19);
+
+});
+
+}
 
 </script>
+
+</body>
+</html>
