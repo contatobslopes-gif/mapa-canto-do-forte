@@ -1,113 +1,326 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Matrimap</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matrimap - Login</title>
 <style>
+:root{
+  --azul:#0b3d91;
+  --azul-escuro:#082c68;
+  --fundo:#eef3fb;
+  --texto:#1f2937;
+  --borda:#d9e2f1;
+  --erro:#b91c1c;
+}
+*{box-sizing:border-box}
 body{
-margin:0;
-font-family:Arial;
-background:#0b3d91;
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,#0b3d91 0%, #0d4fbf 55%, #dbe7ff 100%);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
 }
-
-.box{
-background:white;
-color:black;
-padding:30px;
-border-radius:10px;
-width:300px;
-text-align:center;
+.container{
+  width:100%;
+  max-width:1100px;
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  background:rgba(255,255,255,.98);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 30px 60px rgba(0,0,0,.18);
 }
-
+.hero{
+  padding:56px 48px;
+  color:white;
+  background:
+    linear-gradient(160deg,rgba(8,44,104,.88),rgba(11,61,145,.82)),
+    url('bemvindo.png') center/cover no-repeat;
+  min-height:620px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.hero h1{
+  margin:0 0 12px;
+  font-size:42px;
+  letter-spacing:.8px;
+}
+.hero p{
+  margin:0;
+  max-width:460px;
+  line-height:1.6;
+  font-size:17px;
+  color:#e8f0ff;
+}
+.hero-badge{
+  display:inline-block;
+  padding:10px 14px;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:999px;
+  font-size:13px;
+  background:rgba(255,255,255,.08);
+}
+.form-side{
+  padding:48px 38px 28px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:#fff;
+}
+.brand{
+  color:var(--azul);
+  font-size:32px;
+  font-weight:700;
+  margin:0 0 10px;
+  text-align:center;
+}
+.subtitle{
+  text-align:center;
+  color:#5b6472;
+  margin:0 0 28px;
+}
+.input-group{margin-bottom:14px}
+label{
+  display:block;
+  color:#344054;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:6px;
+}
 input{
-width:100%;
-padding:10px;
-margin:10px 0;
+  width:100%;
+  padding:14px 14px;
+  border:1px solid var(--borda);
+  border-radius:12px;
+  font-size:15px;
+  outline:none;
+  transition:.2s;
 }
-
-button{
-padding:10px;
-width:100%;
-background:#0b3d91;
-color:white;
-border:none;
-cursor:pointer;
+input:focus{
+  border-color:var(--azul);
+  box-shadow:0 0 0 4px rgba(11,61,145,.10);
+}
+.btn{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:14px 16px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+}
+.btn-primary{
+  background:var(--azul);
+  color:#fff;
+}
+.btn-primary:hover{background:var(--azul-escuro)}
+.actions{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:10px;
+}
+.link-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  margin-top:14px;
+  font-size:14px;
+}
+.link-row a{
+  color:var(--azul);
+  text-decoration:none;
+  font-weight:700;
+}
+.link-row a:hover{text-decoration:underline}
+.error{
+  display:none;
+  margin:0 0 14px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#fef2f2;
+  color:var(--erro);
+  border:1px solid #fecaca;
+  font-size:14px;
+}
+.footer{
+  margin-top:22px;
+  text-align:center;
+  font-size:13px;
+  color:#667085;
+  line-height:1.8;
+}
+@media (max-width: 900px){
+  .container{grid-template-columns:1fr}
+  .hero{min-height:280px;padding:34px 28px}
+  .form-side{padding:34px 24px 24px}
+  .hero h1{font-size:32px}
 }
 </style>
 </head>
-
 <body>
+  <div class="container">
+    <section class="hero">
+      <div>
+        <span class="hero-badge">Pesquisa imobiliária em mapa</span>
+        <h1>MATRIMAP</h1>
+        <p>Localize imóveis, visualize informações no mapa e consulte dados de forma mais rápida, organizada e profissional.</p>
+      </div>
+      <p>Acesso restrito para usuários cadastrados.</p>
+    </section>
 
-<div class="box">
+    <section class="form-side">
+      <h2 class="brand">Entrar</h2>
+      <p class="subtitle">Acesse sua conta para continuar</p>
 
-<h2>MATRIMAP</h2>
+      <div id="errorBox" class="error"></div>
 
-<input id="email" placeholder="Email">
-<input id="senha" type="password" placeholder="Senha">
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="Digite seu email">
+      </div>
 
-<button onclick="login()">Entrar</button>
+      <div class="input-group">
+        <label for="senha">Senha</label>
+        <input id="senha" type="password" placeholder="Digite sua senha">
+      </div>
 
-<br><br>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="login()">Entrar</button>
+      </div>
 
-<button onclick="resetSenha()">Esqueci a senha</button>
+      <div class="link-row">
+        <a href="cadastro.html">Criar conta</a>
+        <a href="#" onclick="resetSenha(event)">Esqueci minha senha</a>
+      </div>
 
-</div>
+      <div class="footer">
+        <div>Email: contatomatrimap@gmail.com</div>
+        <div>WhatsApp: 19 99949-3684</div>
+      </div>
+    </section>
+  </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
 
 const firebaseConfig = {
-apiKey: "SUA_KEY",
-authDomain: "SEU_DOMINIO",
-projectId: "matrimap-899b3"
+  apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
+  authDomain: "matrimap-899b3.firebaseapp.com",
+  databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
+  projectId: "matrimap-899b3",
+  storageBucket: "matrimap-899b3.firebasestorage.app",
+  messagingSenderId: "1094066148423",
+  appId: "1:1094066148423:web:260b14f4e2259681554d62"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getDatabase(app);
 
-window.login = function(){
+const errorBox = document.getElementById("errorBox");
 
-let email = document.getElementById("email").value;
-let senha = document.getElementById("senha").value;
-
-// ADMIN
-if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
-localStorage.setItem("tipoUsuario","admin");
-localStorage.setItem("logado","sim");
-window.location.href="mapa.html";
-return;
+function showError(msg){
+  errorBox.textContent = msg;
+  errorBox.style.display = "block";
 }
 
-// USER
-signInWithEmailAndPassword(auth,email,senha)
-.then(()=>{
-localStorage.setItem("tipoUsuario","usuario");
-localStorage.setItem("logado","sim");
-
-// 🔥 SIMULA PAGAMENTO (depois integra Mercado Pago)
-localStorage.setItem("pagamento","ok");
-
-window.location.href="mapa.html";
-})
-.catch(()=>alert("Erro login"));
-
+function hideError(){
+  errorBox.style.display = "none";
+  errorBox.textContent = "";
 }
 
-window.resetSenha = function(){
-let email = document.getElementById("email").value;
-sendPasswordResetEmail(auth,email)
-.then(()=>alert("Email enviado"));
+function isExpired(vencimento){
+  if(!vencimento) return true;
+  return new Date(vencimento).getTime() < Date.now();
 }
 
+async function decidirAcesso(user){
+  const snap = await get(ref(db, "usuarios/" + user.uid));
+  if(!snap.exists()){
+    window.location.href = "pagamento.html";
+    return;
+  }
+
+  const dados = snap.val();
+  localStorage.setItem("tipoUsuario", "usuario");
+  localStorage.setItem("logado", "sim");
+  localStorage.setItem("usuarioNome", dados.nome || "");
+  localStorage.setItem("uid", user.uid);
+
+  const status = dados.status || "pendente_pagamento";
+  const vencimento = dados.vencimento || "";
+  localStorage.setItem("statusUsuario", status);
+  localStorage.setItem("vencimento", vencimento);
+
+  if(status === "ativo" && !isExpired(vencimento)){
+    window.location.href = "mapa.html";
+  } else {
+    window.location.href = "pagamento.html";
+  }
+}
+
+window.login = async function(){
+  hideError();
+
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value;
+
+  if(!email || !senha){
+    showError("Preencha email e senha para entrar.");
+    return;
+  }
+
+  if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
+    localStorage.setItem("tipoUsuario","admin");
+    localStorage.setItem("logado","sim");
+    localStorage.setItem("usuarioNome","Administrador");
+    window.location.href = "mapa.html";
+    return;
+  }
+
+  try{
+    await setPersistence(auth, browserLocalPersistence);
+    const cred = await signInWithEmailAndPassword(auth, email, senha);
+    await decidirAcesso(cred.user);
+  }catch(error){
+    showError("Não foi possível entrar. Verifique email e senha.");
+  }
+}
+
+window.resetSenha = async function(event){
+  if(event) event.preventDefault();
+  hideError();
+
+  const email = document.getElementById("email").value.trim();
+  if(!email){
+    showError("Digite seu email para receber o link de redefinição.");
+    return;
+  }
+
+  try{
+    await sendPasswordResetEmail(auth, email);
+    alert("Email de redefinição enviado com sucesso.");
+  }catch(error){
+    showError("Não foi possível enviar o email de redefinição.");
+  }
+}
+
+document.getElementById("email").addEventListener("keydown", e => {
+  if(e.key === "Enter") login();
+});
+document.getElementById("senha").addEventListener("keydown", e => {
+  if(e.key === "Enter") login();
+});
 </script>
-
 </body>
 </html>
