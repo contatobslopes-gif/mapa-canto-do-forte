@@ -1,226 +1,489 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Matrimap</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matrimap - Mapa</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body{margin:0;font-family:Arial;display:flex;}
-
-#sidebar{
-width:300px;
-background:#0b3d91;
-color:white;
-padding:15px;
+:root{
+  --azul:#0b3d91;
+  --azul-escuro:#082c68;
+  --fundo:#eef3fb;
+  --texto:#1f2937;
+  --borda:#d9e2f1;
 }
-
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#eef3fb;
+  color:var(--texto);
+}
+.app{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  grid-template-rows:70px calc(100vh - 70px);
+  grid-template-areas:
+    "top top"
+    "sidebar map";
+}
+.topbar{
+  grid-area:top;
+  background:#fff;
+  border-bottom:1px solid #dbe6f8;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+}
+.brand{
+  font-size:28px;
+  font-weight:700;
+  color:var(--azul);
+}
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.user-badge{
+  background:#eef4ff;
+  color:var(--azul);
+  border:1px solid #d7e5ff;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:14px;
+}
+.top-btn{
+  border:none;
+  padding:10px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  background:var(--azul);
+  color:#fff;
+}
+.top-btn.sec{
+  background:#eaf1ff;
+  color:var(--azul);
+}
+.sidebar{
+  grid-area:sidebar;
+  background:#fff;
+  border-right:1px solid #dbe6f8;
+  padding:18px;
+  overflow:auto;
+}
+.section{
+  border:1px solid #e5edf8;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+  background:#fafcff;
+}
+.section h3{
+  margin:0 0 12px;
+  font-size:18px;
+  color:#0f172a;
+}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:#344054;
+  margin:10px 0 6px;
+}
+input, select{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid var(--borda);
+  border-radius:12px;
+  font-size:14px;
+  outline:none;
+}
+input:focus, select:focus{
+  border-color:var(--azul);
+  box-shadow:0 0 0 4px rgba(11,61,145,.10);
+}
+.btn{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  margin-top:12px;
+}
+.btn-primary{
+  background:var(--azul);
+  color:#fff;
+}
+.btn-light{
+  background:#eef4ff;
+  color:var(--azul);
+}
+#results{
+  margin-top:12px;
+  max-height:180px;
+  overflow:auto;
+}
+.result-item{
+  padding:10px 12px;
+  border:1px solid #dde7f6;
+  border-radius:12px;
+  margin-bottom:8px;
+  background:#fff;
+  cursor:pointer;
+}
+.result-item:hover{border-color:#bcd2ff}
+.map-wrap{
+  grid-area:map;
+  position:relative;
+}
 #map{
-flex:1;
-height:100vh;
+  width:100%;
+  height:100%;
 }
-
-input{
-width:100%;
-padding:8px;
-margin:5px 0;
+.footer-contact{
+  margin-top:18px;
+  font-size:12px;
+  line-height:1.8;
+  color:#64748b;
 }
-
-button{
-width:100%;
-padding:8px;
-margin-top:5px;
-cursor:pointer;
+.legend-note{
+  font-size:12px;
+  color:#64748b;
+  line-height:1.6;
+  margin-top:10px;
+}
+@media (max-width: 980px){
+  .app{
+    grid-template-columns:1fr;
+    grid-template-rows:70px auto 70vh;
+    grid-template-areas:
+      "top"
+      "sidebar"
+      "map";
+  }
+  .sidebar{border-right:none;border-bottom:1px solid #dbe6f8}
 }
 </style>
 </head>
-
 <body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">MATRIMAP</div>
+    <div class="top-actions">
+      <div class="user-badge" id="userName">Carregando...</div>
+      <button class="top-btn sec" onclick="toggleFullscreen()">Tela cheia</button>
+      <button class="top-btn" onclick="sair()">Sair</button>
+    </div>
+  </header>
 
-<script>
-// BLOQUEIOS
-if(!localStorage.getItem("logado")){
-alert("Faça login");
-window.location.href="index.html";
-}
+  <aside class="sidebar">
+    <div class="section">
+      <h3>Busca urbana</h3>
 
-if(localStorage.getItem("tipoUsuario") !== "admin"){
-if(localStorage.getItem("pagamento") !== "ok"){
-alert("Pagamento necessário");
-window.location.href="index.html";
-}
-}
-</script>
+      <label for="estado">Estado</label>
+      <select id="estado">
+        <option value="">Selecione</option>
+      </select>
 
-<div id="sidebar">
+      <label for="cidade">Cidade</label>
+      <input id="cidade" list="listaCidades" placeholder="Digite ou selecione a cidade">
+      <datalist id="listaCidades"></datalist>
 
-<h3>Busca</h3>
+      <label for="tipoLogradouro">Tipo de logradouro</label>
+      <select id="tipoLogradouro">
+        <option value="">Selecione</option>
+        <option>Rua</option>
+        <option>Avenida</option>
+        <option>Alameda</option>
+        <option>Travessa</option>
+        <option>Estrada</option>
+        <option>Praça</option>
+        <option>Rodovia</option>
+      </select>
 
-<input id="tipo" placeholder="Tipo (Rua, Av)">
-<input id="rua" placeholder="Rua">
-<input id="bairro" placeholder="Bairro">
-<input id="cidade" placeholder="Cidade">
-<input id="estado" placeholder="Estado">
-<input id="cep" placeholder="CEP">
+      <label for="rua">Rua</label>
+      <input id="rua" placeholder="Digite o nome da rua">
 
-<button onclick="buscar()">Buscar</button>
+      <label for="numero">Número</label>
+      <input id="numero" placeholder="Ex.: 120">
 
-<hr>
+      <label for="bairro">Bairro</label>
+      <input id="bairro" placeholder="Digite o bairro">
 
-<h4>Legenda</h4>
-🔴 Sem matrícula<br>
-🟢 Com matrícula<br>
-🟡 Não localizada
+      <button class="btn btn-primary" onclick="buscar()">Buscar</button>
 
+      <div id="results"></div>
+
+      <div class="legend-note">
+        A interface já está pronta para base urbana mais completa. Com mais colunas no seu banco, os filtros ficam ainda mais precisos.
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Busca rural</h3>
+
+      <label for="car">CAR</label>
+      <input id="car" placeholder="Digite o CAR">
+
+      <label for="ccir">CCIR</label>
+      <input id="ccir" placeholder="Digite o CCIR">
+
+      <label for="matriculaRural">Matrícula</label>
+      <input id="matriculaRural" placeholder="Digite a matrícula">
+
+      <button class="btn btn-light" onclick="alert('Estrutura rural pronta para receber a base.');">Buscar rural</button>
+      <button class="btn btn-light" onclick="alert('Botão preparado para o KML rural.');">Baixar KML</button>
+    </div>
+
+    <div class="section">
+      <h3>Contato</h3>
+      <div class="footer-contact">
+        <div>Email: contatomatrimap@gmail.com</div>
+        <div>WhatsApp: 19 99949-3684</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="map-wrap">
+    <div id="map"></div>
+  </main>
 </div>
 
-<div id="map"></div>
-
-<!-- 🔥 AQUI ESTAVA FALTANDO -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
 
-// CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
+  authDomain: "matrimap-899b3.firebaseapp.com",
+  databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
+  projectId: "matrimap-899b3",
+  storageBucket: "matrimap-899b3.firebasestorage.app",
+  messagingSenderId: "1094066148423",
+  appId: "1:1094066148423:web:260b14f4e2259681554d62"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
 const MAPTILER_KEY = "uu87SbOErvr1cRzcFL7E";
-
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
+const estadosBrasil = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS",
+  "MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"
+];
 
-// MAPAS
-var osm = L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{ maxZoom:22 }
-);
-
-var streets = L.tileLayer(
-'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=' + MAPTILER_KEY,
-{ tileSize:512, zoomOffset:-1, maxZoom:22 }
-);
-
-var hybrid = L.tileLayer(
-'https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=' + MAPTILER_KEY,
-{ tileSize:512, zoomOffset:-1, maxZoom:22 }
-);
-
-
-// MAPA
-var map = L.map('map',{
-center:[-22.19,-47.38],
-zoom:13,
-layers:[osm]
+const estadoSelect = document.getElementById("estado");
+estadosBrasil.forEach(uf => {
+  const option = document.createElement("option");
+  option.value = uf;
+  option.textContent = uf;
+  estadoSelect.appendChild(option);
 });
 
+function isExpired(vencimento){
+  if(!vencimento) return true;
+  return new Date(vencimento).getTime() < Date.now();
+}
 
-// CONTROLE
+async function validarAcesso(user){
+  if(localStorage.getItem("tipoUsuario") === "admin"){
+    document.getElementById("userName").textContent = "Administrador";
+    return true;
+  }
+
+  if(!user){
+    window.location.href = "index.html";
+    return false;
+  }
+
+  const snap = await get(ref(db, "usuarios/" + user.uid));
+  if(!snap.exists()){
+    window.location.href = "pagamento.html";
+    return false;
+  }
+
+  const dados = snap.val();
+  document.getElementById("userName").textContent = dados.nome || "Usuário";
+
+  const vencimento = dados.vencimento || "";
+  const status = dados.status || "pendente_pagamento";
+
+  if(status !== "ativo" || isExpired(vencimento)){
+    if(status === "ativo" && isExpired(vencimento)){
+      await update(ref(db, "usuarios/" + user.uid), {
+        status: "pendente_pagamento"
+      });
+    }
+    window.location.href = "pagamento.html";
+    return false;
+  }
+
+  return true;
+}
+
+const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ maxZoom:22 });
+const streets = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=" + MAPTILER_KEY,{ tileSize:512, zoomOffset:-1, maxZoom:22 });
+const hybrid = L.tileLayer("https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=" + MAPTILER_KEY,{ tileSize:512, zoomOffset:-1, maxZoom:22 });
+
+const map = L.map("map", {
+  center:[-22.19,-47.38],
+  zoom:13,
+  layers:[streets]
+});
+
 L.control.layers({
-"OSM": osm,
-"Ruas (MapTiler)": streets,
-"Híbrido": hybrid
+  "Ruas (MapTiler)": streets,
+  "Satélite": hybrid,
+  "OSM": osm
 }).addTo(map);
 
+let markerLayer = L.layerGroup().addTo(map);
+let currentSearchMarker = null;
 
-// 🔥 CARREGAMENTO MAIS SEGURO (não trava o mapa)
-fetch(CSV_URL)
-.then(r=>r.text())
-.then(text=>{
+async function carregarPontos(){
+  try{
+    const r = await fetch(CSV_URL);
+    const text = await r.text();
+    const linhas = text.split("\n").map(l => l.trim()).filter(Boolean);
 
-let linhas = text.split("\n");
+    for(let i = 1; i < linhas.length; i++){
+      const col = linhas[i].split(",");
+      const endereco = (col[0] || "").trim();
+      const matricula = (col[1] || "").trim();
+      const cartorio = (col[2] || "").trim();
 
-// processa aos poucos (evita travar)
-let i = 1;
+      if(!endereco) continue;
 
-function processarLinha(){
+      try{
+        const geo = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(endereco));
+        const data = await geo.json();
 
-if(i >= linhas.length) return;
+        if(data.length > 0){
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
 
-let col = linhas[i].split(",");
+          const marker = L.marker([lat,lon]).addTo(markerLayer);
+          marker.bindPopup(`
+            <div style="min-width:220px">
+              <b>${endereco}</b><br>
+              <b>Matrícula:</b> ${matricula || "-"}<br>
+              <b>Cartório:</b> ${cartorio || "-"}<br>
+              <b>Cidade/Estado:</b> -<br>
+              <b>Quadra:</b> -<br>
+              <b>Lote:</b> -
+            </div>
+          `);
 
-let endereco = col[0];
-let matricula = col[1];
-let cartorio = col[2];
-
-i++;
-
-if(!endereco){
-setTimeout(processarLinha,50);
-return;
+          if(localStorage.getItem("tipoUsuario") === "admin"){
+            const drag = L.marker([lat,lon], {draggable:true}).addTo(markerLayer);
+            drag.on("dragend", function(e){
+              console.log("Nova posição:", e.target.getLatLng());
+            });
+          }
+        }
+      }catch(e){
+        console.log("Falha ao geocodificar:", endereco);
+      }
+    }
+  }catch(error){
+    console.log("Erro ao carregar CSV:", error);
+  }
 }
 
-fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(endereco))
-.then(r=>r.json())
-.then(data=>{
+function montarTermoBusca(){
+  const tipo = document.getElementById("tipoLogradouro").value.trim();
+  const rua = document.getElementById("rua").value.trim();
+  const numero = document.getElementById("numero").value.trim();
+  const bairro = document.getElementById("bairro").value.trim();
+  const cidade = document.getElementById("cidade").value.trim();
+  const estado = document.getElementById("estado").value.trim();
 
-if(data.length > 0){
+  return [tipo, rua, numero, bairro, cidade, estado, "Brasil"]
+    .filter(Boolean)
+    .join(", ");
+}
 
-let lat = parseFloat(data[0].lat);
-let lon = parseFloat(data[0].lon);
+window.buscar = async function(){
+  const results = document.getElementById("results");
+  results.innerHTML = "";
 
-let cor = "red";
-if(matricula && matricula.trim() !== "") cor = "green";
+  const rua = document.getElementById("rua").value.trim();
+  if(!rua){
+    alert("Digite pelo menos o nome da rua para buscar.");
+    return;
+  }
 
-let marker = L.circleMarker([lat,lon],{
-radius:6,
-color:cor,
-fillOpacity:0.8
-}).addTo(map);
+  const termo = montarTermoBusca();
+  const url = "https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=8&q=" + encodeURIComponent(termo);
 
-marker.bindPopup(
-"<b>"+endereco+"</b><br>"+
-"Matrícula: "+matricula+"<br>"+
-"Cartório: "+cartorio
-);
+  try{
+    const r = await fetch(url);
+    const data = await r.json();
 
-// ADMIN DRAG
-if(localStorage.getItem("tipoUsuario")==="admin"){
-let drag = L.marker([lat,lon],{draggable:true}).addTo(map);
+    if(!data.length){
+      results.innerHTML = `<div class="result-item">Nenhum resultado encontrado.</div>`;
+      return;
+    }
 
-drag.on("dragend",function(e){
-console.log("Nova posição:", e.target.getLatLng());
+    data.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "result-item";
+      div.innerHTML = `<b>${item.display_name}</b>`;
+      div.onclick = () => {
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+
+        map.setView([lat, lon], 19);
+
+        if(currentSearchMarker){
+          map.removeLayer(currentSearchMarker);
+        }
+
+        currentSearchMarker = L.marker([lat, lon]).addTo(map);
+        currentSearchMarker.bindPopup(`<b>${item.display_name}</b>`).openPopup();
+      };
+      results.appendChild(div);
+    });
+  }catch(error){
+    results.innerHTML = `<div class="result-item">Erro ao realizar a busca.</div>`;
+  }
+}
+
+window.toggleFullscreen = function(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen();
+  }else{
+    document.exitFullscreen();
+  }
+}
+
+window.sair = async function(){
+  localStorage.clear();
+  try{
+    await signOut(auth);
+  }catch(e){}
+  window.location.href = "index.html";
+}
+
+onAuthStateChanged(auth, async (user) => {
+  const ok = await validarAcesso(user);
+  if(ok) carregarPontos();
 });
-}
-
-}
-
-setTimeout(processarLinha,100);
-
-});
-
-}
-
-processarLinha();
-
-});
-
-
-// BUSCA (mantida)
-function buscar(){
-
-let termo =
-document.getElementById("tipo").value + " " +
-document.getElementById("rua").value + " " +
-document.getElementById("bairro").value + " " +
-document.getElementById("cidade").value + " " +
-document.getElementById("estado").value + " " +
-document.getElementById("cep").value;
-
-fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(termo))
-.then(r=>r.json())
-.then(data=>{
-
-if(data.length==0){
-alert("Não encontrado");
-return;
-}
-
-map.setView([data[0].lat,data[0].lon],19);
-
-});
-
-}
-
 </script>
-
 </body>
 </html>
