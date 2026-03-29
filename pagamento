@@ -8,10 +8,6 @@
 :root{
   --azul:#0b3d91;
   --azul-escuro:#082c68;
-  --fundo:#eef3fb;
-  --texto:#1f2937;
-  --borda:#d9e2f1;
-  --sucesso:#166534;
 }
 *{box-sizing:border-box}
 body{
@@ -26,7 +22,7 @@ body{
 }
 .wrap{
   width:100%;
-  max-width:1180px;
+  max-width:1100px;
   background:#fff;
   border-radius:24px;
   box-shadow:0 26px 50px rgba(0,0,0,.12);
@@ -47,14 +43,6 @@ body{
 }
 .content{
   padding:34px 28px 24px;
-}
-.user-info{
-  margin-bottom:22px;
-  padding:14px 16px;
-  border:1px solid #dbe6f8;
-  background:#f8fbff;
-  border-radius:14px;
-  color:#334155;
 }
 .cards{
   display:grid;
@@ -83,7 +71,6 @@ body{
 .card h2{
   margin:0 0 10px;
   font-size:24px;
-  color:#0f172a;
 }
 .price{
   font-size:38px;
@@ -131,7 +118,6 @@ ul{
 .top-actions{
   display:flex;
   justify-content:space-between;
-  gap:14px;
   align-items:center;
   margin-bottom:18px;
 }
@@ -157,8 +143,8 @@ ul{
 
     <div class="content">
       <div class="top-actions">
-        <div class="user-info" id="userInfo">Carregando informações...</div>
-        <button class="link-btn" onclick="voltarLogin()">Voltar ao login</button>
+        <div id="userInfo">Conta criada. Escolha um plano para continuar.</div>
+        <button class="link-btn" onclick="window.location.href='index.html'">Voltar ao login</button>
       </div>
 
       <div class="cards">
@@ -168,7 +154,7 @@ ul{
           <div class="small">Cobrança mensal</div>
           <ul>
             <li>Acesso ao mapa enquanto o plano estiver ativo</li>
-            <li>Consulta das informações disponíveis na plataforma</li>
+            <li>Consulta das informações disponíveis</li>
             <li>Renovação ao final do período</li>
           </ul>
           <button class="btn" onclick="assinar('mensal')">Assinar agora</button>
@@ -189,7 +175,7 @@ ul{
       </div>
 
       <div class="note">
-        A tela e a lógica já estão prontas para a integração com o Mercado Pago. Depois, bastará inserir os links ou a automação definitiva de cobrança.
+        Tela pronta para integração futura com Mercado Pago. Depois, basta inserir os links reais de pagamento.
       </div>
 
       <div class="footer">
@@ -199,58 +185,11 @@ ul{
     </div>
   </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
-  authDomain: "matrimap-899b3.firebaseapp.com",
-  databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
-  projectId: "matrimap-899b3",
-  storageBucket: "matrimap-899b3.firebasestorage.app",
-  messagingSenderId: "1094066148423",
-  appId: "1:1094066148423:web:260b14f4e2259681554d62"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-const userInfo = document.getElementById("userInfo");
-
-// Depois, troque esses links pelos links reais do Mercado Pago
+<script>
 const LINK_MERCADO_PAGO_MENSAL = "";
 const LINK_MERCADO_PAGO_ANUAL = "";
 
-window.voltarLogin = function(){
-  window.location.href = "index.html";
-}
-
-onAuthStateChanged(auth, async (user) => {
-  if(localStorage.getItem("tipoUsuario") === "admin"){
-    userInfo.textContent = "Administrador com acesso total.";
-    return;
-  }
-
-  if(!user){
-    userInfo.textContent = "Faça login para continuar.";
-    return;
-  }
-
-  const snap = await get(ref(db, "usuarios/" + user.uid));
-  if(snap.exists()){
-    const dados = snap.val();
-    userInfo.textContent = `Usuário: ${dados.nome || "Sem nome"} | Status: ${dados.status || "pendente_pagamento"}`;
-  }else{
-    userInfo.textContent = "Conta criada, aguardando ativação do plano.";
-  }
-});
-
-window.assinar = function(plano){
-  localStorage.setItem("planoSelecionado", plano);
-
+function assinar(plano){
   const link = plano === "mensal" ? LINK_MERCADO_PAGO_MENSAL : LINK_MERCADO_PAGO_ANUAL;
 
   if(link){
@@ -258,7 +197,7 @@ window.assinar = function(plano){
     return;
   }
 
-  alert("Tela pronta. Quando você criar os links do Mercado Pago, basta colá-los no código desta página.");
+  alert("Tela pronta. Quando você tiver os links do Mercado Pago, basta colá-los neste arquivo.");
 }
 </script>
 </body>
