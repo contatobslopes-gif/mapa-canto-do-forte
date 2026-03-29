@@ -8,105 +8,175 @@
 :root{
   --azul:#0b3d91;
   --azul-escuro:#082c68;
+  --azul-claro:#eaf2ff;
   --branco:#ffffff;
   --texto:#1f2937;
+  --muted:#667085;
   --borda:#d9e2f1;
   --erro:#b91c1c;
+  --sombra:0 30px 60px rgba(0,0,0,.18);
 }
 *{box-sizing:border-box}
+html,body{height:100%}
 body{
   margin:0;
   font-family:Arial, sans-serif;
   min-height:100vh;
+  color:var(--texto);
   background:
-    linear-gradient(rgba(11,61,145,.68), rgba(11,61,145,.52)),
+    linear-gradient(120deg, rgba(8,44,104,.86), rgba(11,61,145,.62)),
     url('bemvindo.png') center center / cover no-repeat;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
 }
-.container{
-  width:100%;
-  max-width:1200px;
-  min-height:720px;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  position:relative;
+
+.admin-bar{
+  position:fixed;
+  top:14px;
+  right:14px;
+  z-index:9999;
+  display:none;
+  width:min(360px, calc(100vw - 28px));
+  background:rgba(255,255,255,.96);
+  border:1px solid #d8e5fb;
+  border-radius:18px;
+  box-shadow:0 18px 40px rgba(0,0,0,.14);
+  padding:14px;
+  backdrop-filter:blur(6px);
 }
-.left-text{
-  position:absolute;
-  left:0;
-  top:50%;
-  transform:translateY(-50%);
-  max-width:560px;
+.admin-bar.show{display:block}
+.admin-title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--azul);
+  margin-bottom:10px;
+}
+.admin-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+.admin-btn{
+  border:none;
+  border-radius:12px;
+  padding:11px 10px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  background:#eef4ff;
+  color:var(--azul);
+}
+.admin-btn.primary{
+  background:var(--azul);
   color:#fff;
-  padding:24px;
 }
-.badge{
-  display:inline-block;
-  padding:10px 16px;
-  border:1px solid rgba(255,255,255,.35);
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  font-size:14px;
-  margin-bottom:18px;
+.admin-mini{
+  margin-top:8px;
+  font-size:12px;
+  color:#667085;
+  line-height:1.5;
 }
-.left-text h1{
-  margin:0 0 18px;
-  font-size:66px;
-  line-height:1;
+
+.page{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:minmax(380px, 520px) 1fr;
+  align-items:center;
+  gap:48px;
+  padding:32px 48px;
 }
-.left-text p{
-  margin:0;
-  font-size:20px;
-  line-height:1.7;
-  max-width:520px;
-}
-.left-bottom{
-  margin-top:34px;
-  font-size:17px;
-  color:#eef4ff;
+.left{
+  display:flex;
+  justify-content:flex-start;
 }
 .form-card{
   width:100%;
-  max-width:490px;
+  max-width:500px;
   background:rgba(255,255,255,.97);
-  border-radius:28px;
-  box-shadow:0 30px 60px rgba(0,0,0,.18);
-  padding:46px 44px 34px;
+  border-radius:30px;
+  box-shadow:var(--sombra);
+  padding:34px 34px 28px;
   position:relative;
-  z-index:2;
+}
+.logo-wrap{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:20px;
+}
+.logo-badge{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  background:linear-gradient(135deg, var(--azul), #2a6ae0);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  font-weight:700;
+}
+.logo-text{
+  display:flex;
+  flex-direction:column;
+}
+.logo-text strong{
+  color:var(--azul);
+  font-size:26px;
+  line-height:1;
+}
+.logo-text span{
+  color:#64748b;
+  font-size:13px;
+  margin-top:4px;
 }
 .title{
-  text-align:center;
-  color:var(--azul);
+  margin:0 0 8px;
   font-size:34px;
-  font-weight:700;
-  margin:0 0 12px;
+  color:#0f172a;
 }
 .subtitle{
-  text-align:center;
-  color:#667085;
-  margin:0 0 28px;
-  font-size:18px;
+  margin:0 0 22px;
+  font-size:16px;
+  color:var(--muted);
+  line-height:1.6;
 }
-.input-group{margin-bottom:16px}
+.error{
+  display:none;
+  margin:0 0 14px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#fef2f2;
+  color:var(--erro);
+  border:1px solid #fecaca;
+  font-size:14px;
+}
+.input-group{margin-bottom:14px}
 label{
   display:block;
   color:#344054;
-  font-size:15px;
+  font-size:14px;
   font-weight:700;
   margin-bottom:8px;
 }
+.input-wrap{
+  position:relative;
+}
+.input-icon{
+  position:absolute;
+  top:50%;
+  left:14px;
+  transform:translateY(-50%);
+  color:#94a3b8;
+  font-size:17px;
+  pointer-events:none;
+}
 input{
   width:100%;
-  padding:16px 16px;
+  padding:16px 16px 16px 44px;
   border:1px solid var(--borda);
   border-radius:16px;
-  font-size:17px;
+  font-size:16px;
   outline:none;
+  background:#fff;
 }
 input:focus{
   border-color:var(--azul);
@@ -117,7 +187,7 @@ input:focus{
   border:none;
   border-radius:16px;
   padding:16px;
-  font-size:18px;
+  font-size:17px;
   font-weight:700;
   cursor:pointer;
   background:var(--azul);
@@ -131,7 +201,8 @@ input:focus{
   justify-content:space-between;
   gap:16px;
   margin-top:18px;
-  font-size:16px;
+  font-size:15px;
+  flex-wrap:wrap;
 }
 .link-row a{
   color:var(--azul);
@@ -139,60 +210,211 @@ input:focus{
   font-weight:700;
 }
 .link-row a:hover{text-decoration:underline}
-.error{
-  display:none;
-  margin:0 0 14px;
-  padding:12px 14px;
-  border-radius:12px;
-  background:#fef2f2;
-  color:var(--erro);
-  border:1px solid #fecaca;
-  font-size:14px;
-}
 .footer{
-  margin-top:30px;
+  margin-top:24px;
+  padding-top:18px;
+  border-top:1px solid #e7eefb;
   text-align:center;
-  font-size:15px;
+  font-size:14px;
   color:#667085;
   line-height:1.9;
 }
+
+.right{
+  display:flex;
+  justify-content:flex-end;
+}
+.hero{
+  width:min(100%, 680px);
+  color:#fff;
+  padding:24px;
+}
+.hero-badge{
+  display:inline-block;
+  padding:10px 18px;
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  font-size:14px;
+  margin-bottom:22px;
+}
+.hero h2{
+  margin:0 0 16px;
+  font-size:62px;
+  line-height:1.02;
+  max-width:620px;
+}
+.hero p{
+  margin:0;
+  font-size:20px;
+  line-height:1.75;
+  max-width:580px;
+  color:#eef4ff;
+}
+.hero-card{
+  margin-top:30px;
+  width:min(100%, 520px);
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:28px;
+  padding:20px;
+  backdrop-filter:blur(8px);
+}
+.hero-card-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+}
+.hero-brand{
+  font-size:20px;
+  font-weight:700;
+}
+.hero-chip{
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.16);
+  font-size:12px;
+}
+.map-illus{
+  height:280px;
+  border-radius:22px;
+  overflow:hidden;
+  position:relative;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05)),
+    url('bemvindo.png') center center / cover no-repeat;
+}
+.map-illus::before,
+.map-illus::after{
+  content:"";
+  position:absolute;
+  border-radius:999px;
+  background:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.18);
+}
+.map-illus::before{
+  width:18px;
+  height:18px;
+  top:72px;
+  left:88px;
+}
+.map-illus::after{
+  width:18px;
+  height:18px;
+  right:120px;
+  bottom:70px;
+}
+.pin{
+  position:absolute;
+  width:22px;
+  height:22px;
+  border-radius:50% 50% 50% 0;
+  background:#fff;
+  transform:rotate(-45deg);
+  box-shadow:0 8px 18px rgba(0,0,0,.22);
+}
+.pin::after{
+  content:"";
+  position:absolute;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--azul);
+  top:7px;
+  left:7px;
+}
+.pin.p1{top:52px; right:92px}
+.pin.p2{bottom:58px; left:132px}
+.pin.p3{top:132px; left:228px}
+
 @media (max-width: 1100px){
-  .container{
+  .page{
+    grid-template-columns:1fr;
+    gap:24px;
+    padding:24px;
+  }
+  .left,.right{
     justify-content:center;
-    min-height:auto;
   }
-  .left-text{
-    display:none;
+  .hero{
+    text-align:center;
+    padding:0;
   }
+  .hero h2{
+    font-size:42px;
+    max-width:none;
+  }
+  .hero p{
+    max-width:none;
+    font-size:18px;
+  }
+  .hero-card{
+    margin-left:auto;
+    margin-right:auto;
+  }
+}
+@media (max-width: 640px){
   .form-card{
-    max-width:560px;
+    padding:24px 20px;
+    border-radius:24px;
   }
+  .title{font-size:28px}
+  .hero h2{font-size:34px}
+  .hero-card{display:none}
 }
 </style>
 </head>
 <body>
-  <div class="container">
-    <div class="left-text">
-      <div class="badge">Pesquisa imobiliária em mapa</div>
-      <h1>MATRIMAP</h1>
-      <p>Localize imóveis, visualize informações no mapa e consulte dados de forma mais rápida, organizada e profissional.</p>
-      <div class="left-bottom">Acesso restrito para usuários cadastrados.</div>
-    </div>
 
+<div id="adminBar" class="admin-bar">
+  <div class="admin-title">Modo admin de teste</div>
+  <div class="admin-grid">
+    <button class="admin-btn" onclick="window.location.href='index.html'">Login</button>
+    <button class="admin-btn" onclick="window.location.href='cadastro.html'">Cadastro</button>
+    <button class="admin-btn" onclick="window.location.href='pagamento.html'">Pagamento</button>
+    <button class="admin-btn" onclick="window.location.href='mapa.html'">Mapa</button>
+
+    <button class="admin-btn primary" onclick="simularCadastro()">Não logado</button>
+    <button class="admin-btn primary" onclick="simularPagamento()">Sem pagamento</button>
+    <button class="admin-btn primary" onclick="simularMapa()">Com pagamento</button>
+    <button class="admin-btn" onclick="desligarModoTeste()">Limpar teste</button>
+  </div>
+  <div class="admin-mini">
+    Essa barra aparece só quando você estiver em modo admin.
+  </div>
+</div>
+
+<div class="page">
+  <section class="left">
     <div class="form-card">
-      <h2 class="title">Entrar</h2>
-      <p class="subtitle">Acesse sua conta para continuar</p>
+      <div class="logo-wrap">
+        <div class="logo-badge">⌖</div>
+        <div class="logo-text">
+          <strong>MATRIMAP</strong>
+          <span>Pesquisa imobiliária em mapa</span>
+        </div>
+      </div>
+
+      <h1 class="title">Entrar</h1>
+      <p class="subtitle">Acesse sua conta para consultar dados no mapa de forma rápida, organizada e profissional.</p>
 
       <div id="errorBox" class="error"></div>
 
       <div class="input-group">
         <label for="email">Email</label>
-        <input id="email" type="email" placeholder="Digite seu email">
+        <div class="input-wrap">
+          <span class="input-icon">✉</span>
+          <input id="email" type="email" placeholder="Digite seu email">
+        </div>
       </div>
 
       <div class="input-group">
         <label for="senha">Senha</label>
-        <input id="senha" type="password" placeholder="Digite sua senha">
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input id="senha" type="password" placeholder="Digite sua senha">
+        </div>
       </div>
 
       <button class="btn" onclick="login()">Entrar</button>
@@ -207,7 +429,30 @@ input:focus{
         <div>WhatsApp: 19 99949-3684</div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <section class="right">
+    <div class="hero">
+      <div class="hero-badge">Localize matrículas imobiliárias em segundos</div>
+      <h2>Consulte imóveis no mapa com mais clareza e rapidez.</h2>
+      <p>
+        Visualize localizações, organize buscas urbanas e acesse sua plataforma com um visual mais profissional.
+      </p>
+
+      <div class="hero-card">
+        <div class="hero-card-top">
+          <div class="hero-brand">MATRIMAP</div>
+          <div class="hero-chip">acesso restrito</div>
+        </div>
+        <div class="map-illus">
+          <span class="pin p1"></span>
+          <span class="pin p2"></span>
+          <span class="pin p3"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
@@ -240,6 +485,58 @@ function hideError(){
 function isExpired(vencimento){
   if(!vencimento) return true;
   return new Date(vencimento).getTime() < Date.now();
+}
+
+function mostrarAdminBar(){
+  if(localStorage.getItem("tipoUsuario") === "admin"){
+    document.getElementById("adminBar").classList.add("show");
+  }
+}
+mostrarAdminBar();
+
+window.simularCadastro = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.removeItem("statusUsuario");
+  localStorage.removeItem("vencimento");
+  localStorage.removeItem("uid");
+  localStorage.setItem("logado", "nao");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  window.location.href = "cadastro.html";
+}
+
+window.simularPagamento = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.setItem("logado", "sim");
+  localStorage.setItem("statusUsuario", "pendente_pagamento");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  window.location.href = "pagamento.html";
+}
+
+window.simularMapa = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.setItem("logado", "sim");
+  localStorage.setItem("statusUsuario", "ativo");
+  localStorage.setItem("vencimento", "2099-12-31");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  window.location.href = "mapa.html";
+}
+
+window.desligarModoTeste = function(){
+  localStorage.removeItem("modoTeste");
+  localStorage.removeItem("statusUsuario");
+  localStorage.removeItem("vencimento");
+  localStorage.removeItem("uid");
+  localStorage.removeItem("logado");
+  localStorage.removeItem("usuarioNome");
+  localStorage.removeItem("tipoUsuario");
+  document.getElementById("adminBar").classList.remove("show");
+  window.location.href = "index.html";
 }
 
 async function decidirAcesso(user){
@@ -282,6 +579,8 @@ window.login = async function(){
     localStorage.setItem("tipoUsuario","admin");
     localStorage.setItem("logado","sim");
     localStorage.setItem("usuarioNome","Administrador");
+    localStorage.setItem("modoTeste","sim");
+    mostrarAdminBar();
     window.location.href = "mapa.html";
     return;
   }
