@@ -3,202 +3,518 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Matrimap - Pagamento</title>
+<title>Matrimap - Mapa</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 <style>
 :root{
   --azul:#0b3d91;
   --azul-escuro:#082c68;
+  --fundo:#eef3fb;
+  --texto:#1f2937;
+  --borda:#d9e2f1;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
   font-family:Arial,sans-serif;
   background:#eef3fb;
-  min-height:100vh;
+  color:var(--texto);
+}
+.app{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  grid-template-rows:70px calc(100vh - 70px);
+  grid-template-areas:
+    "top top"
+    "sidebar map";
+}
+.topbar{
+  grid-area:top;
+  background:#fff;
+  border-bottom:1px solid #dbe6f8;
   display:flex;
   align-items:center;
-  justify-content:center;
-  padding:24px;
+  justify-content:space-between;
+  padding:0 20px;
 }
-.wrap{
-  width:100%;
-  max-width:1100px;
-  background:#fff;
-  border-radius:24px;
-  box-shadow:0 26px 50px rgba(0,0,0,.12);
-  overflow:hidden;
+.brand{
+  font-size:28px;
+  font-weight:700;
+  color:var(--azul);
 }
-.header{
-  background:linear-gradient(135deg,#0b3d91,#0a3276);
-  color:#fff;
-  padding:34px 28px;
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
-.header h1{
-  margin:0 0 8px;
-  font-size:34px;
-}
-.header p{
-  margin:0;
-  color:#e8f0ff;
-}
-.content{
-  padding:34px 28px 24px;
-}
-.cards{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:22px;
-}
-.card{
-  border:1px solid #dbe6f8;
-  border-radius:22px;
-  padding:24px 22px;
-  position:relative;
-  background:#fff;
-}
-.badge{
-  position:absolute;
-  top:16px;
-  right:16px;
-  background:#eff6ff;
-  color:#0b3d91;
-  border:1px solid #bfdbfe;
+.user-badge{
+  background:#eef4ff;
+  color:var(--azul);
+  border:1px solid #d7e5ff;
+  padding:10px 14px;
   border-radius:999px;
-  padding:6px 10px;
-  font-size:12px;
   font-weight:700;
+  font-size:14px;
 }
-.card h2{
-  margin:0 0 10px;
-  font-size:24px;
-}
-.price{
-  font-size:38px;
+.top-btn{
+  border:none;
+  padding:10px 14px;
+  border-radius:12px;
+  cursor:pointer;
   font-weight:700;
-  color:#0b3d91;
-  margin-bottom:10px;
+  background:var(--azul);
+  color:#fff;
 }
-.small{
-  color:#64748b;
+.top-btn.sec{
+  background:#eaf1ff;
+  color:var(--azul);
+}
+.sidebar{
+  grid-area:sidebar;
+  background:#fff;
+  border-right:1px solid #dbe6f8;
+  padding:18px;
+  overflow:auto;
+}
+.section{
+  border:1px solid #e5edf8;
+  border-radius:18px;
+  padding:16px;
   margin-bottom:16px;
+  background:#fafcff;
 }
-ul{
-  padding-left:18px;
-  color:#334155;
-  line-height:1.9;
-  margin-bottom:24px;
+.section h3{
+  margin:0 0 12px;
+  font-size:18px;
+  color:#0f172a;
+}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:#344054;
+  margin:10px 0 6px;
+}
+input, select{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid var(--borda);
+  border-radius:12px;
+  font-size:14px;
+  outline:none;
+}
+input:focus, select:focus{
+  border-color:var(--azul);
+  box-shadow:0 0 0 4px rgba(11,61,145,.10);
 }
 .btn{
   width:100%;
   border:none;
-  border-radius:14px;
-  padding:14px 16px;
-  font-size:15px;
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:14px;
   font-weight:700;
   cursor:pointer;
-  background:#0b3d91;
+  margin-top:12px;
+}
+.btn-primary{
+  background:var(--azul);
   color:#fff;
 }
-.btn:hover{background:#082c68}
-.note{
-  margin-top:18px;
-  padding:14px 16px;
-  border-radius:14px;
-  background:#f8fafc;
-  color:#475569;
-  border:1px solid #e2e8f0;
+.btn-light{
+  background:#eef4ff;
+  color:var(--azul);
 }
-.footer{
-  margin-top:20px;
-  text-align:center;
-  font-size:13px;
-  color:#64748b;
-  line-height:1.8;
+#results{
+  margin-top:12px;
+  max-height:220px;
+  overflow:auto;
 }
-.top-actions{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:18px;
-}
-.link-btn{
-  background:none;
-  border:none;
-  color:#0b3d91;
-  font-weight:700;
+.result-item{
+  padding:10px 12px;
+  border:1px solid #dde7f6;
+  border-radius:12px;
+  margin-bottom:8px;
+  background:#fff;
   cursor:pointer;
-  padding:0;
+  line-height:1.5;
 }
-@media (max-width: 900px){
-  .cards{grid-template-columns:1fr}
+.result-item:hover{border-color:#bcd2ff}
+.map-wrap{
+  grid-area:map;
+  position:relative;
+}
+#map{
+  width:100%;
+  height:100%;
+}
+.footer-contact{
+  margin-top:18px;
+  font-size:12px;
+  line-height:1.8;
+  color:#64748b;
+}
+.legend-note{
+  font-size:12px;
+  color:#64748b;
+  line-height:1.6;
+  margin-top:10px;
+}
+@media (max-width: 980px){
+  .app{
+    grid-template-columns:1fr;
+    grid-template-rows:70px auto 70vh;
+    grid-template-areas:
+      "top"
+      "sidebar"
+      "map";
+  }
+  .sidebar{border-right:none;border-bottom:1px solid #dbe6f8}
 }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
-      <h1>Escolha seu plano</h1>
-      <p>Tenha acesso à plataforma Matrimap e continue sua navegação com acesso ativo.</p>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">MATRIMAP</div>
+    <div class="top-actions">
+      <div class="user-badge" id="userName">Carregando...</div>
+      <button class="top-btn sec" onclick="toggleFullscreen()">Tela cheia</button>
+      <button class="top-btn" onclick="sair()">Sair</button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="section">
+      <h3>Busca urbana</h3>
+
+      <label for="estado">Estado</label>
+      <select id="estado">
+        <option value="">Selecione</option>
+      </select>
+
+      <label for="cidade">Cidade</label>
+      <input id="cidade" placeholder="Digite a cidade">
+
+      <label for="tipoLogradouro">Tipo de logradouro</label>
+      <select id="tipoLogradouro">
+        <option value="">Selecione</option>
+        <option>Rua</option>
+        <option>Avenida</option>
+        <option>Alameda</option>
+        <option>Travessa</option>
+        <option>Estrada</option>
+        <option>Praça</option>
+        <option>Rodovia</option>
+      </select>
+
+      <label for="rua">Rua</label>
+      <input id="rua" placeholder="Digite parte do nome da rua">
+
+      <label for="numero">Número</label>
+      <input id="numero" placeholder="Ex.: 120">
+
+      <label for="bairro">Bairro</label>
+      <input id="bairro" placeholder="Digite o bairro">
+
+      <button class="btn btn-primary" onclick="buscar()">Buscar</button>
+
+      <div id="results"></div>
+
+      <div class="legend-note">
+        A busca agora tenta várias combinações para encontrar melhor o endereço.
+      </div>
     </div>
 
-    <div class="content">
-      <div class="top-actions">
-        <div id="userInfo">Conta criada. Escolha um plano para continuar.</div>
-        <button class="link-btn" onclick="window.location.href='index.html'">Voltar ao login</button>
-      </div>
+    <div class="section">
+      <h3>Busca rural</h3>
 
-      <div class="cards">
-        <div class="card">
-          <h2>Plano Mensal</h2>
-          <div class="price">R$ 34,90</div>
-          <div class="small">Cobrança mensal</div>
-          <ul>
-            <li>Acesso ao mapa enquanto o plano estiver ativo</li>
-            <li>Consulta das informações disponíveis</li>
-            <li>Renovação ao final do período</li>
-          </ul>
-          <button class="btn" onclick="assinar('mensal')">Assinar agora</button>
-        </div>
+      <label for="car">CAR</label>
+      <input id="car" placeholder="Digite o CAR">
 
-        <div class="card">
-          <div class="badge">Mais vantajoso</div>
-          <h2>Plano Anual</h2>
-          <div class="price">R$ 349,00</div>
-          <div class="small">Cobrança anual</div>
-          <ul>
-            <li>Acesso por 12 meses</li>
-            <li>Melhor custo para uso recorrente</li>
-            <li>Mesmo fluxo de acesso e renovação</li>
-          </ul>
-          <button class="btn" onclick="assinar('anual')">Assinar agora</button>
-        </div>
-      </div>
+      <label for="ccir">CCIR</label>
+      <input id="ccir" placeholder="Digite o CCIR">
 
-      <div class="note">
-        Tela pronta para integração futura com Mercado Pago. Depois, basta inserir os links reais de pagamento.
-      </div>
+      <label for="matriculaRural">Matrícula</label>
+      <input id="matriculaRural" placeholder="Digite a matrícula">
 
-      <div class="footer">
+      <button class="btn btn-light" onclick="alert('Estrutura rural pronta para receber a base.');">Buscar rural</button>
+      <button class="btn btn-light" onclick="alert('Botão preparado para o KML rural.');">Baixar KML</button>
+    </div>
+
+    <div class="section">
+      <h3>Contato</h3>
+      <div class="footer-contact">
         <div>Email: contatomatrimap@gmail.com</div>
         <div>WhatsApp: 19 99949-3684</div>
       </div>
     </div>
-  </div>
+  </aside>
 
-<script>
-const LINK_MERCADO_PAGO_MENSAL = "";
-const LINK_MERCADO_PAGO_ANUAL = "";
+  <main class="map-wrap">
+    <div id="map"></div>
+  </main>
+</div>
 
-function assinar(plano){
-  const link = plano === "mensal" ? LINK_MERCADO_PAGO_MENSAL : LINK_MERCADO_PAGO_ANUAL;
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  if(link){
-    window.location.href = link;
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
+  authDomain: "matrimap-899b3.firebaseapp.com",
+  databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
+  projectId: "matrimap-899b3",
+  storageBucket: "matrimap-899b3.firebasestorage.app",
+  messagingSenderId: "1094066148423",
+  appId: "1:1094066148423:web:260b14f4e2259681554d62"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const MAPTILER_KEY = "uu87SbOErvr1cRzcFL7E";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
+
+const estadosBrasil = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS",
+  "MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"
+];
+
+const estadoSelect = document.getElementById("estado");
+estadosBrasil.forEach(uf => {
+  const option = document.createElement("option");
+  option.value = uf;
+  option.textContent = uf;
+  estadoSelect.appendChild(option);
+});
+
+function isExpired(vencimento){
+  if(!vencimento) return true;
+  return new Date(vencimento).getTime() < Date.now();
+}
+
+async function validarAcesso(user){
+  if(localStorage.getItem("tipoUsuario") === "admin"){
+    document.getElementById("userName").textContent = "Administrador";
+    return true;
+  }
+
+  if(!user){
+    window.location.href = "index.html";
+    return false;
+  }
+
+  const snap = await get(ref(db, "usuarios/" + user.uid));
+  if(!snap.exists()){
+    window.location.href = "pagamento.html";
+    return false;
+  }
+
+  const dados = snap.val();
+  document.getElementById("userName").textContent = dados.nome || "Usuário";
+
+  const vencimento = dados.vencimento || "";
+  const status = dados.status || "pendente_pagamento";
+
+  if(status !== "ativo" || isExpired(vencimento)){
+    if(status === "ativo" && isExpired(vencimento)){
+      await update(ref(db, "usuarios/" + user.uid), {
+        status: "pendente_pagamento"
+      });
+    }
+    window.location.href = "pagamento.html";
+    return false;
+  }
+
+  return true;
+}
+
+const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ maxZoom:22 });
+const streets = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=" + MAPTILER_KEY,{ tileSize:512, zoomOffset:-1, maxZoom:22 });
+const hybrid = L.tileLayer("https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=" + MAPTILER_KEY,{ tileSize:512, zoomOffset:-1, maxZoom:22 });
+
+const map = L.map("map", {
+  center:[-22.19,-47.38],
+  zoom:13,
+  layers:[streets]
+});
+
+L.control.layers({
+  "Ruas": streets,
+  "Satélite": hybrid,
+  "Mapa alternativo": osm
+}).addTo(map);
+
+let markerLayer = L.layerGroup().addTo(map);
+let currentSearchMarker = null;
+
+async function carregarPontos(){
+  try{
+    const r = await fetch(CSV_URL);
+    const text = await r.text();
+    const linhas = text.split("\n").map(l => l.trim()).filter(Boolean);
+
+    for(let i = 1; i < linhas.length; i++){
+      const col = linhas[i].split(",");
+      const endereco = (col[0] || "").trim();
+      const matricula = (col[1] || "").trim();
+      const cartorio = (col[2] || "").trim();
+
+      if(!endereco) continue;
+
+      try{
+        const geo = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(endereco));
+        const data = await geo.json();
+
+        if(data.length > 0){
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+
+          const marker = L.marker([lat,lon]).addTo(markerLayer);
+          marker.bindPopup(`
+            <div style="min-width:220px">
+              <b>${endereco}</b><br>
+              <b>Matrícula:</b> ${matricula || "-"}<br>
+              <b>Cartório:</b> ${cartorio || "-"}
+            </div>
+          `);
+
+          if(localStorage.getItem("tipoUsuario") === "admin"){
+            const drag = L.marker([lat,lon], {draggable:true}).addTo(markerLayer);
+            drag.on("dragend", function(e){
+              console.log("Nova posição:", e.target.getLatLng());
+            });
+          }
+        }
+      }catch(e){
+        console.log("Falha ao geocodificar:", endereco);
+      }
+    }
+  }catch(error){
+    console.log("Erro ao carregar CSV:", error);
+  }
+}
+
+function limparTexto(v){
+  return (v || "").trim();
+}
+
+function montarTentativasBusca(){
+  const tipo = limparTexto(document.getElementById("tipoLogradouro").value);
+  const rua = limparTexto(document.getElementById("rua").value);
+  const numero = limparTexto(document.getElementById("numero").value);
+  const bairro = limparTexto(document.getElementById("bairro").value);
+  const cidade = limparTexto(document.getElementById("cidade").value);
+  const estado = limparTexto(document.getElementById("estado").value);
+
+  const tentativas = [];
+
+  if(rua && numero && cidade && estado){
+    tentativas.push([tipo, rua, numero, bairro, cidade, estado, "Brasil"].filter(Boolean).join(", "));
+  }
+
+  if(rua && cidade && estado){
+    tentativas.push([tipo, rua, bairro, cidade, estado, "Brasil"].filter(Boolean).join(", "));
+  }
+
+  if(rua && cidade){
+    tentativas.push([tipo, rua, cidade, "Brasil"].filter(Boolean).join(", "));
+  }
+
+  if(rua && estado){
+    tentativas.push([tipo, rua, estado, "Brasil"].filter(Boolean).join(", "));
+  }
+
+  if(rua){
+    tentativas.push([tipo, rua, "Brasil"].filter(Boolean).join(", "));
+    tentativas.push(rua);
+  }
+
+  return [...new Set(tentativas)];
+}
+
+async function buscarNoNominatim(termo){
+  const url = "https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=10&q=" + encodeURIComponent(termo);
+  const r = await fetch(url);
+  return await r.json();
+}
+
+window.buscar = async function(){
+  const results = document.getElementById("results");
+  results.innerHTML = "";
+
+  const rua = limparTexto(document.getElementById("rua").value);
+  if(!rua){
+    results.innerHTML = `<div class="result-item">Digite pelo menos parte do nome da rua.</div>`;
     return;
   }
 
-  alert("Tela pronta. Quando você tiver os links do Mercado Pago, basta colá-los neste arquivo.");
+  const tentativas = montarTentativasBusca();
+  let data = [];
+
+  for(const termo of tentativas){
+    try{
+      const resposta = await buscarNoNominatim(termo);
+      if(resposta && resposta.length){
+        data = resposta;
+        break;
+      }
+    }catch(e){}
+  }
+
+  if(!data.length){
+    results.innerHTML = `<div class="result-item">Nenhum resultado encontrado. Tente buscar apenas pela rua, ou rua + cidade.</div>`;
+    return;
+  }
+
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "result-item";
+    div.innerHTML = `<b>${item.display_name}</b>`;
+    div.onclick = () => {
+      const lat = parseFloat(item.lat);
+      const lon = parseFloat(item.lon);
+
+      map.setView([lat, lon], 19);
+
+      if(currentSearchMarker){
+        map.removeLayer(currentSearchMarker);
+      }
+
+      currentSearchMarker = L.marker([lat, lon]).addTo(map);
+      currentSearchMarker.bindPopup(`<b>${item.display_name}</b>`).openPopup();
+    };
+    results.appendChild(div);
+  });
 }
+
+window.toggleFullscreen = function(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen();
+  }else{
+    document.exitFullscreen();
+  }
+}
+
+window.sair = async function(){
+  localStorage.clear();
+  try{
+    await signOut(auth);
+  }catch(e){}
+  window.location.href = "index.html";
+}
+
+onAuthStateChanged(auth, async (user) => {
+  const ok = await validarAcesso(user);
+  if(ok) carregarPontos();
+});
 </script>
 </body>
 </html>
