@@ -1,145 +1,407 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Matrimap - Cadastro</title>
-
 <style>
-
+:root{
+  --azul:#0b3d91;
+  --azul-escuro:#082c68;
+  --fundo:#eef3fb;
+  --texto:#1f2937;
+  --borda:#d9e2f1;
+  --erro:#b91c1c;
+  --ok:#166534;
+}
+*{box-sizing:border-box}
 body{
-font-family:Arial;
-background:#0b3d91;
-color:white;
-text-align:center;
-padding-top:150px;
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,#0b3d91 0%, #0d4fbf 55%, #dbe7ff 100%);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
 }
-
+.container{
+  width:100%;
+  max-width:1200px;
+  display:grid;
+  grid-template-columns:1fr 420px;
+  background:#fff;
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 30px 60px rgba(0,0,0,.18);
+}
+.form-side{
+  padding:42px 34px 28px;
+}
+.plan-side{
+  background:linear-gradient(180deg,#0b3d91 0%, #0a3276 100%);
+  color:#fff;
+  padding:42px 28px;
+}
+.brand{
+  color:#0b3d91;
+  font-size:34px;
+  font-weight:700;
+  margin:0 0 10px;
+}
+.subtitle{
+  color:#667085;
+  margin:0 0 24px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.grid .full{grid-column:1 / -1}
+label{
+  display:block;
+  color:#344054;
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:6px;
+}
 input{
-padding:10px;
-margin:10px;
-width:250px;
-border:none;
-border-radius:4px;
+  width:100%;
+  padding:13px 14px;
+  border:1px solid var(--borda);
+  border-radius:12px;
+  font-size:15px;
+  outline:none;
 }
-
-button{
-padding:10px 20px;
-border:none;
-border-radius:4px;
-background:white;
-color:#0b3d91;
-font-weight:bold;
-cursor:pointer;
+input:focus{
+  border-color:var(--azul);
+  box-shadow:0 0 0 4px rgba(11,61,145,.10);
 }
-
+.checkbox-row{
+  margin-top:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:14px;
+  color:#475467;
+}
+.checkbox-row input{width:auto}
+.btn{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:14px 16px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+}
+.btn-primary{
+  background:var(--azul);
+  color:#fff;
+}
+.btn-primary:hover{background:var(--azul-escuro)}
+.btn-light{
+  background:#eef4ff;
+  color:var(--azul);
+  margin-top:10px;
+}
+.error, .success{
+  display:none;
+  margin:0 0 16px;
+  padding:12px 14px;
+  border-radius:12px;
+  font-size:14px;
+}
+.error{
+  background:#fef2f2;
+  color:var(--erro);
+  border:1px solid #fecaca;
+}
+.success{
+  background:#f0fdf4;
+  color:var(--ok);
+  border:1px solid #bbf7d0;
+}
+.card{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:20px;
+  padding:20px 18px;
+  margin-bottom:16px;
+}
+.card h3{
+  margin:0 0 8px;
+  font-size:20px;
+}
+.price{
+  font-size:28px;
+  font-weight:700;
+  margin:6px 0 10px;
+}
+.muted{color:#d9e7ff}
+.plan-side ul{
+  padding-left:18px;
+  line-height:1.8;
+}
+.footer{
+  margin-top:18px;
+  font-size:13px;
+  color:#667085;
+  line-height:1.8;
+}
+.footer-dark{
+  margin-top:18px;
+  font-size:13px;
+  line-height:1.8;
+  color:#e8f0ff;
+}
+@media (max-width: 980px){
+  .container{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+}
 </style>
 </head>
-
 <body>
+  <div class="container">
+    <section class="form-side">
+      <h1 class="brand">Criar conta</h1>
+      <p class="subtitle">Preencha seus dados para continuar no Matrimap.</p>
 
-<img src="bemvindo.png" style="width:450px;"><br>
+      <div id="errorBox" class="error"></div>
+      <div id="successBox" class="success"></div>
 
-<h1>Criar Conta</h1>
+      <div class="grid">
+        <div class="full">
+          <label for="nome">Nome completo</label>
+          <input id="nome" placeholder="Digite seu nome completo">
+        </div>
 
-<input id="nome" placeholder="Nome completo"><br>
+        <div>
+          <label for="cpf">CPF</label>
+          <input id="cpf" placeholder="000.000.000-00" maxlength="14">
+        </div>
 
-<input id="cpf" placeholder="CPF"><br>
+        <div>
+          <label for="whatsapp">WhatsApp (opcional)</label>
+          <input id="whatsapp" placeholder="(00) 00000-0000">
+        </div>
 
-<input id="cidade" placeholder="Cidade"><br>
+        <div class="full">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="Digite seu email">
+        </div>
 
-<input id="email" placeholder="Email"><br>
+        <div>
+          <label for="senha">Senha</label>
+          <input id="senha" type="password" placeholder="Crie uma senha">
+        </div>
 
-<input id="senha" type="password" placeholder="Senha"><br>
+        <div>
+          <label for="confirmarSenha">Confirmar senha</label>
+          <input id="confirmarSenha" type="password" placeholder="Repita sua senha">
+        </div>
 
-<label>
-<input type="checkbox" onclick="mostrarSenha()"> Mostrar senha
-</label>
+        <div class="full checkbox-row">
+          <input type="checkbox" id="mostrarSenha" onclick="mostrarSenha()">
+          <label for="mostrarSenha" style="margin:0;font-weight:400;">Mostrar senha</label>
+        </div>
 
-<br><br>
+        <div class="full">
+          <button class="btn btn-primary" onclick="criarConta()">Cadastrar</button>
+          <button class="btn btn-light" onclick="window.location.href='index.html'">Voltar para login</button>
+        </div>
+      </div>
 
-<button onclick="criarConta()">Cadastrar</button>
+      <div class="footer">
+        <div>Email: contatomatrimap@gmail.com</div>
+        <div>WhatsApp: 19 99949-3684</div>
+      </div>
+    </section>
 
-<br><br>
+    <aside class="plan-side">
+      <div class="card">
+        <h3>Plano Mensal</h3>
+        <div class="price">R$ 34,90<span style="font-size:14px;font-weight:400;">/mês</span></div>
+        <div class="muted">Acesso contínuo à plataforma.</div>
+      </div>
 
-<a href="index.html">
-<button>Voltar para login</button>
-</a>
+      <div class="card">
+        <h3>Plano Anual</h3>
+        <div class="price">R$ 349,00<span style="font-size:14px;font-weight:400;">/ano</span></div>
+        <div class="muted">Melhor custo para uso recorrente.</div>
+      </div>
+
+      <h3 style="margin-top:26px;">O que você terá acesso</h3>
+      <ul>
+        <li>Busca e visualização no mapa</li>
+        <li>Consulta de informações disponíveis</li>
+        <li>Estrutura pronta para expansão urbano e rural</li>
+        <li>Acesso restrito por plano ativo</li>
+      </ul>
+
+      <div class="footer-dark">
+        <div>Email: contatomatrimap@gmail.com</div>
+        <div>WhatsApp: 19 99949-3684</div>
+      </div>
+    </aside>
+  </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-
-import { getAuth, createUserWithEmailAndPassword }
-from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-
-import { getDatabase, ref, set }
-from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
-authDomain: "matrimap-899b3.firebaseapp.com",
-databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
-projectId: "matrimap-899b3",
-storageBucket: "matrimap-899b3.firebasestorage.app",
-messagingSenderId: "1094066148423",
-appId: "1:1094066148423:web:260b14f4e2259681554d62"
+  apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
+  authDomain: "matrimap-899b3.firebaseapp.com",
+  databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
+  projectId: "matrimap-899b3",
+  storageBucket: "matrimap-899b3.firebasestorage.app",
+  messagingSenderId: "1094066148423",
+  appId: "1:1094066148423:web:260b14f4e2259681554d62"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-window.criarConta = async function(){
+const errorBox = document.getElementById("errorBox");
+const successBox = document.getElementById("successBox");
 
-var nome = document.getElementById("nome").value;
-var cpf = document.getElementById("cpf").value;
-var cidade = document.getElementById("cidade").value;
-var email = document.getElementById("email").value;
-var senha = document.getElementById("senha").value;
-
-try{
-
-const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
-
-const user = userCredential.user;
-
-await set(ref(db, "usuarios/" + user.uid), {
-
-nome: nome,
-cpf: cpf,
-cidade: cidade,
-email: email
-
-});
-
-alert("Conta criada com sucesso!");
-
-window.location.href="index.html";
-
-}catch(error){
-
-alert(error.message);
-
+function showError(msg){
+  successBox.style.display = "none";
+  errorBox.textContent = msg;
+  errorBox.style.display = "block";
 }
 
+function showSuccess(msg){
+  errorBox.style.display = "none";
+  successBox.textContent = msg;
+  successBox.style.display = "block";
+}
+
+function limparCPF(valor){
+  return valor.replace(/\D/g, "");
+}
+
+function validarCPF(cpf){
+  cpf = limparCPF(cpf);
+  if(cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+  let soma = 0, resto;
+  for(let i=1;i<=9;i++) soma += parseInt(cpf.substring(i-1,i)) * (11 - i);
+  resto = (soma * 10) % 11;
+  if((resto === 10) || (resto === 11)) resto = 0;
+  if(resto !== parseInt(cpf.substring(9,10))) return false;
+  soma = 0;
+  for(let i=1;i<=10;i++) soma += parseInt(cpf.substring(i-1,i)) * (12 - i);
+  resto = (soma * 10) % 11;
+  if((resto === 10) || (resto === 11)) resto = 0;
+  return resto === parseInt(cpf.substring(10,11));
+}
+
+function formatarCPF(v){
+  v = limparCPF(v).slice(0,11);
+  v = v.replace(/(\d{3})(\d)/, "$1.$2");
+  v = v.replace(/(\d{3})(\d)/, "$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  return v;
+}
+
+async function cpfJaExiste(cpfLimpo){
+  const snap = await get(ref(db, "usuarios"));
+  if(!snap.exists()) return false;
+  const usuarios = snap.val();
+  return Object.values(usuarios).some(u => (u.cpf || "").replace(/\D/g, "") === cpfLimpo);
+}
+
+window.criarConta = async function(){
+  errorBox.style.display = "none";
+  successBox.style.display = "none";
+
+  const nome = document.getElementById("nome").value.trim();
+  const cpf = document.getElementById("cpf").value.trim();
+  const whatsapp = document.getElementById("whatsapp").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value;
+  const confirmarSenha = document.getElementById("confirmarSenha").value;
+
+  if(!nome || !cpf || !email || !senha || !confirmarSenha){
+    showError("Preencha todos os campos obrigatórios.");
+    return;
+  }
+
+  if(!validarCPF(cpf)){
+    showError("CPF inválido.");
+    return;
+  }
+
+  if(senha.length < 6){
+    showError("A senha deve ter pelo menos 6 caracteres.");
+    return;
+  }
+
+  if(senha !== confirmarSenha){
+    showError("As senhas não coincidem.");
+    return;
+  }
+
+  try{
+    const cpfLimpo = limparCPF(cpf);
+    const existeCPF = await cpfJaExiste(cpfLimpo);
+    if(existeCPF){
+      showError("Este CPF já está cadastrado.");
+      return;
+    }
+
+    const cred = await createUserWithEmailAndPassword(auth, email, senha);
+    const user = cred.user;
+
+    await set(ref(db, "usuarios/" + user.uid), {
+      nome,
+      cpf: formatarCPF(cpf),
+      whatsapp,
+      email,
+      status: "pendente_pagamento",
+      plano: "",
+      vencimento: "",
+      criadoEm: new Date().toISOString()
+    });
+
+    localStorage.setItem("uid", user.uid);
+    localStorage.setItem("usuarioNome", nome);
+    localStorage.setItem("tipoUsuario", "usuario");
+    localStorage.setItem("statusUsuario", "pendente_pagamento");
+
+    showSuccess("Conta criada com sucesso. Redirecionando para pagamento...");
+    setTimeout(() => {
+      window.location.href = "pagamento.html";
+    }, 1200);
+
+  }catch(error){
+    if((error.code || "").includes("email-already-in-use")){
+      showError("Este email já está cadastrado.");
+    }else if((error.code || "").includes("invalid-email")){
+      showError("Email inválido.");
+    }else{
+      showError("Não foi possível concluir o cadastro.");
+    }
+  }
 }
 
 window.mostrarSenha = function(){
-
-var campo = document.getElementById("senha");
-
-if(campo.type === "password"){
-campo.type = "text";
-}else{
-campo.type = "password";
+  const s1 = document.getElementById("senha");
+  const s2 = document.getElementById("confirmarSenha");
+  const tipo = s1.type === "password" ? "text" : "password";
+  s1.type = tipo;
+  s2.type = tipo;
 }
 
-}
-
+document.getElementById("cpf").addEventListener("input", e => {
+  e.target.value = formatarCPF(e.target.value);
+});
 </script>
-
 </body>
 </html>
-
 
