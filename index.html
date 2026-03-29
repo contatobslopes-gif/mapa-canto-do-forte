@@ -22,10 +22,8 @@ body{
   margin:0;
   font-family:Arial, sans-serif;
   min-height:100vh;
-  color:var(--texto);
-  background:
-    linear-gradient(120deg, rgba(8,44,104,.86), rgba(11,61,145,.62)),
-    url('bemvindo.png') center center / cover no-repeat;
+  overflow:hidden;
+  background:#0b3d91;
 }
 
 .admin-bar{
@@ -34,7 +32,7 @@ body{
   right:14px;
   z-index:9999;
   display:none;
-  width:min(360px, calc(100vw - 28px));
+  width:min(340px, calc(100vw - 28px));
   background:rgba(255,255,255,.96);
   border:1px solid #d8e5fb;
   border-radius:18px;
@@ -68,39 +66,34 @@ body{
   background:var(--azul);
   color:#fff;
 }
-.admin-mini{
-  margin-top:8px;
-  font-size:12px;
-  color:#667085;
-  line-height:1.5;
-}
 
 .page{
   min-height:100vh;
   display:grid;
-  grid-template-columns:minmax(380px, 520px) 1fr;
-  align-items:center;
-  gap:48px;
-  padding:32px 48px;
+  grid-template-columns:520px 1fr;
+  align-items:stretch;
 }
+
 .left{
+  background:#fff;
   display:flex;
-  justify-content:flex-start;
+  align-items:center;
+  justify-content:center;
+  padding:34px;
+  position:relative;
+  z-index:2;
 }
+
 .form-card{
   width:100%;
-  max-width:500px;
-  background:rgba(255,255,255,.97);
-  border-radius:30px;
-  box-shadow:var(--sombra);
-  padding:34px 34px 28px;
-  position:relative;
+  max-width:420px;
 }
+
 .logo-wrap{
   display:flex;
   align-items:center;
   gap:12px;
-  margin-bottom:20px;
+  margin-bottom:24px;
 }
 .logo-badge{
   width:48px;
@@ -120,7 +113,7 @@ body{
 }
 .logo-text strong{
   color:var(--azul);
-  font-size:26px;
+  font-size:28px;
   line-height:1;
 }
 .logo-text span{
@@ -128,17 +121,19 @@ body{
   font-size:13px;
   margin-top:4px;
 }
+
 .title{
   margin:0 0 8px;
   font-size:34px;
   color:#0f172a;
 }
 .subtitle{
-  margin:0 0 22px;
+  margin:0 0 24px;
   font-size:16px;
   color:var(--muted);
   line-height:1.6;
 }
+
 .error{
   display:none;
   margin:0 0 14px;
@@ -149,6 +144,7 @@ body{
   border:1px solid #fecaca;
   font-size:14px;
 }
+
 .input-group{margin-bottom:14px}
 label{
   display:block;
@@ -221,13 +217,31 @@ input:focus{
 }
 
 .right{
+  position:relative;
+  min-height:100vh;
+  overflow:hidden;
   display:flex;
-  justify-content:flex-end;
+  align-items:center;
+  justify-content:center;
+  background:
+    linear-gradient(rgba(8,44,104,.34), rgba(11,61,145,.18)),
+    url('bemvindo.png') center center / contain no-repeat,
+    linear-gradient(135deg,#0b3d91,#082c68);
 }
-.hero{
-  width:min(100%, 680px);
+
+.hero-overlay{
+  width:100%;
+  height:100%;
+  padding:48px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  background:linear-gradient(90deg, rgba(11,61,145,.05) 0%, rgba(11,61,145,.12) 100%);
+}
+
+.hero-content{
+  max-width:520px;
   color:#fff;
-  padding:24px;
 }
 .hero-badge{
   display:inline-block;
@@ -238,137 +252,50 @@ input:focus{
   font-size:14px;
   margin-bottom:22px;
 }
-.hero h2{
+.hero-content h2{
   margin:0 0 16px;
-  font-size:62px;
-  line-height:1.02;
-  max-width:620px;
+  font-size:52px;
+  line-height:1.04;
 }
-.hero p{
+.hero-content p{
   margin:0;
-  font-size:20px;
+  font-size:19px;
   line-height:1.75;
-  max-width:580px;
   color:#eef4ff;
 }
-.hero-card{
-  margin-top:30px;
-  width:min(100%, 520px);
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:28px;
-  padding:20px;
-  backdrop-filter:blur(8px);
-}
-.hero-card-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:16px;
-}
-.hero-brand{
-  font-size:20px;
-  font-weight:700;
-}
-.hero-chip{
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.16);
-  font-size:12px;
-}
-.map-illus{
-  height:280px;
-  border-radius:22px;
-  overflow:hidden;
-  position:relative;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05)),
-    url('bemvindo.png') center center / cover no-repeat;
-}
-.map-illus::before,
-.map-illus::after{
-  content:"";
-  position:absolute;
-  border-radius:999px;
-  background:#fff;
-  box-shadow:0 8px 20px rgba(0,0,0,.18);
-}
-.map-illus::before{
-  width:18px;
-  height:18px;
-  top:72px;
-  left:88px;
-}
-.map-illus::after{
-  width:18px;
-  height:18px;
-  right:120px;
-  bottom:70px;
-}
-.pin{
-  position:absolute;
-  width:22px;
-  height:22px;
-  border-radius:50% 50% 50% 0;
-  background:#fff;
-  transform:rotate(-45deg);
-  box-shadow:0 8px 18px rgba(0,0,0,.22);
-}
-.pin::after{
-  content:"";
-  position:absolute;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--azul);
-  top:7px;
-  left:7px;
-}
-.pin.p1{top:52px; right:92px}
-.pin.p2{bottom:58px; left:132px}
-.pin.p3{top:132px; left:228px}
 
 @media (max-width: 1100px){
+  body{overflow:auto}
   .page{
     grid-template-columns:1fr;
-    gap:24px;
-    padding:24px;
   }
-  .left,.right{
+  .right{
+    min-height:420px;
+    order:-1;
+  }
+  .hero-overlay{
     justify-content:center;
-  }
-  .hero{
     text-align:center;
-    padding:0;
+    padding:30px 24px;
   }
-  .hero h2{
-    font-size:42px;
-    max-width:none;
-  }
-  .hero p{
-    max-width:none;
-    font-size:18px;
-  }
-  .hero-card{
-    margin-left:auto;
-    margin-right:auto;
+  .hero-content h2{
+    font-size:36px;
   }
 }
 @media (max-width: 640px){
-  .form-card{
-    padding:24px 20px;
-    border-radius:24px;
+  .left{
+    padding:24px;
   }
   .title{font-size:28px}
-  .hero h2{font-size:34px}
-  .hero-card{display:none}
+  .hero-content h2{font-size:30px}
+  .hero-content p{font-size:16px}
 }
 </style>
 </head>
 <body>
 
 <div id="adminBar" class="admin-bar">
-  <div class="admin-title">Modo admin de teste</div>
+  <div class="admin-title">Admin</div>
   <div class="admin-grid">
     <button class="admin-btn" onclick="window.location.href='index.html'">Login</button>
     <button class="admin-btn" onclick="window.location.href='cadastro.html'">Cadastro</button>
@@ -378,10 +305,7 @@ input:focus{
     <button class="admin-btn primary" onclick="simularCadastro()">Não logado</button>
     <button class="admin-btn primary" onclick="simularPagamento()">Sem pagamento</button>
     <button class="admin-btn primary" onclick="simularMapa()">Com pagamento</button>
-    <button class="admin-btn" onclick="desligarModoTeste()">Limpar teste</button>
-  </div>
-  <div class="admin-mini">
-    Essa barra aparece só quando você estiver em modo admin.
+    <button class="admin-btn" onclick="desligarModoTeste()">Limpar</button>
   </div>
 </div>
 
@@ -397,7 +321,7 @@ input:focus{
       </div>
 
       <h1 class="title">Entrar</h1>
-      <p class="subtitle">Acesse sua conta para consultar dados no mapa de forma rápida, organizada e profissional.</p>
+      <p class="subtitle">Acesse sua conta para continuar na plataforma.</p>
 
       <div id="errorBox" class="error"></div>
 
@@ -432,23 +356,11 @@ input:focus{
   </section>
 
   <section class="right">
-    <div class="hero">
-      <div class="hero-badge">Localize matrículas imobiliárias em segundos</div>
-      <h2>Consulte imóveis no mapa com mais clareza e rapidez.</h2>
-      <p>
-        Visualize localizações, organize buscas urbanas e acesse sua plataforma com um visual mais profissional.
-      </p>
-
-      <div class="hero-card">
-        <div class="hero-card-top">
-          <div class="hero-brand">MATRIMAP</div>
-          <div class="hero-chip">acesso restrito</div>
-        </div>
-        <div class="map-illus">
-          <span class="pin p1"></span>
-          <span class="pin p2"></span>
-          <span class="pin p3"></span>
-        </div>
+    <div class="hero-overlay">
+      <div class="hero-content">
+        <div class="hero-badge">Solução ágil em segundos</div>
+        <h2>Buscando o número da matrícula imobiliária?</h2>
+        <p>Consulte imóveis, visualize localizações no mapa e navegue em uma plataforma mais clara, organizada e profissional.</p>
       </div>
     </div>
   </section>
