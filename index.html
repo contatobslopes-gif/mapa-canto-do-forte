@@ -8,7 +8,7 @@
 :root{
   --azul:#0b3d91;
   --azul-escuro:#082c68;
-  --fundo:#eef3fb;
+  --branco:#ffffff;
   --texto:#1f2937;
   --borda:#d9e2f1;
   --erro:#b91c1c;
@@ -17,8 +17,10 @@
 body{
   margin:0;
   font-family:Arial, sans-serif;
-  background:linear-gradient(135deg,#0b3d91 0%, #0d4fbf 55%, #dbe7ff 100%);
   min-height:100vh;
+  background:
+    linear-gradient(rgba(11,61,145,.68), rgba(11,61,145,.52)),
+    url('bemvindo.png') center center / cover no-repeat;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -26,80 +28,85 @@ body{
 }
 .container{
   width:100%;
-  max-width:1100px;
-  display:grid;
-  grid-template-columns:1.15fr .85fr;
-  background:rgba(255,255,255,.98);
-  border-radius:24px;
-  overflow:hidden;
-  box-shadow:0 30px 60px rgba(0,0,0,.18);
-}
-.hero{
-  padding:56px 48px;
-  color:white;
-  background:
-    linear-gradient(160deg,rgba(8,44,104,.88),rgba(11,61,145,.82)),
-    url('bemvindo.png') center/cover no-repeat;
-  min-height:620px;
+  max-width:1200px;
+  min-height:720px;
   display:flex;
-  flex-direction:column;
-  justify-content:space-between;
+  align-items:center;
+  justify-content:flex-end;
+  position:relative;
 }
-.hero h1{
-  margin:0 0 12px;
-  font-size:42px;
-  letter-spacing:.8px;
+.left-text{
+  position:absolute;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+  max-width:560px;
+  color:#fff;
+  padding:24px;
 }
-.hero p{
-  margin:0;
-  max-width:460px;
-  line-height:1.6;
-  font-size:17px;
-  color:#e8f0ff;
-}
-.hero-badge{
+.badge{
   display:inline-block;
-  padding:10px 14px;
-  border:1px solid rgba(255,255,255,.22);
+  padding:10px 16px;
+  border:1px solid rgba(255,255,255,.35);
   border-radius:999px;
-  font-size:13px;
   background:rgba(255,255,255,.08);
+  font-size:14px;
+  margin-bottom:18px;
 }
-.form-side{
-  padding:48px 38px 28px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  background:#fff;
+.left-text h1{
+  margin:0 0 18px;
+  font-size:66px;
+  line-height:1;
 }
-.brand{
-  color:var(--azul);
-  font-size:32px;
-  font-weight:700;
-  margin:0 0 10px;
+.left-text p{
+  margin:0;
+  font-size:20px;
+  line-height:1.7;
+  max-width:520px;
+}
+.left-bottom{
+  margin-top:34px;
+  font-size:17px;
+  color:#eef4ff;
+}
+.form-card{
+  width:100%;
+  max-width:490px;
+  background:rgba(255,255,255,.97);
+  border-radius:28px;
+  box-shadow:0 30px 60px rgba(0,0,0,.18);
+  padding:46px 44px 34px;
+  position:relative;
+  z-index:2;
+}
+.title{
   text-align:center;
+  color:var(--azul);
+  font-size:34px;
+  font-weight:700;
+  margin:0 0 12px;
 }
 .subtitle{
   text-align:center;
-  color:#5b6472;
+  color:#667085;
   margin:0 0 28px;
+  font-size:18px;
 }
-.input-group{margin-bottom:14px}
+.input-group{margin-bottom:16px}
 label{
   display:block;
   color:#344054;
-  font-size:14px;
+  font-size:15px;
   font-weight:700;
-  margin-bottom:6px;
+  margin-bottom:8px;
 }
 input{
   width:100%;
-  padding:14px 14px;
+  padding:16px 16px;
   border:1px solid var(--borda);
-  border-radius:12px;
-  font-size:15px;
+  border-radius:16px;
+  font-size:17px;
   outline:none;
-  transition:.2s;
 }
 input:focus{
   border-color:var(--azul);
@@ -108,31 +115,23 @@ input:focus{
 .btn{
   width:100%;
   border:none;
-  border-radius:12px;
-  padding:14px 16px;
-  font-size:15px;
+  border-radius:16px;
+  padding:16px;
+  font-size:18px;
   font-weight:700;
   cursor:pointer;
-  transition:.2s;
-}
-.btn-primary{
   background:var(--azul);
   color:#fff;
+  transition:.2s;
+  margin-top:8px;
 }
-.btn-primary:hover{background:var(--azul-escuro)}
-.actions{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  margin-top:10px;
-}
+.btn:hover{background:var(--azul-escuro)}
 .link-row{
   display:flex;
   justify-content:space-between;
-  align-items:center;
   gap:16px;
-  margin-top:14px;
-  font-size:14px;
+  margin-top:18px;
+  font-size:16px;
 }
 .link-row a{
   color:var(--azul);
@@ -151,33 +150,37 @@ input:focus{
   font-size:14px;
 }
 .footer{
-  margin-top:22px;
+  margin-top:30px;
   text-align:center;
-  font-size:13px;
+  font-size:15px;
   color:#667085;
-  line-height:1.8;
+  line-height:1.9;
 }
-@media (max-width: 900px){
-  .container{grid-template-columns:1fr}
-  .hero{min-height:280px;padding:34px 28px}
-  .form-side{padding:34px 24px 24px}
-  .hero h1{font-size:32px}
+@media (max-width: 1100px){
+  .container{
+    justify-content:center;
+    min-height:auto;
+  }
+  .left-text{
+    display:none;
+  }
+  .form-card{
+    max-width:560px;
+  }
 }
 </style>
 </head>
 <body>
   <div class="container">
-    <section class="hero">
-      <div>
-        <span class="hero-badge">Pesquisa imobiliária em mapa</span>
-        <h1>MATRIMAP</h1>
-        <p>Localize imóveis, visualize informações no mapa e consulte dados de forma mais rápida, organizada e profissional.</p>
-      </div>
-      <p>Acesso restrito para usuários cadastrados.</p>
-    </section>
+    <div class="left-text">
+      <div class="badge">Pesquisa imobiliária em mapa</div>
+      <h1>MATRIMAP</h1>
+      <p>Localize imóveis, visualize informações no mapa e consulte dados de forma mais rápida, organizada e profissional.</p>
+      <div class="left-bottom">Acesso restrito para usuários cadastrados.</div>
+    </div>
 
-    <section class="form-side">
-      <h2 class="brand">Entrar</h2>
+    <div class="form-card">
+      <h2 class="title">Entrar</h2>
       <p class="subtitle">Acesse sua conta para continuar</p>
 
       <div id="errorBox" class="error"></div>
@@ -192,9 +195,7 @@ input:focus{
         <input id="senha" type="password" placeholder="Digite sua senha">
       </div>
 
-      <div class="actions">
-        <button class="btn btn-primary" onclick="login()">Entrar</button>
-      </div>
+      <button class="btn" onclick="login()">Entrar</button>
 
       <div class="link-row">
         <a href="cadastro.html">Criar conta</a>
@@ -205,7 +206,7 @@ input:focus{
         <div>Email: contatomatrimap@gmail.com</div>
         <div>WhatsApp: 19 99949-3684</div>
       </div>
-    </section>
+    </div>
   </div>
 
 <script type="module">
@@ -226,19 +227,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-
 const errorBox = document.getElementById("errorBox");
 
 function showError(msg){
   errorBox.textContent = msg;
   errorBox.style.display = "block";
 }
-
 function hideError(){
   errorBox.style.display = "none";
   errorBox.textContent = "";
 }
-
 function isExpired(vencimento){
   if(!vencimento) return true;
   return new Date(vencimento).getTime() < Date.now();
