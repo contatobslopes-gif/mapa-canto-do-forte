@@ -8,30 +8,77 @@
 :root{
   --azul:#0b3d91;
   --azul-escuro:#082c68;
+  --borda:#d9e2f1;
+  --texto:#1f2937;
+  --muted:#64748b;
 }
 *{box-sizing:border-box}
 body{
   margin:0;
   font-family:Arial,sans-serif;
-  background:#eef3fb;
   min-height:100vh;
+  background:
+    linear-gradient(rgba(8,44,104,.80), rgba(11,61,145,.72)),
+    url('bemvindo.png') center center / cover no-repeat;
   display:flex;
   align-items:center;
   justify-content:center;
   padding:24px;
 }
+
+.admin-bar{
+  position:fixed;
+  top:14px;
+  right:14px;
+  z-index:9999;
+  display:none;
+  width:min(340px, calc(100vw - 28px));
+  background:rgba(255,255,255,.96);
+  border:1px solid #d8e5fb;
+  border-radius:18px;
+  box-shadow:0 18px 40px rgba(0,0,0,.14);
+  padding:14px;
+  backdrop-filter:blur(6px);
+}
+.admin-bar.show{display:block}
+.admin-title{
+  font-size:13px;
+  font-weight:700;
+  color:var(--azul);
+  margin-bottom:10px;
+}
+.admin-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+.admin-btn{
+  border:none;
+  border-radius:12px;
+  padding:11px 10px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  background:#eef4ff;
+  color:var(--azul);
+}
+.admin-btn.primary{
+  background:var(--azul);
+  color:#fff;
+}
+
 .wrap{
   width:100%;
-  max-width:1100px;
-  background:#fff;
-  border-radius:24px;
-  box-shadow:0 26px 50px rgba(0,0,0,.12);
+  max-width:1180px;
+  background:rgba(255,255,255,.98);
+  border-radius:28px;
+  box-shadow:0 26px 50px rgba(0,0,0,.16);
   overflow:hidden;
 }
 .header{
   background:linear-gradient(135deg,#0b3d91,#0a3276);
   color:#fff;
-  padding:34px 28px;
+  padding:36px 30px;
 }
 .header h1{
   margin:0 0 8px;
@@ -40,9 +87,31 @@ body{
 .header p{
   margin:0;
   color:#e8f0ff;
+  line-height:1.7;
 }
 .content{
-  padding:34px 28px 24px;
+  padding:34px 30px 28px;
+}
+.top-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.user-info{
+  color:#334155;
+  font-size:15px;
+}
+.link-btn{
+  background:none;
+  border:none;
+  color:#0b3d91;
+  font-weight:700;
+  cursor:pointer;
+  padding:0;
+  font-size:15px;
 }
 .cards{
   display:grid;
@@ -51,10 +120,11 @@ body{
 }
 .card{
   border:1px solid #dbe6f8;
-  border-radius:22px;
+  border-radius:24px;
   padding:24px 22px;
   position:relative;
   background:#fff;
+  box-shadow:0 10px 24px rgba(11,61,145,.05);
 }
 .badge{
   position:absolute;
@@ -71,9 +141,10 @@ body{
 .card h2{
   margin:0 0 10px;
   font-size:24px;
+  color:#0f172a;
 }
 .price{
-  font-size:38px;
+  font-size:40px;
   font-weight:700;
   color:#0b3d91;
   margin-bottom:10px;
@@ -101,93 +172,167 @@ ul{
 }
 .btn:hover{background:#082c68}
 .note{
-  margin-top:18px;
-  padding:14px 16px;
-  border-radius:14px;
+  margin-top:20px;
+  padding:16px 18px;
+  border-radius:16px;
   background:#f8fafc;
   color:#475569;
   border:1px solid #e2e8f0;
+  line-height:1.7;
 }
 .footer{
-  margin-top:20px;
+  margin-top:22px;
   text-align:center;
   font-size:13px;
   color:#64748b;
   line-height:1.8;
 }
-.top-actions{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:18px;
-}
-.link-btn{
-  background:none;
-  border:none;
-  color:#0b3d91;
-  font-weight:700;
-  cursor:pointer;
-  padding:0;
-}
+
 @media (max-width: 900px){
   .cards{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
-      <h1>Escolha seu plano</h1>
-      <p>Tenha acesso à plataforma Matrimap e continue sua navegação com acesso ativo.</p>
+
+<div id="adminBar" class="admin-bar">
+  <div class="admin-title">Admin</div>
+  <div class="admin-grid">
+    <button class="admin-btn" onclick="window.location.href='index.html'">Login</button>
+    <button class="admin-btn" onclick="window.location.href='cadastro.html'">Cadastro</button>
+    <button class="admin-btn" onclick="window.location.href='pagamento.html'">Pagamento</button>
+    <button class="admin-btn" onclick="window.location.href='mapa.html'">Mapa</button>
+
+    <button class="admin-btn primary" onclick="simularCadastro()">Não logado</button>
+    <button class="admin-btn primary" onclick="simularPagamento()">Sem pagamento</button>
+    <button class="admin-btn primary" onclick="simularMapa()">Com pagamento</button>
+    <button class="admin-btn" onclick="desligarModoTeste()">Limpar</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="header">
+    <h1>Escolha seu plano</h1>
+    <p>Tenha acesso à plataforma Matrimap e continue sua navegação com acesso ativo.</p>
+  </div>
+
+  <div class="content">
+    <div class="top-actions">
+      <div id="userInfo" class="user-info">Conta criada. Escolha um plano para continuar.</div>
+      <button class="link-btn" onclick="window.location.href='index.html'">Voltar ao login</button>
     </div>
 
-    <div class="content">
-      <div class="top-actions">
-        <div id="userInfo">Conta criada. Escolha um plano para continuar.</div>
-        <button class="link-btn" onclick="window.location.href='index.html'">Voltar ao login</button>
+    <div class="cards">
+      <div class="card">
+        <h2>Plano Mensal</h2>
+        <div class="price">R$ 34,90</div>
+        <div class="small">Cobrança mensal</div>
+        <ul>
+          <li>Acesso ao mapa enquanto o plano estiver ativo</li>
+          <li>Consulta das informações disponíveis</li>
+          <li>Renovação ao final do período</li>
+        </ul>
+        <button class="btn" onclick="assinar('mensal')">Assinar agora</button>
       </div>
 
-      <div class="cards">
-        <div class="card">
-          <h2>Plano Mensal</h2>
-          <div class="price">R$ 34,90</div>
-          <div class="small">Cobrança mensal</div>
-          <ul>
-            <li>Acesso ao mapa enquanto o plano estiver ativo</li>
-            <li>Consulta das informações disponíveis</li>
-            <li>Renovação ao final do período</li>
-          </ul>
-          <button class="btn" onclick="assinar('mensal')">Assinar agora</button>
-        </div>
-
-        <div class="card">
-          <div class="badge">Mais vantajoso</div>
-          <h2>Plano Anual</h2>
-          <div class="price">R$ 349,00</div>
-          <div class="small">Cobrança anual</div>
-          <ul>
-            <li>Acesso por 12 meses</li>
-            <li>Melhor custo para uso recorrente</li>
-            <li>Mesmo fluxo de acesso e renovação</li>
-          </ul>
-          <button class="btn" onclick="assinar('anual')">Assinar agora</button>
-        </div>
+      <div class="card">
+        <div class="badge">Mais vantajoso</div>
+        <h2>Plano Anual</h2>
+        <div class="price">R$ 349,00</div>
+        <div class="small">Cobrança anual</div>
+        <ul>
+          <li>Acesso por 12 meses</li>
+          <li>Melhor custo para uso recorrente</li>
+          <li>Mesmo fluxo de acesso e renovação</li>
+        </ul>
+        <button class="btn" onclick="assinar('anual')">Assinar agora</button>
       </div>
+    </div>
 
-      <div class="note">
-        Tela pronta para integração futura com Mercado Pago. Depois, basta inserir os links reais de pagamento.
-      </div>
+    <div class="note">
+      Tela pronta para integração com Mercado Pago. Quando você colar os links reais nos campos do script, o botão já redireciona automaticamente.
+    </div>
 
-      <div class="footer">
-        <div>Email: contatomatrimap@gmail.com</div>
-        <div>WhatsApp: 19 99949-3684</div>
-      </div>
+    <div class="footer">
+      <div>Email: contatomatrimap@gmail.com</div>
+      <div>WhatsApp: 19 99949-3684</div>
     </div>
   </div>
+</div>
 
 <script>
 const LINK_MERCADO_PAGO_MENSAL = "";
 const LINK_MERCADO_PAGO_ANUAL = "";
+
+function mostrarAdminBar(){
+  if(localStorage.getItem("tipoUsuario") === "admin"){
+    document.getElementById("adminBar").classList.add("show");
+  }
+}
+mostrarAdminBar();
+
+function atualizarUsuario(){
+  const nome = localStorage.getItem("usuarioNome") || "";
+  const status = localStorage.getItem("statusUsuario") || "";
+
+  let texto = "Conta criada. Escolha um plano para continuar.";
+
+  if(localStorage.getItem("tipoUsuario") === "admin"){
+    texto = "Administrador em modo de teste.";
+  } else if(nome && status === "ativo"){
+    texto = nome + ", sua conta está ativa.";
+  } else if(nome){
+    texto = nome + ", escolha um plano para liberar o acesso.";
+  }
+
+  document.getElementById("userInfo").textContent = texto;
+}
+atualizarUsuario();
+
+window.simularCadastro = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.removeItem("statusUsuario");
+  localStorage.removeItem("vencimento");
+  localStorage.removeItem("uid");
+  localStorage.setItem("logado", "nao");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  window.location.href = "cadastro.html";
+}
+
+window.simularPagamento = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.setItem("logado", "sim");
+  localStorage.setItem("statusUsuario", "pendente_pagamento");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  atualizarUsuario();
+}
+
+window.simularMapa = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.setItem("logado", "sim");
+  localStorage.setItem("statusUsuario", "ativo");
+  localStorage.setItem("vencimento", "2099-12-31");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  window.location.href = "mapa.html";
+}
+
+window.desligarModoTeste = function(){
+  localStorage.removeItem("modoTeste");
+  localStorage.removeItem("statusUsuario");
+  localStorage.removeItem("vencimento");
+  localStorage.removeItem("uid");
+  localStorage.removeItem("logado");
+  localStorage.removeItem("usuarioNome");
+  localStorage.removeItem("tipoUsuario");
+  document.getElementById("adminBar").classList.remove("show");
+  window.location.href = "index.html";
+}
 
 function assinar(plano){
   const link = plano === "mensal" ? LINK_MERCADO_PAGO_MENSAL : LINK_MERCADO_PAGO_ANUAL;
