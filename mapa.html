@@ -6,6 +6,7 @@
 <title>Matrimap - Mapa</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
 :root{
@@ -547,6 +548,22 @@ function normalizarTexto(s){
     .toLowerCase();
 }
 
+function extrairLatLngDaCoordenada(coordenada){
+  const texto = limparTexto(coordenada);
+  if(!texto) return null;
+
+  const partes = texto.split("|");
+  if(partes.length !== 2) return null;
+
+  const lat = parseFloat(partes[0].trim().replace(",", "."));
+  const lng = parseFloat(partes[1].trim().replace(",", "."));
+
+  if(isNaN(lat) || isNaN(lng)) return null;
+  if(Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+
+  return { lat, lng };
+}
+
 function preencherListaCidades(cidades){
   listaCidades.innerHTML = "";
   cidades.forEach(nome => {
@@ -598,41 +615,46 @@ cidadeInput.addEventListener("input", () => {
 
 async function carregarPontos(){
   try{
-    const r = await fetch(CSV_URL);
-    const text = await r.text();
-    const linhas = text.split("\n").map(l => l.trim()).filter(Boolean);
+    markerLayer.clearLayers();
 
-    for(let i = 1; i < linhas.length; i++){
-      const col = linhas[i].split(",");
-      const endereco = (col[0] || "").trim();
-      const matricula = (col[1] || "").trim();
-      const cartorio = (col[2] || "").trim();
+    Papa.parse(CSV_URL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: function(resultado){
+        const linhas = resultado.data || [];
 
-      if(!endereco) continue;
+        linhas.forEach((linha) => {
+          const endereco = limparTexto(linha.endereco || linha.Endereco || linha.ENDERECO);
+          const matricula = limparTexto(linha.matricula || linha.Matricula || linha.MATRICULA);
+          const cartorio = limparTexto(linha.cartorio || linha.Cartorio || linha.CARTORIO);
+          const coordenada = limparTexto(linha.coordenada || linha.Coordenada || linha.COORDENADA);
 
-      try{
-        const geo = await fetch("https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=" + encodeURIComponent(endereco));
-        const data = await geo.json();
+          const posicao = extrairLatLngDaCoordenada(coordenada);
+          if(!posicao) return;
 
-        if(data.length > 0){
-          const item = data[0];
-          const lat = parseFloat(item.lat);
-          const lon = parseFloat(item.lon);
-
-          const marker = L.marker([lat,lon]).addTo(markerLayer);
-          marker.bindPopup(montarHtmlPopupCurto(item.address || {}, matricula, cartorio, endereco));
+          const marker = L.marker([posicao.lat, posicao.lng]).addTo(markerLayer);
+          marker.bindPopup(
+            montarHtmlPopupCurto(
+              { road: endereco },
+              matricula,
+              cartorio,
+              endereco
+            )
+          );
 
           if(localStorage.getItem("tipoUsuario") === "admin"){
-            const drag = L.marker([lat,lon], {draggable:true, opacity:0.01}).addTo(markerLayer);
+            const drag = L.marker([posicao.lat, posicao.lng], {draggable:true, opacity:0.01}).addTo(markerLayer);
             drag.on("dragend", function(e){
               console.log("Nova posição:", e.target.getLatLng());
             });
           }
-        }
-      }catch(e){
-        console.log("Falha ao geocodificar:", endereco);
+        });
+      },
+      error: function(error){
+        console.log("Erro ao carregar CSV:", error);
       }
-    }
+    });
   }catch(error){
     console.log("Erro ao carregar CSV:", error);
   }
