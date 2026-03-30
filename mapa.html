@@ -1,601 +1,761 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Matrimap</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matrimap - Mapa</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-  <style>
-    *{
-      box-sizing:border-box;
-    }
+<style>
+:root{
+  --azul:#0b3d91;
+  --azul-escuro:#082c68;
+  --fundo:#eef3fb;
+  --texto:#1f2937;
+  --borda:#d9e2f1;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#eef3fb;
+  color:var(--texto);
+}
+.admin-bar{
+  position:fixed;
+  top:12px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:99999;
+  display:none;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  width:min(96vw, 980px);
+  padding:12px;
+  background:rgba(255,255,255,.96);
+  border:1px solid #d7e5ff;
+  border-radius:18px;
+  box-shadow:0 18px 40px rgba(0,0,0,.14);
+  backdrop-filter:blur(6px);
+}
+.admin-bar.show{display:flex}
+.admin-tag{
+  padding:8px 12px;
+  border-radius:999px;
+  background:#eef4ff;
+  color:var(--azul);
+  font-size:12px;
+  font-weight:700;
+}
+.admin-nav-btn{
+  border:none;
+  border-radius:12px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:700;
+  background:#eef4ff;
+  color:var(--azul);
+}
+.admin-nav-btn.primary{
+  background:var(--azul);
+  color:#fff;
+}
 
-    body{
-      margin:0;
-      font-family:Arial, sans-serif;
-      display:flex;
-      height:100vh;
-      overflow:hidden;
-      background:#f5f7fb;
-    }
-
-    #sidebar{
-      width:340px;
-      background:#0b3d91;
-      color:white;
-      padding:20px;
-      overflow-y:auto;
-      box-shadow:2px 0 10px rgba(0,0,0,0.15);
-      z-index:1000;
-    }
-
-    #sidebar h1{
-      margin-top:0;
-      font-size:28px;
-      margin-bottom:8px;
-    }
-
-    #sidebar p{
-      font-size:14px;
-      line-height:1.4;
-      margin-bottom:18px;
-      color:#dfe9ff;
-    }
-
-    .bloco{
-      margin-bottom:18px;
-      background:rgba(255,255,255,0.08);
-      padding:14px;
-      border-radius:10px;
-    }
-
-    .bloco h2{
-      font-size:16px;
-      margin:0 0 10px 0;
-      color:#fff;
-    }
-
-    input, select, button{
-      width:100%;
-      padding:10px;
-      margin-bottom:10px;
-      border:none;
-      border-radius:8px;
-      font-size:14px;
-    }
-
-    input, select{
-      background:white;
-      color:#222;
-    }
-
-    button{
-      background:#ffffff;
-      color:#0b3d91;
-      font-weight:bold;
-      cursor:pointer;
-      transition:0.2s;
-    }
-
-    button:hover{
-      transform:scale(1.01);
-      opacity:0.96;
-    }
-
-    .botao-secundario{
-      background:#dfe9ff;
-    }
-
-    .legenda-item{
-      display:flex;
-      align-items:center;
-      margin-bottom:8px;
-      font-size:14px;
-    }
-
-    .cor{
-      width:16px;
-      height:16px;
-      border-radius:50%;
-      margin-right:8px;
-      border:1px solid rgba(255,255,255,0.5);
-      flex-shrink:0;
-    }
-
-    #map{
-      flex:1;
-      height:100vh;
-    }
-
-    .info-status{
-      font-size:13px;
-      color:#dfe9ff;
-      margin-top:5px;
-      line-height:1.4;
-    }
-
-    .resultado-busca{
-      background:white;
-      color:#222;
-      border-radius:8px;
-      padding:10px;
-      margin-top:8px;
-      font-size:13px;
-      max-height:180px;
-      overflow-y:auto;
-    }
-
-    .resultado-item{
-      padding:8px;
-      border-bottom:1px solid #ddd;
-      cursor:pointer;
-    }
-
-    .resultado-item:last-child{
-      border-bottom:none;
-    }
-
-    .resultado-item:hover{
-      background:#f1f5ff;
-    }
-
-    .leaflet-popup-content{
-      font-size:14px;
-      line-height:1.5;
-    }
-
-    .popup-endereco{
-      font-weight:bold;
-      color:#0b3d91;
-      margin-bottom:8px;
-    }
-
-    .topo-mapa{
-      position:absolute;
-      top:15px;
-      left:50%;
-      transform:translateX(-50%);
-      z-index:1001;
-      background:white;
-      padding:8px;
-      border-radius:12px;
-      box-shadow:0 4px 16px rgba(0,0,0,0.15);
-      width:min(500px, calc(100% - 30px));
-    }
-
-    .topo-mapa input{
-      margin:0;
-      border:1px solid #d9d9d9;
-    }
-
-    @media (max-width: 900px){
-      body{
-        flex-direction:column;
-      }
-
-      #sidebar{
-        width:100%;
-        height:320px;
-      }
-
-      #map{
-        height:calc(100vh - 320px);
-      }
-    }
-  </style>
+.app{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  grid-template-rows:70px calc(100vh - 70px);
+  grid-template-areas:
+    "top top"
+    "sidebar map";
+}
+.topbar{
+  grid-area:top;
+  background:#fff;
+  border-bottom:1px solid #dbe6f8;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+}
+.brand{
+  font-size:28px;
+  font-weight:700;
+  color:var(--azul);
+}
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.user-badge{
+  background:#eef4ff;
+  color:var(--azul);
+  border:1px solid #d7e5ff;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:14px;
+}
+.top-btn{
+  border:none;
+  padding:10px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  background:var(--azul);
+  color:#fff;
+}
+.top-btn.sec{
+  background:#eaf1ff;
+  color:var(--azul);
+}
+.sidebar{
+  grid-area:sidebar;
+  background:#fff;
+  border-right:1px solid #dbe6f8;
+  padding:18px;
+  overflow:auto;
+}
+.section{
+  border:1px solid #e5edf8;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+  background:#fafcff;
+}
+.section h3{
+  margin:0 0 12px;
+  font-size:18px;
+  color:#0f172a;
+}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:#344054;
+  margin:10px 0 6px;
+}
+input, select{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid var(--borda);
+  border-radius:12px;
+  font-size:14px;
+  outline:none;
+}
+input:focus, select:focus{
+  border-color:var(--azul);
+  box-shadow:0 0 0 4px rgba(11,61,145,.10);
+}
+.btn{
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  margin-top:12px;
+}
+.btn-primary{
+  background:var(--azul);
+  color:#fff;
+}
+.btn-light{
+  background:#eef4ff;
+  color:var(--azul);
+}
+#results{
+  margin-top:12px;
+  max-height:260px;
+  overflow:auto;
+}
+.result-item{
+  padding:12px;
+  border:1px solid #dde7f6;
+  border-radius:12px;
+  margin-bottom:8px;
+  background:#fff;
+  cursor:pointer;
+  line-height:1.5;
+}
+.result-item:hover{border-color:#bcd2ff}
+.result-title{
+  font-weight:700;
+  color:#0f172a;
+  margin-bottom:4px;
+}
+.result-sub{
+  font-size:13px;
+  color:#64748b;
+}
+.map-wrap{
+  grid-area:map;
+  position:relative;
+}
+#map{
+  width:100%;
+  height:100%;
+}
+.footer-contact{
+  margin-top:18px;
+  font-size:12px;
+  line-height:1.8;
+  color:#64748b;
+}
+.legend-note{
+  font-size:12px;
+  color:#64748b;
+  line-height:1.6;
+  margin-top:10px;
+}
+.popup-short{
+  min-width:220px;
+  line-height:1.6;
+}
+.popup-short .loc{
+  font-weight:700;
+  color:#0f172a;
+  margin-bottom:6px;
+}
+.popup-short .sub{
+  color:#475569;
+  font-size:13px;
+}
+@media (max-width: 980px){
+  .app{
+    grid-template-columns:1fr;
+    grid-template-rows:70px auto 70vh;
+    grid-template-areas:
+      "top"
+      "sidebar"
+      "map";
+  }
+  .sidebar{border-right:none;border-bottom:1px solid #dbe6f8}
+  .admin-bar{
+    left:12px;
+    right:12px;
+    transform:none;
+    width:auto;
+  }
+}
+</style>
 </head>
 <body>
 
-  <div id="sidebar">
-    <h1>MATRIMAP</h1>
-    <p>Buscando o número da matrícula imobiliária? Solução ágil em segundos.</p>
+<div id="adminBar" class="admin-bar">
+  <span class="admin-tag">Modo admin</span>
+  <button class="admin-nav-btn" onclick="window.location.href='index.html'">Login</button>
+  <button class="admin-nav-btn" onclick="window.location.href='cadastro.html'">Cadastro</button>
+  <button class="admin-nav-btn" onclick="window.location.href='pagamento.html'">Pagamento</button>
+  <button class="admin-nav-btn" onclick="window.location.href='mapa.html'">Mapa</button>
+  <button class="admin-nav-btn primary" onclick="simularCadastro()">Não logado</button>
+  <button class="admin-nav-btn primary" onclick="simularPagamento()">Sem pagamento</button>
+  <button class="admin-nav-btn primary" onclick="simularMapa()">Com pagamento</button>
+  <button class="admin-nav-btn" onclick="desligarModoTeste()">Limpar teste</button>
+</div>
 
-    <div class="bloco">
-      <h2>Buscar imóvel</h2>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">MATRIMAP</div>
+    <div class="top-actions">
+      <div class="user-badge" id="userName">Carregando...</div>
+      <button class="top-btn sec" onclick="toggleFullscreen()">Tela cheia</button>
+      <button class="top-btn" onclick="sair()">Sair</button>
+    </div>
+  </header>
 
-      <select id="tipoBusca">
-        <option value="endereco">Buscar por endereço</option>
-        <option value="matricula">Buscar por matrícula</option>
-        <option value="cartorio">Buscar por cartório</option>
+  <aside class="sidebar">
+    <div class="section">
+      <h3>Busca urbana</h3>
+
+      <label for="estado">Estado</label>
+      <select id="estado">
+        <option value="">Selecione</option>
       </select>
 
-      <input type="text" id="campoBusca" placeholder="Digite aqui...">
+      <label for="cidade">Cidade</label>
+      <input id="cidade" list="listaCidades" placeholder="Digite ou selecione a cidade">
+      <datalist id="listaCidades"></datalist>
 
-      <button onclick="buscarImoveis()">Buscar</button>
-      <button class="botao-secundario" onclick="limparBusca()">Limpar busca</button>
+      <label for="tipoLogradouro">Tipo de logradouro</label>
+      <select id="tipoLogradouro">
+        <option value="">Selecione</option>
+        <option>Rua</option>
+        <option>Avenida</option>
+        <option>Alameda</option>
+        <option>Travessa</option>
+        <option>Estrada</option>
+        <option>Praça</option>
+        <option>Rodovia</option>
+      </select>
 
-      <div id="resultadoBusca" class="resultado-busca" style="display:none;"></div>
-    </div>
+      <label for="rua">Rua</label>
+      <input id="rua" placeholder="Digite parte do nome da rua">
 
-    <div class="bloco">
-      <h2>Legenda</h2>
+      <label for="numero">Número</label>
+      <input id="numero" placeholder="Ex.: 120">
 
-      <div class="legenda-item">
-        <div class="cor" style="background:#16a34a;"></div>
-        <span>Com matrícula</span>
+      <label for="bairro">Bairro</label>
+      <input id="bairro" placeholder="Digite o bairro">
+
+      <button class="btn btn-primary" onclick="buscar()">Buscar</button>
+
+      <div id="results"></div>
+
+      <div class="legend-note">
+        A busca mostra somente rua, bairro e cidade para ficar mais limpa.
       </div>
+    </div>
 
-      <div class="legenda-item">
-        <div class="cor" style="background:#dc2626;"></div>
-        <span>Sem matrícula</span>
+    <div class="section">
+      <h3>Busca rural</h3>
+
+      <label for="car">CAR</label>
+      <input id="car" placeholder="Digite o CAR">
+
+      <label for="ccir">CCIR</label>
+      <input id="ccir" placeholder="Digite o CCIR">
+
+      <label for="matriculaRural">Matrícula</label>
+      <input id="matriculaRural" placeholder="Digite a matrícula">
+
+      <button class="btn btn-light" onclick="alert('Estrutura rural pronta para receber a base.');">Buscar rural</button>
+      <button class="btn btn-light" onclick="alert('Botão preparado para o KML rural.');">Baixar KML</button>
+    </div>
+
+    <div class="section">
+      <h3>Contato</h3>
+      <div class="footer-contact">
+        <div>Email: contatomatrimap@gmail.com</div>
+        <div>WhatsApp: 19 99949-3684</div>
       </div>
-
-      <div class="legenda-item">
-        <div class="cor" style="background:#eab308;"></div>
-        <span>Informação incompleta</span>
-      </div>
     </div>
+  </aside>
 
-    <div class="bloco">
-      <h2>Status</h2>
-      <div id="status" class="info-status">Carregando dados...</div>
-    </div>
+  <main class="map-wrap">
+    <div id="map"></div>
+  </main>
+</div>
 
-    <div class="bloco">
-      <h2>Ações</h2>
-      <button onclick="centralizarMapa()">Centralizar mapa</button>
-      <button class="botao-secundario" onclick="recarregarDados()">Recarregar dados</button>
-      <button class="botao-secundario" onclick="logout()">Sair</button>
-    </div>
-  </div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <div class="topo-mapa">
-    <input type="text" id="buscaRapidaMapa" placeholder="Busca rápida no mapa..." onkeyup="buscarRapidaMapa(event)">
-  </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
 
-  <div id="map"></div>
+const firebaseConfig = {
+  apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
+  authDomain: "matrimap-899b3.firebaseapp.com",
+  databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
+  projectId: "matrimap-899b3",
+  storageBucket: "matrimap-899b3.firebasestorage.app",
+  messagingSenderId: "1094066148423",
+  appId: "1:1094066148423:web:260b14f4e2259681554d62"
+};
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-  <script>
-    /******************************************************************
-     * 1) CONFIGURAÇÃO
-     * TROQUE APENAS A URL ABAIXO PELA SUA PLANILHA PUBLICADA EM CSV
-     ******************************************************************/
-    const CSV_URL = "COLE_AQUI_O_LINK_CSV_DA_SUA_PLANILHA";
+const MAPTILER_KEY = "uu87SbOErvr1cRzcFL7E";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
-    /******************************************************************
-     * 2) PROTEÇÃO MODO TESTE
-     * Mantido em localStorage como você pediu
-     ******************************************************************/
-    const usuarioLogado = localStorage.getItem("usuarioLogado");
-    const tipoUsuario = localStorage.getItem("tipoUsuario");
-    const pagamento = localStorage.getItem("pagamento");
+const estadosBrasil = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS",
+  "MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"
+];
 
-    if (!usuarioLogado) {
-      alert("Você precisa estar logado para acessar o mapa.");
-      window.location.href = "index.html";
+const estadoSelect = document.getElementById("estado");
+const cidadeInput = document.getElementById("cidade");
+const listaCidades = document.getElementById("listaCidades");
+
+let cidadesDoEstado = [];
+
+estadosBrasil.forEach(uf => {
+  const option = document.createElement("option");
+  option.value = uf;
+  option.textContent = uf;
+  estadoSelect.appendChild(option);
+});
+
+function mostrarAdminBar(){
+  if(localStorage.getItem("tipoUsuario") === "admin"){
+    document.getElementById("adminBar").classList.add("show");
+  }
+}
+mostrarAdminBar();
+
+window.simularCadastro = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.setItem("logado", "nao");
+  localStorage.removeItem("statusUsuario");
+  localStorage.removeItem("vencimento");
+  localStorage.removeItem("uid");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  window.location.href = "cadastro.html";
+}
+
+window.simularPagamento = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.setItem("logado", "sim");
+  localStorage.setItem("statusUsuario", "pendente_pagamento");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  window.location.href = "pagamento.html";
+}
+
+window.simularMapa = function(){
+  localStorage.setItem("tipoUsuario", "admin");
+  localStorage.setItem("modoTeste", "sim");
+  localStorage.setItem("logado", "sim");
+  localStorage.setItem("statusUsuario", "ativo");
+  localStorage.setItem("vencimento", "2099-12-31");
+  localStorage.setItem("usuarioNome", "Administrador");
+  mostrarAdminBar();
+  window.location.href = "mapa.html";
+}
+
+window.desligarModoTeste = function(){
+  localStorage.removeItem("modoTeste");
+  localStorage.removeItem("statusUsuario");
+  localStorage.removeItem("vencimento");
+  localStorage.removeItem("uid");
+  localStorage.removeItem("logado");
+  localStorage.removeItem("usuarioNome");
+  localStorage.removeItem("tipoUsuario");
+  document.getElementById("adminBar").classList.remove("show");
+  window.location.href = "index.html";
+}
+
+function isExpired(vencimento){
+  if(!vencimento) return true;
+  return new Date(vencimento).getTime() < Date.now();
+}
+
+async function validarAcesso(user){
+  if(localStorage.getItem("tipoUsuario") === "admin"){
+    document.getElementById("userName").textContent = "Administrador";
+    return true;
+  }
+
+  if(!user){
+    window.location.href = "index.html";
+    return false;
+  }
+
+  const snap = await get(ref(db, "usuarios/" + user.uid));
+  if(!snap.exists()){
+    window.location.href = "pagamento.html";
+    return false;
+  }
+
+  const dados = snap.val();
+  document.getElementById("userName").textContent = dados.nome || "Usuário";
+
+  const vencimento = dados.vencimento || "";
+  const status = dados.status || "pendente_pagamento";
+
+  if(status !== "ativo" || isExpired(vencimento)){
+    if(status === "ativo" && isExpired(vencimento)){
+      await update(ref(db, "usuarios/" + user.uid), {
+        status: "pendente_pagamento"
+      });
     }
+    window.location.href = "pagamento.html";
+    return false;
+  }
 
-    if (tipoUsuario !== "admin" && pagamento !== "aprovado") {
-      alert("Seu acesso ao mapa está bloqueado até a confirmação do pagamento.");
-      window.location.href = "index.html";
+  return true;
+}
+
+const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{ maxZoom:22 });
+const streets = L.tileLayer("https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=" + MAPTILER_KEY,{ tileSize:512, zoomOffset:-1, maxZoom:22 });
+const hybrid = L.tileLayer("https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=" + MAPTILER_KEY,{ tileSize:512, zoomOffset:-1, maxZoom:22 });
+
+const map = L.map("map", {
+  center:[-22.19,-47.38],
+  zoom:13,
+  layers:[streets]
+});
+
+L.control.layers({
+  "Ruas": streets,
+  "Satélite": hybrid,
+  "Mapa alternativo": osm
+}).addTo(map);
+
+let markerLayer = L.layerGroup().addTo(map);
+let currentSearchMarker = null;
+
+function limparTexto(v){
+  return (v || "").trim();
+}
+
+function primeiraValida(...valores){
+  return valores.find(v => limparTexto(v));
+}
+
+function extrairCidade(address = {}){
+  return primeiraValida(address.city, address.town, address.village, address.municipality, address.city_district);
+}
+
+function montarEnderecoCurto(address = {}){
+  const rua = primeiraValida(address.road, address.pedestrian, address.footway, address.cycleway, address.path, address.residential);
+  const bairro = primeiraValida(address.suburb, address.neighbourhood, address.quarter, address.city_district);
+  const cidade = extrairCidade(address);
+
+  return {
+    rua: rua || "",
+    bairro: bairro || "",
+    cidade: cidade || ""
+  };
+}
+
+function textoEnderecoCurto(address = {}){
+  const loc = montarEnderecoCurto(address);
+  return [loc.rua, loc.bairro, loc.cidade].filter(Boolean).join(", ");
+}
+
+function montarHtmlPopupCurto(address = {}, matricula = "", cartorio = "", fallback = ""){
+  const loc = montarEnderecoCurto(address);
+  const linhaPrincipal = loc.rua || fallback || "Localização encontrada";
+  const linhaSecundaria = [loc.bairro, loc.cidade].filter(Boolean).join(" • ");
+
+  return `
+    <div class="popup-short">
+      <div class="loc">${linhaPrincipal}</div>
+      ${linhaSecundaria ? `<div class="sub">${linhaSecundaria}</div>` : ""}
+      ${matricula || cartorio ? `<div style="margin-top:8px"><b>Matrícula:</b> ${matricula || "-"}<br><b>Cartório:</b> ${cartorio || "-"}</div>` : ""}
+    </div>
+  `;
+}
+
+function normalizarTexto(s){
+  return limparTexto(s)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function preencherListaCidades(cidades){
+  listaCidades.innerHTML = "";
+  cidades.forEach(nome => {
+    const option = document.createElement("option");
+    option.value = nome;
+    listaCidades.appendChild(option);
+  });
+}
+
+async function carregarCidadesDoEstado(uf){
+  cidadeInput.value = "";
+  cidadesDoEstado = [];
+  preencherListaCidades([]);
+
+  if(!uf) return;
+
+  try{
+    const url = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`;
+    const resposta = await fetch(url);
+    const dados = await resposta.json();
+
+    cidadesDoEstado = dados
+      .map(item => item.nome)
+      .filter(Boolean)
+      .sort((a,b) => a.localeCompare(b, "pt-BR"));
+
+    preencherListaCidades(cidadesDoEstado);
+  }catch(error){
+    console.log("Erro ao carregar cidades:", error);
+  }
+}
+
+estadoSelect.addEventListener("change", async () => {
+  await carregarCidadesDoEstado(estadoSelect.value);
+});
+
+cidadeInput.addEventListener("input", () => {
+  const termo = normalizarTexto(cidadeInput.value);
+  if(!termo){
+    preencherListaCidades(cidadesDoEstado);
+    return;
+  }
+
+  const filtradas = cidadesDoEstado.filter(nome =>
+    normalizarTexto(nome).includes(termo)
+  );
+  preencherListaCidades(filtradas);
+});
+
+async function carregarPontos(){
+  try{
+    const r = await fetch(CSV_URL);
+    const text = await r.text();
+    const linhas = text.split("\n").map(l => l.trim()).filter(Boolean);
+
+    for(let i = 1; i < linhas.length; i++){
+      const col = linhas[i].split(",");
+      const endereco = (col[0] || "").trim();
+      const matricula = (col[1] || "").trim();
+      const cartorio = (col[2] || "").trim();
+
+      if(!endereco) continue;
+
+      try{
+        const geo = await fetch("https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=" + encodeURIComponent(endereco));
+        const data = await geo.json();
+
+        if(data.length > 0){
+          const item = data[0];
+          const lat = parseFloat(item.lat);
+          const lon = parseFloat(item.lon);
+
+          const marker = L.marker([lat,lon]).addTo(markerLayer);
+          marker.bindPopup(montarHtmlPopupCurto(item.address || {}, matricula, cartorio, endereco));
+
+          if(localStorage.getItem("tipoUsuario") === "admin"){
+            const drag = L.marker([lat,lon], {draggable:true, opacity:0.01}).addTo(markerLayer);
+            drag.on("dragend", function(e){
+              console.log("Nova posição:", e.target.getLatLng());
+            });
+          }
+        }
+      }catch(e){
+        console.log("Falha ao geocodificar:", endereco);
+      }
     }
+  }catch(error){
+    console.log("Erro ao carregar CSV:", error);
+  }
+}
 
-    /******************************************************************
-     * 3) MAPA
-     ******************************************************************/
-    const map = L.map("map").setView([-22.1856, -47.3842], 13);
+function montarTentativasBusca(){
+  const tipo = limparTexto(document.getElementById("tipoLogradouro").value);
+  const rua = limparTexto(document.getElementById("rua").value);
+  const numero = limparTexto(document.getElementById("numero").value);
+  const bairro = limparTexto(document.getElementById("bairro").value);
+  const cidade = limparTexto(document.getElementById("cidade").value);
+  const estado = limparTexto(document.getElementById("estado").value);
 
-    const camadaOSM = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 22,
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(map);
+  const tentativas = [];
 
-    const camadaSatelite = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-      maxZoom: 22,
-      attribution: "Tiles &copy; Esri"
-    });
+  if(rua && numero && cidade && estado){
+    tentativas.push([tipo, rua, numero, bairro, cidade, estado, "Brasil"].filter(Boolean).join(", "));
+  }
 
-    const baseMaps = {
-      "Mapa": camadaOSM,
-      "Satélite": camadaSatelite
+  if(rua && cidade && estado){
+    tentativas.push([tipo, rua, bairro, cidade, estado, "Brasil"].filter(Boolean).join(", "));
+  }
+
+  if(rua && cidade){
+    tentativas.push([tipo, rua, bairro, cidade, "Brasil"].filter(Boolean).join(", "));
+  }
+
+  if(rua && estado){
+    tentativas.push([tipo, rua, bairro, estado, "Brasil"].filter(Boolean).join(", "));
+  }
+
+  if(rua){
+    tentativas.push([tipo, rua, bairro, "Brasil"].filter(Boolean).join(", "));
+    tentativas.push(rua);
+  }
+
+  return [...new Set(tentativas)];
+}
+
+async function buscarNoNominatim(termo){
+  const url = "https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=10&q=" + encodeURIComponent(termo);
+  const r = await fetch(url);
+  return await r.json();
+}
+
+window.buscar = async function(){
+  const results = document.getElementById("results");
+  results.innerHTML = "";
+
+  const rua = limparTexto(document.getElementById("rua").value);
+  if(!rua){
+    results.innerHTML = `<div class="result-item">Digite pelo menos parte do nome da rua.</div>`;
+    return;
+  }
+
+  const tentativas = montarTentativasBusca();
+  let data = [];
+
+  for(const termo of tentativas){
+    try{
+      const resposta = await buscarNoNominatim(termo);
+      if(resposta && resposta.length){
+        data = resposta;
+        break;
+      }
+    }catch(e){}
+  }
+
+  if(!data.length){
+    results.innerHTML = `<div class="result-item">Nenhum resultado encontrado. Tente buscar apenas pela rua, ou rua + cidade.</div>`;
+    return;
+  }
+
+  data.forEach(item => {
+    const curto = montarEnderecoCurto(item.address || {});
+    const titulo = curto.rua || "Endereço encontrado";
+    const subtitulo = [curto.bairro, curto.cidade].filter(Boolean).join(" • ");
+
+    const div = document.createElement("div");
+    div.className = "result-item";
+    div.innerHTML = `
+      <div class="result-title">${titulo}</div>
+      <div class="result-sub">${subtitulo || "Sem bairro/cidade informados"}</div>
+    `;
+
+    div.onclick = () => {
+      const lat = parseFloat(item.lat);
+      const lon = parseFloat(item.lon);
+
+      map.setView([lat, lon], 19);
+
+      if(currentSearchMarker){
+        map.removeLayer(currentSearchMarker);
+      }
+
+      currentSearchMarker = L.marker([lat, lon]).addTo(map);
+      currentSearchMarker.bindPopup(montarHtmlPopupCurto(item.address || {}, "", "", titulo)).openPopup();
     };
 
-    L.control.layers(baseMaps, null, { collapsed: true }).addTo(map);
+    results.appendChild(div);
+  });
+}
 
-    let markersLayer = L.layerGroup().addTo(map);
-    let todosImoveis = [];
-    let todosMarkers = [];
-    let boundsGerais = [];
+window.toggleFullscreen = function(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen();
+  }else{
+    document.exitFullscreen();
+  }
+}
 
-    /******************************************************************
-     * 4) FUNÇÕES DE TRATAMENTO
-     ******************************************************************/
-    function limparTexto(valor) {
-      if (valor === null || valor === undefined) return "";
-      return String(valor).trim();
-    }
+window.sair = async function(){
+  localStorage.clear();
+  try{
+    await signOut(auth);
+  }catch(e){}
+  window.location.href = "index.html";
+}
 
-    function normalizarTexto(valor) {
-      return limparTexto(valor)
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
-    }
-
-    function extrairLatLng(coordenadaOriginal) {
-      if (!coordenadaOriginal) return null;
-
-      let texto = String(coordenadaOriginal).trim();
-
-      texto = texto.replace(/\s+/g, " ");
-
-      const numeros = texto.match(/-?\d+(?:[.,]\d+)?/g);
-      if (!numeros || numeros.length < 2) return null;
-
-      let n1 = numeros[0].replace(",", ".");
-      let n2 = numeros[1].replace(",", ".");
-
-      let lat = parseFloat(n1);
-      let lng = parseFloat(n2);
-
-      if (isNaN(lat) || isNaN(lng)) return null;
-
-      if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
-        return null;
-      }
-
-      return { lat, lng };
-    }
-
-    function definirCorMarcador(imovel) {
-      const matricula = limparTexto(imovel.matricula);
-      const endereco = limparTexto(imovel.endereco);
-      const cartorio = limparTexto(imovel.cartorio);
-
-      if (matricula && endereco && cartorio) return "#16a34a";
-      if (!matricula) return "#dc2626";
-      return "#eab308";
-    }
-
-    function criarIcone(cor) {
-      return L.divIcon({
-        className: "",
-        html: `
-          <div style="
-            width:18px;
-            height:18px;
-            background:${cor};
-            border:2px solid white;
-            border-radius:50%;
-            box-shadow:0 0 6px rgba(0,0,0,0.4);
-          "></div>
-        `,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9],
-        popupAnchor: [0, -9]
-      });
-    }
-
-    function montarPopup(imovel) {
-      return `
-        <div class="popup-endereco">${imovel.endereco || "Endereço não informado"}</div>
-        <div><strong>Matrícula:</strong> ${imovel.matricula || "Não informada"}</div>
-        <div><strong>Cartório:</strong> ${imovel.cartorio || "Não informado"}</div>
-        <div><strong>Coordenada:</strong> ${imovel.coordenada || "Não informada"}</div>
-      `;
-    }
-
-    /******************************************************************
-     * 5) CARREGAMENTO DA PLANILHA
-     * COLUNAS ESPERADAS:
-     * ENDERECO | MATRICULA | CARTORIO | COORDENADA
-     ******************************************************************/
-    function carregarDados() {
-      document.getElementById("status").innerHTML = "Carregando dados da planilha...";
-      markersLayer.clearLayers();
-      todosImoveis = [];
-      todosMarkers = [];
-      boundsGerais = [];
-
-      Papa.parse(CSV_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function(resultado) {
-          const linhas = resultado.data;
-
-          if (!linhas || linhas.length === 0) {
-            document.getElementById("status").innerHTML = "Nenhum dado encontrado na planilha.";
-            return;
-          }
-
-          let totalLidos = 0;
-          let totalValidos = 0;
-          let totalInvalidos = 0;
-
-          linhas.forEach((linha, index) => {
-            totalLidos++;
-
-            const endereco = limparTexto(linha.ENDERECO || linha.Endereco || linha.endereco);
-            const matricula = limparTexto(linha.MATRICULA || linha.Matricula || linha.matricula);
-            const cartorio = limparTexto(linha.CARTORIO || linha.Cartorio || linha.cartorio);
-            const coordenada = limparTexto(linha.COORDENADA || linha.Coordenada || linha.coordenada);
-
-            const latLng = extrairLatLng(coordenada);
-
-            if (!latLng) {
-              totalInvalidos++;
-              return;
-            }
-
-            const imovel = {
-              id: index + 1,
-              endereco,
-              matricula,
-              cartorio,
-              coordenada,
-              lat: latLng.lat,
-              lng: latLng.lng
-            };
-
-            todosImoveis.push(imovel);
-
-            const cor = definirCorMarcador(imovel);
-            const marker = L.marker([imovel.lat, imovel.lng], {
-              icon: criarIcone(cor)
-            }).bindPopup(montarPopup(imovel));
-
-            marker.imovelData = imovel;
-
-            marker.addTo(markersLayer);
-            todosMarkers.push(marker);
-            boundsGerais.push([imovel.lat, imovel.lng]);
-
-            totalValidos++;
-          });
-
-          if (boundsGerais.length > 0) {
-            map.fitBounds(boundsGerais, { padding: [30, 30] });
-          }
-
-          document.getElementById("status").innerHTML =
-            "Total lido: " + totalLidos +
-            "<br>Válidos no mapa: " + totalValidos +
-            "<br>Ignorados por coordenada inválida: " + totalInvalidos;
-        },
-        error: function(erro) {
-          document.getElementById("status").innerHTML = "Erro ao carregar a planilha.";
-          console.error("Erro ao carregar CSV:", erro);
-        }
-      });
-    }
-
-    /******************************************************************
-     * 6) BUSCA
-     ******************************************************************/
-    function exibirResultados(lista) {
-      const box = document.getElementById("resultadoBusca");
-
-      if (!lista.length) {
-        box.style.display = "block";
-        box.innerHTML = "Nenhum imóvel encontrado.";
-        return;
-      }
-
-      box.style.display = "block";
-      box.innerHTML = "";
-
-      lista.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "resultado-item";
-        div.innerHTML = `
-          <strong>${item.endereco || "Endereço não informado"}</strong><br>
-          Matrícula: ${item.matricula || "Não informada"}<br>
-          Cartório: ${item.cartorio || "Não informado"}
-        `;
-
-        div.onclick = function() {
-          map.setView([item.lat, item.lng], 18);
-
-          const markerEncontrado = todosMarkers.find(m =>
-            m.imovelData.id === item.id
-          );
-
-          if (markerEncontrado) {
-            markerEncontrado.openPopup();
-          }
-        };
-
-        box.appendChild(div);
-      });
-    }
-
-    function buscarImoveis() {
-      const tipo = document.getElementById("tipoBusca").value;
-      const valor = normalizarTexto(document.getElementById("campoBusca").value);
-
-      if (!valor) {
-        alert("Digite algo para buscar.");
-        return;
-      }
-
-      let encontrados = [];
-
-      if (tipo === "endereco") {
-        encontrados = todosImoveis.filter(item =>
-          normalizarTexto(item.endereco).includes(valor)
-        );
-      } else if (tipo === "matricula") {
-        encontrados = todosImoveis.filter(item =>
-          normalizarTexto(item.matricula).includes(valor)
-        );
-      } else if (tipo === "cartorio") {
-        encontrados = todosImoveis.filter(item =>
-          normalizarTexto(item.cartorio).includes(valor)
-        );
-      }
-
-      exibirResultados(encontrados);
-    }
-
-    function buscarRapidaMapa(event) {
-      if (event.key !== "Enter") return;
-
-      const valor = normalizarTexto(document.getElementById("buscaRapidaMapa").value);
-
-      if (!valor) return;
-
-      const encontrados = todosImoveis.filter(item =>
-        normalizarTexto(item.endereco).includes(valor) ||
-        normalizarTexto(item.matricula).includes(valor) ||
-        normalizarTexto(item.cartorio).includes(valor)
-      );
-
-      exibirResultados(encontrados);
-
-      if (encontrados.length === 1) {
-        map.setView([encontrados[0].lat, encontrados[0].lng], 18);
-
-        const markerEncontrado = todosMarkers.find(m =>
-          m.imovelData.id === encontrados[0].id
-        );
-
-        if (markerEncontrado) {
-          markerEncontrado.openPopup();
-        }
-      }
-    }
-
-    function limparBusca() {
-      document.getElementById("campoBusca").value = "";
-      document.getElementById("buscaRapidaMapa").value = "";
-      document.getElementById("resultadoBusca").style.display = "none";
-      document.getElementById("resultadoBusca").innerHTML = "";
-
-      if (boundsGerais.length > 0) {
-        map.fitBounds(boundsGerais, { padding: [30, 30] });
-      }
-    }
-
-    /******************************************************************
-     * 7) AÇÕES
-     ******************************************************************/
-    function centralizarMapa() {
-      if (boundsGerais.length > 0) {
-        map.fitBounds(boundsGerais, { padding: [30, 30] });
-      }
-    }
-
-    function recarregarDados() {
-      carregarDados();
-    }
-
-    function logout() {
-      localStorage.removeItem("usuarioLogado");
-      localStorage.removeItem("tipoUsuario");
-      localStorage.removeItem("pagamento");
-      window.location.href = "index.html";
-    }
-
-    /******************************************************************
-     * 8) INICIAR
-     ******************************************************************/
-    carregarDados();
-  </script>
+onAuthStateChanged(auth, async (user) => {
+  const ok = await validarAcesso(user);
+  if(ok) carregarPontos();
+});
+</script>
 </body>
 </html>
