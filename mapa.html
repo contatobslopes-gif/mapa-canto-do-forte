@@ -623,12 +623,27 @@ async function carregarPontos(){
         const linhas = resultado.data || [];
 
         linhas.forEach((linha) => {
-          const endereco = limparTexto(linha.endereco || linha.Endereco || linha.ENDERECO);
+          const endereco = limparTexto(linha.endereco || linha.Endereco || linha.ENDERECO || linha["endereço"] || linha["Endereço"] || linha["ENDEREÇO"]);
           const matricula = limparTexto(linha.matricula || linha.Matricula || linha.MATRICULA);
           const cartorio = limparTexto(linha.cartorio || linha.Cartorio || linha.CARTORIO);
           const coordenada = limparTexto(linha.coordenada || linha.Coordenada || linha.COORDENADA);
 
-          const posicao = extrairLatLngDaCoordenada(coordenada);
+          let posicao = null;
+
+          const latTexto = limparTexto(linha.lat || linha.Lat || linha.LAT);
+          const lngTexto = limparTexto(linha.lng || linha.Lng || linha.LNG);
+
+          const lat = parseFloat(latTexto.replace(",", "."));
+          const lng = parseFloat(lngTexto.replace(",", "."));
+
+          if (!isNaN(lat) && !isNaN(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+            posicao = { lat, lng };
+          }
+
+          if (!posicao && coordenada) {
+            posicao = extrairLatLngDaCoordenada(coordenada);
+          }
+
           if(!posicao) return;
 
           const marker = L.marker([posicao.lat, posicao.lng]).addTo(markerLayer);
