@@ -623,15 +623,46 @@ async function carregarPontos(){
         const linhas = resultado.data || [];
 
         linhas.forEach((linha) => {
-          const endereco = limparTexto(linha.endereco || linha.Endereco || linha.ENDERECO || linha["endereço"] || linha["Endereço"] || linha["ENDEREÇO"]);
-          const matricula = limparTexto(linha.matricula || linha.Matricula || linha.MATRICULA);
-          const cartorio = limparTexto(linha.cartorio || linha.Cartorio || linha.CARTORIO);
-          const coordenada = limparTexto(linha.coordenada || linha.Coordenada || linha.COORDENADA);
+          const endereco = limparTexto(
+            linha.endereco ||
+            linha.Endereco ||
+            linha.ENDERECO ||
+            linha["endereço"] ||
+            linha["Endereço"] ||
+            linha["ENDEREÇO"]
+          );
+
+          const matricula = limparTexto(
+            linha.matricula ||
+            linha.Matricula ||
+            linha.MATRICULA
+          );
+
+          const cartorio = limparTexto(
+            linha.cartorio ||
+            linha.Cartorio ||
+            linha.CARTORIO
+          );
+
+          const coordenada = limparTexto(
+            linha.coordenada ||
+            linha.Coordenada ||
+            linha.COORDENADA
+          );
 
           let posicao = null;
 
-          const latTexto = limparTexto(linha.lat || linha.Lat || linha.LAT);
-          const lngTexto = limparTexto(linha.lng || linha.Lng || linha.LNG);
+          const latTexto = limparTexto(
+            linha.lat ||
+            linha.Lat ||
+            linha.LAT
+          );
+
+          const lngTexto = limparTexto(
+            linha.lng ||
+            linha.Lng ||
+            linha.LNG
+          );
 
           const lat = parseFloat(latTexto.replace(",", "."));
           const lng = parseFloat(lngTexto.replace(",", "."));
@@ -646,7 +677,12 @@ async function carregarPontos(){
 
           if(!posicao) return;
 
-          const marker = L.marker([posicao.lat, posicao.lng]).addTo(markerLayer);
+          const isAdmin = localStorage.getItem("tipoUsuario") === "admin";
+
+          const marker = L.marker([posicao.lat, posicao.lng], {
+            draggable: isAdmin
+          }).addTo(markerLayer);
+
           marker.bindPopup(
             montarHtmlPopupCurto(
               {},
@@ -656,9 +692,8 @@ async function carregarPontos(){
             )
           );
 
-          if(localStorage.getItem("tipoUsuario") === "admin"){
-            const drag = L.marker([posicao.lat, posicao.lng], {draggable:true, opacity:0.01}).addTo(markerLayer);
-            drag.on("dragend", function(e){
+          if(isAdmin){
+            marker.on("dragend", function(e){
               console.log("Nova posição:", e.target.getLatLng());
             });
           }
