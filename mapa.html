@@ -1080,8 +1080,8 @@ window.sair = async function(){
 onAuthStateChanged(auth, async (user) => {
   const ok = await validarAcesso(user);
   if(ok){
-    carregarPontos();
-    aplicarModoVisualizacao();
+    carregarPontos();   // urbano
+    carregarRural();    // 👈 ADICIONAR ISSO
   }
 });
 </script>
