@@ -171,7 +171,7 @@ input:focus, select:focus{
   background:#eef4ff;
   color:var(--azul);
 }
-#results{
+#results, #ruralResults{
   margin-top:12px;
   max-height:260px;
   overflow:auto;
@@ -227,6 +227,39 @@ input:focus, select:focus{
 .popup-short .sub{
   color:#475569;
   font-size:13px;
+}
+.popup-rural{
+  min-width:250px;
+  line-height:1.6;
+}
+.popup-rural .titulo{
+  font-weight:700;
+  color:#0f172a;
+  margin-bottom:8px;
+}
+.popup-rural .linha{
+  font-size:13px;
+  color:#334155;
+  margin:4px 0;
+}
+.popup-rural .popup-btn{
+  display:inline-block;
+  margin-top:10px;
+  background:var(--azul);
+  color:#fff;
+  padding:8px 12px;
+  border-radius:10px;
+  text-decoration:none;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  border:none;
+}
+.rural-status{
+  margin-top:10px;
+  font-size:12px;
+  color:#64748b;
+  line-height:1.6;
 }
 @media (max-width: 980px){
   .app{
@@ -317,6 +350,16 @@ input:focus, select:focus{
     <div class="section">
       <h3>Busca rural</h3>
 
+      <label for="ruralEstado">Estado</label>
+      <select id="ruralEstado">
+        <option value="SP">SP</option>
+      </select>
+
+      <label for="ruralCidade">Cidade</label>
+      <select id="ruralCidade">
+        <option value="Leme">Leme</option>
+      </select>
+
       <label for="car">CAR</label>
       <input id="car" placeholder="Digite o CAR">
 
@@ -326,25 +369,12 @@ input:focus, select:focus{
       <label for="matriculaRural">Matrícula</label>
       <input id="matriculaRural" placeholder="Digite a matrícula">
 
-      <label for="modoVisualizacao">Visualização</label>
-      <select id="modoVisualizacao">
-        <option value="urbano">Só urbano</option>
-        <option value="rural">Só rural</option>
-        <option value="completo">Completo</option>
-      </select>
-
-      <label for="estadoRural">Estado rural</label>
-      <select id="estadoRural">
-        <option value="SP">SP</option>
-      </select>
-
-      <label for="cidadeRural">Cidade rural</label>
-      <select id="cidadeRural">
-        <option value="Leme">Leme</option>
-      </select>
-
       <button class="btn btn-light" onclick="buscarRural()">Buscar rural</button>
-      <button class="btn btn-light" onclick="baixarKmlRural()">Baixar KML</button>
+      <button class="btn btn-light" onclick="mostrarTudoRural()">Mostrar todo rural</button>
+      <button class="btn btn-light" onclick="baixarKMLSelecionado()">Baixar KML do selecionado</button>
+
+      <div id="ruralResults"></div>
+      <div id="ruralStatus" class="rural-status">Base rural carregando...</div>
     </div>
 
     <div class="section">
@@ -385,6 +415,15 @@ const db = getDatabase(app);
 const MAPTILER_KEY = "uu87SbOErvr1cRzcFL7E";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTch50HxxT3Aq6udssiJ8H5RUrAsINsNQz9zpwKT6j2fS_a_7HwHCx8PnQLBeSc6KeyWkNlRXPRpPEB/pub?output=csv";
 
+const RURAL_INDEX = {
+  SP: {
+    Leme: {
+      sigef: "sigef_leme.geojson",
+      car: ""
+    }
+  }
+};
+
 const estadosBrasil = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS",
   "MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"
@@ -393,6 +432,11 @@ const estadosBrasil = [
 const estadoSelect = document.getElementById("estado");
 const cidadeInput = document.getElementById("cidade");
 const listaCidades = document.getElementById("listaCidades");
+
+const ruralEstadoSelect = document.getElementById("ruralEstado");
+const ruralCidadeSelect = document.getElementById("ruralCidade");
+const ruralResults = document.getElementById("ruralResults");
+const ruralStatus = document.getElementById("ruralStatus");
 
 let cidadesDoEstado = [];
 
@@ -420,7 +464,7 @@ window.simularCadastro = function(){
   localStorage.setItem("usuarioNome", "Administrador");
   mostrarAdminBar();
   window.location.href = "cadastro.html";
-}
+};
 
 window.simularPagamento = function(){
   localStorage.setItem("tipoUsuario", "admin");
@@ -430,7 +474,7 @@ window.simularPagamento = function(){
   localStorage.setItem("usuarioNome", "Administrador");
   mostrarAdminBar();
   window.location.href = "pagamento.html";
-}
+};
 
 window.simularMapa = function(){
   localStorage.setItem("tipoUsuario", "admin");
@@ -441,7 +485,7 @@ window.simularMapa = function(){
   localStorage.setItem("usuarioNome", "Administrador");
   mostrarAdminBar();
   window.location.href = "mapa.html";
-}
+};
 
 window.desligarModoTeste = function(){
   localStorage.removeItem("modoTeste");
@@ -453,7 +497,7 @@ window.desligarModoTeste = function(){
   localStorage.removeItem("tipoUsuario");
   document.getElementById("adminBar").classList.remove("show");
   window.location.href = "index.html";
-}
+};
 
 function isExpired(vencimento){
   if(!vencimento) return true;
@@ -514,27 +558,15 @@ L.control.layers({
 
 let markerLayer = L.layerGroup().addTo(map);
 let currentSearchMarker = null;
-
-let ruralLayer = null;
-let ruralDataCache = {};
-let ultimoResultadoRural = null;
-
-const RURAL_INDEX = {
-  SP: {
-    Leme: {
-      sigef: "sigef_leme.geojson",
-      car: "car_leme.geojson"
-    }
-  }
-};
-
-const modoVisualizacao = document.getElementById("modoVisualizacao");
-const estadoRuralSelect = document.getElementById("estadoRural");
-const cidadeRuralSelect = document.getElementById("cidadeRural");
-
+let ruralSigefLayer = L.geoJSON(null);
+let ruralCarLayer = L.geoJSON(null);
+let ruralFeatures = [];
+let selectedRuralFeature = null;
+let selectedRuralLayer = null;
+let ruralLoadedOnce = false;
 
 function limparTexto(v){
-  return (v || "").trim();
+  return (v || "").toString().trim();
 }
 
 function primeiraValida(...valores){
@@ -555,11 +587,6 @@ function montarEnderecoCurto(address = {}){
     bairro: bairro || "",
     cidade: cidade || ""
   };
-}
-
-function textoEnderecoCurto(address = {}){
-  const loc = montarEnderecoCurto(address);
-  return [loc.rua, loc.bairro, loc.cidade].filter(Boolean).join(", ");
 }
 
 function montarHtmlPopupCurto(address = {}, matricula = "", cartorio = "", endereco = ""){
@@ -839,227 +866,480 @@ window.buscar = async function(){
 
     results.appendChild(div);
   });
+};
+
+function escapeXml(str){
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
-
-function textoSeguro(valor, fallback="-"){
-  const txt = limparTexto(valor);
-  return txt || fallback;
+function obterNomeRural(props = {}){
+  return limparTexto(
+    props.nome ||
+    props.nome_area ||
+    props.denominaca ||
+    props.denominacao ||
+    props.imovel ||
+    props.area_imovel
+  ) || "Imóvel rural";
 }
 
-function formatarAreaRural(valor){
-  const numero = Number(valor);
-  if(Number.isNaN(numero)) return textoSeguro(valor);
-  return numero.toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2}) + " ha";
+function obterMatriculaOuCAR(props = {}){
+  return limparTexto(
+    props.matricula ||
+    props.registro_m ||
+    props.car ||
+    props.cod_imovel ||
+    props.cod_immov ||
+    props.ccir ||
+    props.codigo
+  ) || "-";
 }
 
-function montarPopupRural(props = {}){
-  const nome = textoSeguro(props.nome || props.nome_area, "Imóvel rural");
-  const matriculaOuCar = textoSeguro(props.matricula || props.registro_m || props.car || props.cod_imo || props.codigo);
-  const municipio = textoSeguro(props.municipio || props.municipio_ || props.city);
-  const area = formatarAreaRural(props.area_ha || props.area || props.parcela_co);
-  const download = limparTexto(props.download_kml || props.kml || "");
+function obterMunicipioRural(props = {}){
+  return limparTexto(
+    props.municipio ||
+    props.municipio_ ||
+    props.município
+  ) || "-";
+}
+
+function obterAreaRural(props = {}){
+  const valor = limparTexto(
+    props.area_ha ||
+    props.area ||
+    props.area_imovel ||
+    props.hectares ||
+    props.num_area
+  );
+  return valor || "-";
+}
+
+function formatarValorAreaRural(valor){
+  if(!valor || valor === "-") return "-";
+  const numero = Number(String(valor).replace(",", "."));
+  if(Number.isNaN(numero)) return valor;
+  return numero.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ha";
+}
+
+function sanitizarNomeArquivo(nome){
+  return limparTexto(nome)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .toLowerCase() || "imovel_rural";
+}
+
+function geometryToKml(geometry){
+  if(!geometry || !geometry.type || !geometry.coordinates) return "";
+
+  const coordsToString = (ring) => ring.map(coord => {
+    const lng = coord[0];
+    const lat = coord[1];
+    const alt = coord[2] || 0;
+    return `${lng},${lat},${alt}`;
+  }).join(" ");
+
+  const polygonToKml = (polygonCoords) => {
+    if(!polygonCoords || !polygonCoords.length) return "";
+    const outer = polygonCoords[0] || [];
+    const inners = polygonCoords.slice(1);
+
+    let kml = `
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>${coordsToString(outer)}</coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+    `;
+
+    inners.forEach(inner => {
+      kml += `
+        <innerBoundaryIs>
+          <LinearRing>
+            <coordinates>${coordsToString(inner)}</coordinates>
+          </LinearRing>
+        </innerBoundaryIs>
+      `;
+    });
+
+    kml += `</Polygon>`;
+    return kml;
+  };
+
+  if(geometry.type === "Polygon"){
+    return polygonToKml(geometry.coordinates);
+  }
+
+  if(geometry.type === "MultiPolygon"){
+    return geometry.coordinates.map(polygonToKml).join("");
+  }
+
+  return "";
+}
+
+function featureToKml(feature){
+  const props = feature.properties || {};
+  const nome = obterNomeRural(props);
+  const matriculaOuCar = obterMatriculaOuCAR(props);
+  const municipio = obterMunicipioRural(props);
+  const area = formatarValorAreaRural(obterAreaRural(props));
+  const geometryKml = geometryToKml(feature.geometry);
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>${escapeXml(nome)}</name>
+    <Placemark>
+      <name>${escapeXml(nome)}</name>
+      <description><![CDATA[
+        <b>Matrícula / CAR:</b> ${escapeXml(matriculaOuCar)}<br>
+        <b>Município:</b> ${escapeXml(municipio)}<br>
+        <b>Área:</b> ${escapeXml(area)}
+      ]]></description>
+      ${geometryKml}
+    </Placemark>
+  </Document>
+</kml>`;
+}
+
+function baixarTextoComoArquivo(conteudo, nomeArquivo, tipo){
+  const blob = new Blob([conteudo], { type: tipo });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nomeArquivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function estiloRural(base = "sigef"){
+  if(base === "car"){
+    return {
+      color: "#0f766e",
+      weight: 1.2,
+      fillColor: "#14b8a6",
+      fillOpacity: 0.18
+    };
+  }
+
+  return {
+    color: "#0b3d91",
+    weight: 1.2,
+    fillColor: "#3b82f6",
+    fillOpacity: 0.14
+  };
+}
+
+function destacarRural(layer){
+  layer.setStyle({
+    weight: 2.5,
+    fillOpacity: 0.28
+  });
+  if(!L.Browser.ie && !L.Browser.opera && !L.Browser.edge){
+    layer.bringToFront();
+  }
+}
+
+function resetarRural(layer){
+  if(!layer || !layer.feature) return;
+  const base = layer.feature.properties?._baseTipo || "sigef";
+  layer.setStyle(estiloRural(base));
+}
+
+function montarPopupRural(feature){
+  const props = feature.properties || {};
+  const nome = obterNomeRural(props);
+  const matriculaOuCar = obterMatriculaOuCAR(props);
+  const municipio = obterMunicipioRural(props);
+  const area = formatarValorAreaRural(obterAreaRural(props));
+  const rid = props._rid || "";
 
   return `
-    <div class="popup-short">
-      <div><b>Nome do imóvel:</b> ${nome}</div>
-      <div><b>Matrícula / CAR:</b> ${matriculaOuCar}</div>
-      <div><b>Município:</b> ${municipio}</div>
-      <div><b>Área:</b> ${area}</div>
-      ${download ? `<div style="margin-top:8px"><a href="${download}" target="_blank" style="display:inline-block;padding:8px 12px;background:#0b3d91;color:#fff;text-decoration:none;border-radius:10px;font-weight:700">Baixar KML</a></div>` : ""}
+    <div class="popup-rural">
+      <div class="titulo">${nome}</div>
+      <div class="linha"><b>Matrícula / CAR:</b> ${matriculaOuCar}</div>
+      <div class="linha"><b>Município:</b> ${municipio}</div>
+      <div class="linha"><b>Área:</b> ${area}</div>
+      <button class="popup-btn" onclick="baixarKMLPorId('${rid}')">Baixar KML</button>
     </div>
   `;
 }
 
-function estiloRural(){
-  return {
-    color:"#0b3d91",
-    weight:1.5,
-    fillColor:"#3d7cff",
-    fillOpacity:0.18
-  };
-}
-
-function popularCidadesRurais(){
-  const uf = estadoRuralSelect.value;
+function atualizarSelectCidadesRurais(){
+  const uf = ruralEstadoSelect.value;
   const cidades = Object.keys(RURAL_INDEX[uf] || {});
-  cidadeRuralSelect.innerHTML = "";
+  ruralCidadeSelect.innerHTML = "";
+
   cidades.forEach(cidade => {
     const option = document.createElement("option");
     option.value = cidade;
     option.textContent = cidade;
-    cidadeRuralSelect.appendChild(option);
+    ruralCidadeSelect.appendChild(option);
   });
-}
 
-async function carregarGeoJsonRural(nomeArquivo){
-  if(!nomeArquivo) return null;
-  if(ruralDataCache[nomeArquivo]) return ruralDataCache[nomeArquivo];
-
-  const resposta = await fetch(nomeArquivo);
-  if(!resposta.ok) throw new Error("Não foi possível carregar " + nomeArquivo);
-  const dados = await resposta.json();
-  ruralDataCache[nomeArquivo] = dados;
-  return dados;
-}
-
-function removerRural(){
-  if(ruralLayer){
-    map.removeLayer(ruralLayer);
-    ruralLayer = null;
+  if(!cidades.length){
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Sem cidades";
+    ruralCidadeSelect.appendChild(option);
   }
-  ultimoResultadoRural = null;
+}
+
+ruralEstadoSelect.addEventListener("change", () => {
+  atualizarSelectCidadesRurais();
+  carregarRural();
+});
+
+ruralCidadeSelect.addEventListener("change", () => {
+  carregarRural();
+});
+
+async function carregarGeoJsonRural(arquivo, baseTipo){
+  if(!arquivo) return [];
+
+  const resposta = await fetch(arquivo);
+  if(!resposta.ok){
+    throw new Error("Não foi possível carregar " + arquivo);
+  }
+
+  const geojson = await resposta.json();
+  const features = Array.isArray(geojson.features) ? geojson.features : [];
+
+  return features.map((feature, index) => {
+    if(!feature.properties) feature.properties = {};
+    feature.properties._baseTipo = baseTipo;
+    feature.properties._rid = `${baseTipo}_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 8)}`;
+    return feature;
+  });
 }
 
 async function carregarRural(){
-  const uf = estadoRuralSelect.value;
-  const cidade = cidadeRuralSelect.value;
-  const config = (RURAL_INDEX[uf] || {})[cidade];
-  removerRural();
-  if(!config) return;
+  const uf = ruralEstadoSelect.value;
+  const cidade = ruralCidadeSelect.value;
+  const config = RURAL_INDEX[uf]?.[cidade];
 
-  const grupos = [];
+  ruralResults.innerHTML = "";
+  ruralStatus.textContent = "Carregando base rural...";
 
-  if(config.sigef){
-    const sigef = await carregarGeoJsonRural(config.sigef);
-    grupos.push(sigef);
+  ruralSigefLayer.clearLayers();
+  ruralCarLayer.clearLayers();
+
+  if(map.hasLayer(ruralSigefLayer)) map.removeLayer(ruralSigefLayer);
+  if(map.hasLayer(ruralCarLayer)) map.removeLayer(ruralCarLayer);
+
+  ruralFeatures = [];
+  selectedRuralFeature = null;
+  selectedRuralLayer = null;
+
+  if(!config){
+    ruralStatus.textContent = "Nenhuma base rural cadastrada para esta cidade.";
+    return;
   }
 
-  if(config.car){
-    try{
-      const car = await carregarGeoJsonRural(config.car);
-      grupos.push(car);
-    }catch(e){
-      console.log("CAR ainda não disponível:", e.message);
+  try{
+    const sigefFeatures = await carregarGeoJsonRural(config.sigef, "sigef");
+    const carFeatures = config.car ? await carregarGeoJsonRural(config.car, "car") : [];
+
+    ruralFeatures = [...sigefFeatures, ...carFeatures];
+
+    ruralSigefLayer = L.geoJSON(sigefFeatures, {
+      style: () => estiloRural("sigef"),
+      onEachFeature: (feature, layer) => {
+        layer.bindPopup(montarPopupRural(feature));
+
+        layer.on("click", () => {
+          selectedRuralFeature = feature;
+          selectedRuralLayer = layer;
+          destacarRural(layer);
+        });
+
+        layer.on("mouseover", () => destacarRural(layer));
+        layer.on("mouseout", () => {
+          if(selectedRuralLayer !== layer){
+            resetarRural(layer);
+          }
+        });
+      }
+    }).addTo(map);
+
+    ruralCarLayer = L.geoJSON(carFeatures, {
+      style: () => estiloRural("car"),
+      onEachFeature: (feature, layer) => {
+        layer.bindPopup(montarPopupRural(feature));
+
+        layer.on("click", () => {
+          selectedRuralFeature = feature;
+          selectedRuralLayer = layer;
+          destacarRural(layer);
+        });
+
+        layer.on("mouseover", () => destacarRural(layer));
+        layer.on("mouseout", () => {
+          if(selectedRuralLayer !== layer){
+            resetarRural(layer);
+          }
+        });
+      }
+    }).addTo(map);
+
+    const grupo = L.featureGroup([ruralSigefLayer, ruralCarLayer]);
+    if(!ruralLoadedOnce){
+      const bounds = grupo.getBounds();
+      if(bounds.isValid()){
+        map.fitBounds(bounds, { padding:[20,20] });
+      }
+      ruralLoadedOnce = true;
     }
+
+    ruralStatus.textContent = `${ruralFeatures.length} imóvel(is) rural(is) carregado(s) em ${cidade}/${uf}.`;
+    mostrarTudoRural();
+  }catch(error){
+    console.log("Erro ao carregar rural:", error);
+    ruralStatus.textContent = "Erro ao carregar a base rural.";
+  }
+}
+
+window.mostrarTudoRural = function(){
+  if(!ruralFeatures.length){
+    ruralResults.innerHTML = `<div class="result-item">Nenhum imóvel rural carregado.</div>`;
+    return;
   }
 
-  const features = grupos.flatMap(g => g.features || []);
+  ruralResults.innerHTML = ruralFeatures.slice(0, 50).map(feature => {
+    const props = feature.properties || {};
+    const rid = props._rid || "";
+    return `
+      <div class="result-item" onclick="focarRuralPorId('${rid}')">
+        <div class="result-title">${obterNomeRural(props)}</div>
+        <div class="result-sub">
+          Matrícula / CAR: ${obterMatriculaOuCAR(props)}<br>
+          Município: ${obterMunicipioRural(props)}
+        </div>
+      </div>
+    `;
+  }).join("");
+};
 
-  ruralLayer = L.geoJSON({type:"FeatureCollection", features}, {
-    style: estiloRural,
-    onEachFeature: function(feature, layer){
-      const props = feature.properties || {};
-      layer.bindPopup(montarPopupRural(props));
-      layer.on("click", function(){
-        ultimoResultadoRural = { feature, layer };
-      });
+function encontrarLayerPorRid(rid){
+  let layerEncontrada = null;
+
+  ruralSigefLayer.eachLayer(layer => {
+    if(layer.feature?.properties?._rid === rid){
+      layerEncontrada = layer;
     }
   });
 
-  const modo = modoVisualizacao.value;
-  if(modo === "rural" || modo === "completo"){
-    ruralLayer.addTo(map);
-  }
-}
-
-function aplicarModoVisualizacao(){
-  const modo = modoVisualizacao.value;
-
-  if(modo === "urbano"){
-    if(!map.hasLayer(markerLayer)) map.addLayer(markerLayer);
-    removerRural();
-  }
-
-  if(modo === "rural"){
-    if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
-    carregarRural().then(() => {
-      if(ruralLayer){
-        ruralLayer.addTo(map);
-        const bounds = ruralLayer.getBounds();
-        if(bounds.isValid()) map.fitBounds(bounds, {padding:[20,20]});
-      }
-    }).catch(err => console.log(err));
-  }
-
-  if(modo === "completo"){
-    if(!map.hasLayer(markerLayer)) map.addLayer(markerLayer);
-    carregarRural().then(() => {
-      if(ruralLayer){
-        ruralLayer.addTo(map);
-      }
-    }).catch(err => console.log(err));
-  }
-}
-
-window.buscarRural = async function(){
-  try{
-    await carregarRural();
-    if(!ruralLayer || !map.hasLayer(ruralLayer)){
-      ruralLayer && ruralLayer.addTo(map);
-    }
-
-    const car = normalizarTexto(document.getElementById("car").value);
-    const ccir = normalizarTexto(document.getElementById("ccir").value);
-    const matricula = normalizarTexto(document.getElementById("matriculaRural").value);
-    const termo = car || ccir || matricula;
-
-    if(!termo){
-      if(ruralLayer){
-        const bounds = ruralLayer.getBounds();
-        if(bounds.isValid()) map.fitBounds(bounds, {padding:[20,20]});
-      }
-      return;
-    }
-
-    let encontrado = null;
-    ruralLayer.eachLayer(layer => {
-      if(encontrado) return;
-      const p = layer.feature?.properties || {};
-      const alvo = [
-        p.car, p.cod_imo, p.ccir, p.matricula, p.registro_m, p.nome, p.nome_area, p.municipio, p.municipio_
-      ].map(v => normalizarTexto(String(v || ""))).join(" | ");
-
-      if(alvo.includes(termo)){
-        encontrado = layer;
+  if(!layerEncontrada){
+    ruralCarLayer.eachLayer(layer => {
+      if(layer.feature?.properties?._rid === rid){
+        layerEncontrada = layer;
       }
     });
-
-    if(encontrado){
-      ultimoResultadoRural = { feature: encontrado.feature, layer: encontrado };
-      map.fitBounds(encontrado.getBounds(), {padding:[20,20]});
-      encontrado.openPopup();
-      modoVisualizacao.value = map.hasLayer(markerLayer) ? "completo" : "rural";
-    }else{
-      alert("Nenhum imóvel rural encontrado para esta busca.");
-    }
-  }catch(error){
-    console.log("Erro ao buscar rural:", error);
-    alert("Erro ao carregar a base rural.");
   }
+
+  return layerEncontrada;
 }
 
-window.baixarKmlRural = function(){
-  if(!ultimoResultadoRural){
-    alert("Primeiro localize e clique em um imóvel rural que tenha KML.");
+window.focarRuralPorId = function(rid){
+  const layer = encontrarLayerPorRid(rid);
+  if(!layer) return;
+
+  selectedRuralFeature = layer.feature;
+  selectedRuralLayer = layer;
+
+  const bounds = layer.getBounds ? layer.getBounds() : null;
+  if(bounds && bounds.isValid()){
+    map.fitBounds(bounds, { padding:[20,20] });
+  }
+
+  layer.openPopup();
+  destacarRural(layer);
+};
+
+window.buscarRural = function(){
+  const termoCar = normalizarTexto(document.getElementById("car").value);
+  const termoCcir = normalizarTexto(document.getElementById("ccir").value);
+  const termoMatricula = normalizarTexto(document.getElementById("matriculaRural").value);
+
+  if(!ruralFeatures.length){
+    ruralResults.innerHTML = `<div class="result-item">A base rural ainda não foi carregada.</div>`;
     return;
   }
-  const props = ultimoResultadoRural.feature?.properties || {};
-  const link = limparTexto(props.download_kml || props.kml || "");
-  if(!link){
-    alert("Este imóvel ainda não possui KML disponível.");
+
+  const filtrados = ruralFeatures.filter(feature => {
+    const props = feature.properties || {};
+
+    const car = normalizarTexto(props.car || props.cod_imovel || props.cod_immov || "");
+    const ccir = normalizarTexto(props.ccir || "");
+    const matricula = normalizarTexto(props.matricula || props.registro_m || "");
+    const nome = normalizarTexto(obterNomeRural(props));
+
+    const carOk = !termoCar || car.includes(termoCar) || nome.includes(termoCar);
+    const ccirOk = !termoCcir || ccir.includes(termoCcir);
+    const matriculaOk = !termoMatricula || matricula.includes(termoMatricula);
+
+    return carOk && ccirOk && matriculaOk;
+  });
+
+  if(!filtrados.length){
+    ruralResults.innerHTML = `<div class="result-item">Nenhum imóvel rural encontrado.</div>`;
     return;
   }
-  window.open(link, "_blank");
-}
 
-estadoRuralSelect.addEventListener("change", () => {
-  popularCidadesRurais();
-  if(modoVisualizacao.value !== "urbano"){
-    carregarRural().catch(err => console.log(err));
+  ruralResults.innerHTML = filtrados.slice(0, 50).map(feature => {
+    const props = feature.properties || {};
+    const rid = props._rid || "";
+    return `
+      <div class="result-item" onclick="focarRuralPorId('${rid}')">
+        <div class="result-title">${obterNomeRural(props)}</div>
+        <div class="result-sub">
+          Matrícula / CAR: ${obterMatriculaOuCAR(props)}<br>
+          Município: ${obterMunicipioRural(props)}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  if(filtrados.length === 1){
+    window.focarRuralPorId(filtrados[0].properties._rid);
   }
-});
+};
 
-cidadeRuralSelect.addEventListener("change", () => {
-  if(modoVisualizacao.value !== "urbano"){
-    carregarRural().catch(err => console.log(err));
+window.baixarKMLSelecionado = function(){
+  if(!selectedRuralFeature){
+    alert("Selecione primeiro um imóvel rural no mapa ou na lista.");
+    return;
   }
-});
 
-modoVisualizacao.addEventListener("change", aplicarModoVisualizacao);
+  const nome = obterNomeRural(selectedRuralFeature.properties || {});
+  const kml = featureToKml(selectedRuralFeature);
+  const arquivo = sanitizarNomeArquivo(nome) + ".kml";
+  baixarTextoComoArquivo(kml, arquivo, "application/vnd.google-earth.kml+xml");
+};
 
-popularCidadesRurais();
+window.baixarKMLPorId = function(rid){
+  const layer = encontrarLayerPorRid(rid);
+  if(!layer || !layer.feature){
+    alert("Não foi possível gerar o KML deste imóvel.");
+    return;
+  }
 
+  selectedRuralFeature = layer.feature;
+  selectedRuralLayer = layer;
+  const nome = obterNomeRural(layer.feature.properties || {});
+  const kml = featureToKml(layer.feature);
+  const arquivo = sanitizarNomeArquivo(nome) + ".kml";
+  baixarTextoComoArquivo(kml, arquivo, "application/vnd.google-earth.kml+xml");
+};
 
 window.toggleFullscreen = function(){
   if(!document.fullscreenElement){
@@ -1067,7 +1347,7 @@ window.toggleFullscreen = function(){
   }else{
     document.exitFullscreen();
   }
-}
+};
 
 window.sair = async function(){
   localStorage.clear();
@@ -1075,13 +1355,15 @@ window.sair = async function(){
     await signOut(auth);
   }catch(e){}
   window.location.href = "index.html";
-}
+};
+
+atualizarSelectCidadesRurais();
 
 onAuthStateChanged(auth, async (user) => {
   const ok = await validarAcesso(user);
   if(ok){
-    carregarPontos();   // urbano
-    carregarRural();    // 👈 ADICIONAR ISSO
+    carregarPontos();
+    carregarRural();
   }
 });
 </script>
