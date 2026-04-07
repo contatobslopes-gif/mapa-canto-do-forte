@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matrimap Rural</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;display:flex;background:#f5f7fb;}
+
+    #sidebar{
+      width:320px;
+      min-width:320px;
+      height:100vh;
+      background:#0b3d91;
+      color:#fff;
+      padding:18px;
+      overflow:auto;
+    }
+
+    #sidebar h1{
+      margin:0 0 8px;
+      font-size:26px;
+    }
+
+    #sidebar h2{
+      margin:0 0 16px;
+      font-size:16px;
+      font-weight:normal;
+      opacity:.95;
+    }
+
+    .bloco{
+      background:rgba(255,255,255,.08);
+      border-radius:12px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+
+    .bloco strong{display:block;margin-bottom:8px;font-size:14px;}
+
+    select,input,button{
+      width:100%;
+      border:none;
+      border-radius:8px;
+      padding:10px 12px;
+      font-size:14px;
+      margin-bottom:10px;
+    }
+
+    input,select{background:#fff;color:#111;}
+
+    button{
+      background:#fff;
+      color:#0b3d91;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    button:hover{opacity:.95;}
+
+    #status{
+      font-size:13px;
+      line-height:1.5;
+      opacity:.95;
+    }
+
+    #resultados{
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .itemResultado{
+      background:rgba(255,255,255,.09);
+      border-radius:10px;
+      padding:10px;
+      margin-top:8px;
+      cursor:pointer;
+    }
+
+    .itemResultado:hover{background:rgba(255,255,255,.16);}
+
+    #map{flex:1;height:100vh;}
+
+    .popup-titulo{
+      font-size:15px;
+      font-weight:bold;
+      margin-bottom:8px;
+      color:#0b3d91;
+    }
+
+    .popup-linha{margin:4px 0;font-size:13px;}
+
+    .popup-btn{
+      display:inline-block;
+      margin-top:10px;
+      padding:8px 12px;
+      background:#0b3d91;
+      color:#fff !important;
+      text-decoration:none;
+      border-radius:8px;
+      font-size:13px;
+      font-weight:bold;
+    }
+
+    @media(max-width:900px){
+      body{flex-direction:column;}
+      #sidebar{width:100%;min-width:100%;height:auto;}
+      #map{height:70vh;}
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h1>MATRIMAP RURAL</h1>
+    <h2>Base rural separada — SP / Leme</h2>
+
+    <div class="bloco">
+      <strong>Base ativa</strong>
+      <select id="camadaSelect">
+        <option value="sigef">SIGEF - Leme</option>
+      </select>
+
+      <strong>Estado</strong>
+      <select id="estadoSelect">
+        <option value="SP">São Paulo</option>
+      </select>
+
+      <strong>Município</strong>
+      <select id="municipioSelect">
+        <option value="Leme">Leme</option>
+      </select>
+    </div>
+
+    <div class="bloco">
+      <strong>Buscar por nome do imóvel, matrícula ou código</strong>
+      <input id="busca" type="text" placeholder="Ex: Fazenda, matrícula, código...">
+      <button id="btnBuscar">Buscar</button>
+      <button id="btnLimpar">Limpar busca</button>
+      <div id="status">Carregando base rural...</div>
+    </div>
+
+    <div class="bloco">
+      <strong>Resultados</strong>
+      <div id="resultados">Nenhuma busca feita ainda.</div>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map');
+
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 22,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const dadosConfig = {
+      sigef: {
+        nome: 'SIGEF - Leme',
+        arquivo: 'sigef_leme.geojson'
+      }
+    };
+
+    const statusEl = document.getElementById('status');
+    const resultadosEl = document.getElementById('resultados');
+    const buscaEl = document.getElementById('busca');
+    const btnBuscar = document.getElementById('btnBuscar');
+    const btnLimpar = document.getElementById('btnLimpar');
+    const camadaSelect = document.getElementById('camadaSelect');
+
+    let camadaAtual = null;
+    let dadosAtuais = null;
+    let itensEncontrados = [];
+
+    function formatarArea(valor){
+      if(valor === null || valor === undefined || valor === '') return 'Não informado';
+      const numero = Number(valor);
+      if(Number.isNaN(numero)) return valor;
+      return numero.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ha';
+    }
+
+    function textoSeguro(valor, fallback='Não informado'){
+      if(valor === null || valor === undefined) return fallback;
+      const txt = String(valor).trim();
+      return txt ? txt : fallback;
+    }
+
+    function montarPopup(props){
+      const nome = textoSeguro(props.nome);
+      const matriculaOuCar = textoSeguro(props.matricula || props.car || props.codigo);
+      const municipio = textoSeguro(props.municipio);
+      const area = formatarArea(props.area_ha || props.area);
+      const download = props.download || '';
+
+      return `
+        <div class="popup-titulo">${nome}</div>
+        <div class="popup-linha"><strong>Matrícula / CAR:</strong> ${matriculaOuCar}</div>
+        <div class="popup-linha"><strong>Município:</strong> ${municipio}</div>
+        <div class="popup-linha"><strong>Área:</strong> ${area}</div>
+        ${download ? `<a class="popup-btn" href="${download}" target="_blank" rel="noopener">Baixar arquivo</a>` : ''}
+      `;
+    }
+
+    function estiloPoligono(){
+      return {
+        color: '#0b3d91',
+        weight: 1.5,
+        fillColor: '#3d7cff',
+        fillOpacity: 0.22
+      };
+    }
+
+    function destacar(e){
+      const layer = e.target;
+      layer.setStyle({ weight: 3, fillOpacity: 0.32 });
+      if(!L.Browser.ie && !L.Browser.opera && !L.Browser.edge){
+        layer.bringToFront();
+      }
+    }
+
+    function resetarDestaque(e){
+      if(camadaAtual) camadaAtual.resetStyle(e.target);
+    }
+
+    function aproximarItem(feature, layer){
+      layer.openPopup();
+      map.fitBounds(layer.getBounds(), {padding:[20,20]});
+    }
+
+    function renderizarResultados(lista){
+      if(!lista.length){
+        resultadosEl.innerHTML = 'Nenhum imóvel encontrado para esta busca.';
+        return;
+      }
+
+      resultadosEl.innerHTML = lista.slice(0, 30).map((item, index) => {
+        const p = item.feature.properties || {};
+        return `
+          <div class="itemResultado" onclick="focarResultado(${index})">
+            <strong>${textoSeguro(p.nome)}</strong><br>
+            Matrícula / CAR: ${textoSeguro(p.matricula || p.car || p.codigo)}<br>
+            Município: ${textoSeguro(p.municipio)}
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.focarResultado = function(index){
+      const item = itensEncontrados[index];
+      if(!item) return;
+      aproximarItem(item.feature, item.layer);
+    };
+
+    function prepararBusca(){
+      itensEncontrados = [];
+      camadaAtual.eachLayer(layer => {
+        if(layer.feature){
+          itensEncontrados.push({feature: layer.feature, layer});
+        }
+      });
+      resultadosEl.innerHTML = 'Base carregada. Faça uma busca para localizar um imóvel.';
+    }
+
+    function buscar(){
+      const termo = buscaEl.value.trim().toLowerCase();
+      if(!camadaAtual){
+        resultadosEl.innerHTML = 'A base ainda não terminou de carregar.';
+        return;
+      }
+
+      if(!termo){
+        prepararBusca();
+        return;
+      }
+
+      const filtrados = [];
+      camadaAtual.eachLayer(layer => {
+        const p = layer.feature?.properties || {};
+        const alvo = [p.nome, p.matricula, p.car, p.codigo, p.parcela_co, p.municipio]
+          .map(v => (v || '').toString().toLowerCase())
+          .join(' | ');
+        if(alvo.includes(termo)){
+          filtrados.push({feature: layer.feature, layer});
+        }
+      });
+
+      itensEncontrados = filtrados;
+      renderizarResultados(filtrados);
+
+      if(filtrados.length === 1){
+        aproximarItem(filtrados[0].feature, filtrados[0].layer);
+      } else if(filtrados.length > 1){
+        const group = L.featureGroup(filtrados.map(i => i.layer));
+        map.fitBounds(group.getBounds(), {padding:[20,20]});
+      }
+    }
+
+    async function carregarCamada(){
+      try{
+        statusEl.textContent = 'Carregando base rural...';
+        resultadosEl.innerHTML = 'Aguarde...';
+
+        if(camadaAtual){
+          map.removeLayer(camadaAtual);
+          camadaAtual = null;
+        }
+
+        const chave = camadaSelect.value;
+        const config = dadosConfig[chave];
+        const resposta = await fetch(config.arquivo);
+        if(!resposta.ok) throw new Error('Não foi possível carregar o arquivo ' + config.arquivo);
+
+        dadosAtuais = await resposta.json();
+
+        camadaAtual = L.geoJSON(dadosAtuais, {
+          style: estiloPoligono,
+          onEachFeature: function(feature, layer){
+            layer.bindPopup(montarPopup(feature.properties || {}));
+            layer.on({
+              mouseover: destacar,
+              mouseout: resetarDestaque,
+              click: function(){ aproximarItem(feature, layer); }
+            });
+          }
+        }).addTo(map);
+
+        const bounds = camadaAtual.getBounds();
+        if(bounds.isValid()){
+          map.fitBounds(bounds, {padding:[20,20]});
+        } else {
+          map.setView([-22.19, -47.39], 11);
+        }
+
+        prepararBusca();
+        statusEl.textContent = `Base carregada: ${dadosAtuais.features.length} imóveis rurais em Leme/SP.`;
+      }catch(erro){
+        console.error(erro);
+        statusEl.textContent = 'Erro ao carregar a base rural.';
+        resultadosEl.innerHTML = 'Confira se o arquivo GeoJSON está na mesma pasta do rural.html.';
+        map.setView([-22.19, -47.39], 11);
+      }
+    }
+
+    btnBuscar.addEventListener('click', buscar);
+    btnLimpar.addEventListener('click', function(){
+      buscaEl.value = '';
+      prepararBusca();
+      if(camadaAtual){
+        const bounds = camadaAtual.getBounds();
+        if(bounds.isValid()) map.fitBounds(bounds, {padding:[20,20]});
+      }
+    });
+    buscaEl.addEventListener('keydown', function(e){ if(e.key === 'Enter') buscar(); });
+    camadaSelect.addEventListener('change', carregarCamada);
+
+    carregarCamada();
+  </script>
+</body>
+</html>
