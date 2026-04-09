@@ -3,27 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Matrimap - Login</title>
+<title>Matrimap - Pagamento</title>
 <style>
 :root{
   --azul:#0b3d91;
   --azul-escuro:#082c68;
-  --azul-claro:#eaf2ff;
-  --branco:#ffffff;
-  --texto:#1f2937;
-  --muted:#667085;
   --borda:#d9e2f1;
-  --erro:#b91c1c;
-  --sombra:0 30px 60px rgba(0,0,0,.18);
+  --texto:#1f2937;
+  --muted:#64748b;
 }
 *{box-sizing:border-box}
-html,body{height:100%}
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   min-height:100vh;
-  overflow:hidden;
-  background:#0b3d91;
+  background:
+    linear-gradient(rgba(8,44,104,.80), rgba(11,61,145,.72)),
+    url('bemvindo.png') center center / cover no-repeat;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
 }
 
 .admin-bar{
@@ -67,228 +67,129 @@ body{
   color:#fff;
 }
 
-.page{
-  min-height:100vh;
-  display:grid;
-  grid-template-columns:520px 1fr;
-  align-items:stretch;
-}
-
-.left{
-  background:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:34px;
-  position:relative;
-  z-index:2;
-}
-
-.form-card{
+.wrap{
   width:100%;
-  max-width:420px;
+  max-width:1180px;
+  background:rgba(255,255,255,.98);
+  border-radius:28px;
+  box-shadow:0 26px 50px rgba(0,0,0,.16);
+  overflow:hidden;
 }
-
-.logo-wrap{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:24px;
-}
-.logo-badge{
-  width:48px;
-  height:48px;
-  border-radius:16px;
-  background:linear-gradient(135deg, var(--azul), #2a6ae0);
+.header{
+  background:linear-gradient(135deg,#0b3d91,#0a3276);
   color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-  font-weight:700;
+  padding:36px 30px;
 }
-.logo-text{
-  display:flex;
-  flex-direction:column;
-}
-.logo-text strong{
-  color:var(--azul);
-  font-size:28px;
-  line-height:1;
-}
-.logo-text span{
-  color:#64748b;
-  font-size:13px;
-  margin-top:4px;
-}
-
-.title{
+.header h1{
   margin:0 0 8px;
   font-size:34px;
+}
+.header p{
+  margin:0;
+  color:#e8f0ff;
+  line-height:1.7;
+}
+.content{
+  padding:34px 30px 28px;
+}
+.top-actions{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.user-info{
+  color:#334155;
+  font-size:15px;
+}
+.link-btn{
+  background:none;
+  border:none;
+  color:#0b3d91;
+  font-weight:700;
+  cursor:pointer;
+  padding:0;
+  font-size:15px;
+}
+.cards{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+}
+.card{
+  border:1px solid #dbe6f8;
+  border-radius:24px;
+  padding:24px 22px;
+  position:relative;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(11,61,145,.05);
+}
+.badge{
+  position:absolute;
+  top:16px;
+  right:16px;
+  background:#eff6ff;
+  color:#0b3d91;
+  border:1px solid #bfdbfe;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:700;
+}
+.card h2{
+  margin:0 0 10px;
+  font-size:24px;
   color:#0f172a;
 }
-.subtitle{
-  margin:0 0 24px;
-  font-size:16px;
-  color:var(--muted);
-  line-height:1.6;
-}
-
-.error{
-  display:none;
-  margin:0 0 14px;
-  padding:12px 14px;
-  border-radius:12px;
-  background:#fef2f2;
-  color:var(--erro);
-  border:1px solid #fecaca;
-  font-size:14px;
-}
-
-.input-group{margin-bottom:14px}
-label{
-  display:block;
-  color:#344054;
-  font-size:14px;
+.price{
+  font-size:40px;
   font-weight:700;
-  margin-bottom:8px;
+  color:#0b3d91;
+  margin-bottom:10px;
 }
-.input-wrap{
-  position:relative;
+.small{
+  color:#64748b;
+  margin-bottom:16px;
 }
-.input-icon{
-  position:absolute;
-  top:50%;
-  left:14px;
-  transform:translateY(-50%);
-  color:#94a3b8;
-  font-size:17px;
-  pointer-events:none;
-}
-input{
-  width:100%;
-  padding:16px 16px 16px 44px;
-  border:1px solid var(--borda);
-  border-radius:16px;
-  font-size:16px;
-  outline:none;
-  background:#fff;
-}
-input:focus{
-  border-color:var(--azul);
-  box-shadow:0 0 0 4px rgba(11,61,145,.10);
+ul{
+  padding-left:18px;
+  color:#334155;
+  line-height:1.9;
+  margin-bottom:24px;
 }
 .btn{
   width:100%;
   border:none;
-  border-radius:16px;
-  padding:16px;
-  font-size:17px;
+  border-radius:14px;
+  padding:14px 16px;
+  font-size:15px;
   font-weight:700;
   cursor:pointer;
-  background:var(--azul);
+  background:#0b3d91;
   color:#fff;
-  transition:.2s;
-  margin-top:8px;
 }
-.btn:hover{background:var(--azul-escuro)}
-.link-row{
-  display:flex;
-  justify-content:space-between;
-  gap:16px;
-  margin-top:18px;
-  font-size:15px;
-  flex-wrap:wrap;
+.btn:hover{background:#082c68}
+.note{
+  margin-top:20px;
+  padding:16px 18px;
+  border-radius:16px;
+  background:#f8fafc;
+  color:#475569;
+  border:1px solid #e2e8f0;
+  line-height:1.7;
 }
-.link-row a{
-  color:var(--azul);
-  text-decoration:none;
-  font-weight:700;
-}
-.link-row a:hover{text-decoration:underline}
 .footer{
-  margin-top:24px;
-  padding-top:18px;
-  border-top:1px solid #e7eefb;
+  margin-top:22px;
   text-align:center;
-  font-size:14px;
-  color:#667085;
-  line-height:1.9;
+  font-size:13px;
+  color:#64748b;
+  line-height:1.8;
 }
 
-.right{
-  position:relative;
-  min-height:100vh;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:
-    linear-gradient(rgba(8,44,104,.34), rgba(11,61,145,.18)),
-    url('bemvindo.png') center center / contain no-repeat,
-    linear-gradient(135deg,#0b3d91,#082c68);
-}
-
-.hero-overlay{
-  width:100%;
-  height:100%;
-  padding:48px;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  background:linear-gradient(90deg, rgba(11,61,145,.05) 0%, rgba(11,61,145,.12) 100%);
-}
-
-.hero-content{
-  max-width:520px;
-  color:#fff;
-}
-.hero-badge{
-  display:inline-block;
-  padding:10px 18px;
-  border:1px solid rgba(255,255,255,.35);
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  font-size:14px;
-  margin-bottom:22px;
-}
-.hero-content h2{
-  margin:0 0 16px;
-  font-size:52px;
-  line-height:1.04;
-}
-.hero-content p{
-  margin:0;
-  font-size:19px;
-  line-height:1.75;
-  color:#eef4ff;
-}
-
-@media (max-width: 1100px){
-  body{overflow:auto}
-  .page{
-    grid-template-columns:1fr;
-  }
-  .right{
-    min-height:420px;
-    order:-1;
-  }
-  .hero-overlay{
-    justify-content:center;
-    text-align:center;
-    padding:30px 24px;
-  }
-  .hero-content h2{
-    font-size:36px;
-  }
-}
-@media (max-width: 640px){
-  .left{
-    padding:24px;
-  }
-  .title{font-size:28px}
-  .hero-content h2{font-size:30px}
-  .hero-content p{font-size:16px}
+@media (max-width: 900px){
+  .cards{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -309,95 +210,59 @@ input:focus{
   </div>
 </div>
 
-<div class="page">
-  <section class="left">
-    <div class="form-card">
-      <div class="logo-wrap">
-        <div class="logo-badge">⌖</div>
-        <div class="logo-text">
-          <strong>MATRIMAP</strong>
-          <span>Pesquisa imobiliária em mapa</span>
-        </div>
+<div class="wrap">
+  <div class="header">
+    <h1>Escolha seu plano</h1>
+    <p>Tenha acesso à plataforma Matrimap e continue sua navegação com acesso ativo.</p>
+  </div>
+
+  <div class="content">
+    <div class="top-actions">
+      <div id="userInfo" class="user-info">Conta criada. Escolha um plano para continuar.</div>
+      <button class="link-btn" onclick="window.location.href='index.html'">Voltar ao login</button>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h2>Plano Mensal</h2>
+        <div class="price">R$ 34,90</div>
+        <div class="small">Cobrança mensal</div>
+        <ul>
+          <li>Acesso ao mapa enquanto o plano estiver ativo</li>
+          <li>Consulta das informações disponíveis</li>
+          <li>Renovação ao final do período</li>
+        </ul>
+        <button class="btn" onclick="assinar('mensal')">Assinar agora</button>
       </div>
 
-      <h1 class="title">Entrar</h1>
-      <p class="subtitle">Acesse sua conta para continuar na plataforma.</p>
-
-      <div id="errorBox" class="error"></div>
-
-      <div class="input-group">
-        <label for="email">Email</label>
-        <div class="input-wrap">
-          <span class="input-icon">✉</span>
-          <input id="email" type="email" placeholder="Digite seu email">
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label for="senha">Senha</label>
-        <div class="input-wrap">
-          <span class="input-icon">🔒</span>
-          <input id="senha" type="password" placeholder="Digite sua senha">
-        </div>
-      </div>
-
-      <button class="btn" onclick="login()">Entrar</button>
-
-      <div class="link-row">
-        <a href="cadastro.html">Criar conta</a>
-        <a href="#" onclick="resetSenha(event)">Esqueci minha senha</a>
-      </div>
-
-      <div class="footer">
-        <div>Email: contatomatrimap@gmail.com</div>
-        <div>WhatsApp: 19 99949-3684</div>
+      <div class="card">
+        <div class="badge">Mais vantajoso</div>
+        <h2>Plano Anual</h2>
+        <div class="price">R$ 349,00</div>
+        <div class="small">Cobrança anual</div>
+        <ul>
+          <li>Acesso por 12 meses</li>
+          <li>Melhor custo para uso recorrente</li>
+          <li>Mesmo fluxo de acesso e renovação</li>
+        </ul>
+        <button class="btn" onclick="assinar('anual')">Assinar agora</button>
       </div>
     </div>
-  </section>
 
-  <section class="right">
-    <div class="hero-overlay">
-      <div class="hero-content">
-        <div class="hero-badge">Solução ágil em segundos</div>
-        <h2>Buscando o número da matrícula imobiliária?</h2>
-        <p>Consulte imóveis, visualize localizações no mapa e navegue em uma plataforma mais clara, organizada e profissional.</p>
-      </div>
+    <div class="note">
+      Após escolher o plano, você será redirecionado ao Mercado Pago para concluir o pagamento.
     </div>
-  </section>
+
+    <div class="footer">
+      <div>Email: contatomatrimap@gmail.com</div>
+      <div>WhatsApp: 19 99949-3684</div>
+    </div>
+  </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
-  authDomain: "matrimap-899b3.firebaseapp.com",
-  databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
-  projectId: "matrimap-899b3",
-  storageBucket: "matrimap-899b3.firebasestorage.app",
-  messagingSenderId: "1094066148423",
-  appId: "1:1094066148423:web:260b14f4e2259681554d62"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-const errorBox = document.getElementById("errorBox");
-
-function showError(msg){
-  errorBox.textContent = msg;
-  errorBox.style.display = "block";
-}
-function hideError(){
-  errorBox.style.display = "none";
-  errorBox.textContent = "";
-}
-function isExpired(vencimento){
-  if(!vencimento) return true;
-  return new Date(vencimento).getTime() < Date.now();
-}
+<script>
+const LINK_MERCADO_PAGO_MENSAL = "https://mpago.la/32CJkcN";
+const LINK_MERCADO_PAGO_ANUAL = "https://mpago.la/11oS7PX";
 
 function mostrarAdminBar(){
   if(localStorage.getItem("tipoUsuario") === "admin"){
@@ -405,6 +270,24 @@ function mostrarAdminBar(){
   }
 }
 mostrarAdminBar();
+
+function atualizarUsuario(){
+  const nome = localStorage.getItem("usuarioNome") || "";
+  const status = localStorage.getItem("statusUsuario") || "";
+
+  let texto = "Conta criada. Escolha um plano para continuar.";
+
+  if(localStorage.getItem("tipoUsuario") === "admin"){
+    texto = "Administrador em modo de teste.";
+  } else if(nome && status === "ativo"){
+    texto = nome + ", sua conta está ativa.";
+  } else if(nome){
+    texto = nome + ", escolha um plano para liberar o acesso.";
+  }
+
+  document.getElementById("userInfo").textContent = texto;
+}
+atualizarUsuario();
 
 window.simularCadastro = function(){
   localStorage.setItem("tipoUsuario", "admin");
@@ -425,7 +308,7 @@ window.simularPagamento = function(){
   localStorage.setItem("statusUsuario", "pendente_pagamento");
   localStorage.setItem("usuarioNome", "Administrador");
   mostrarAdminBar();
-  window.location.href = "pagamento.html";
+  atualizarUsuario();
 }
 
 window.simularMapa = function(){
@@ -451,85 +334,16 @@ window.desligarModoTeste = function(){
   window.location.href = "index.html";
 }
 
-async function decidirAcesso(user){
-  const snap = await get(ref(db, "usuarios/" + user.uid));
-  if(!snap.exists()){
-    window.location.href = "pagamento.html";
+function assinar(plano){
+  const link = plano === "mensal" ? LINK_MERCADO_PAGO_MENSAL : LINK_MERCADO_PAGO_ANUAL;
+
+  if(link){
+    window.location.href = link;
     return;
   }
 
-  const dados = snap.val();
-  localStorage.setItem("tipoUsuario", "usuario");
-  localStorage.setItem("logado", "sim");
-  localStorage.setItem("usuarioNome", dados.nome || "");
-  localStorage.setItem("uid", user.uid);
-
-  const status = dados.status || "pendente_pagamento";
-  const vencimento = dados.vencimento || "";
-  localStorage.setItem("statusUsuario", status);
-  localStorage.setItem("vencimento", vencimento);
-
-  if(status === "ativo" && !isExpired(vencimento)){
-    window.location.href = "mapa.html";
-  } else {
-    window.location.href = "pagamento.html";
-  }
+  alert("Link de pagamento não configurado.");
 }
-
-window.login = async function(){
-  hideError();
-
-  const email = document.getElementById("email").value.trim();
-  const senha = document.getElementById("senha").value;
-
-  if(!email || !senha){
-    showError("Preencha email e senha para entrar.");
-    return;
-  }
-
-  if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
-    localStorage.setItem("tipoUsuario","admin");
-    localStorage.setItem("logado","sim");
-    localStorage.setItem("usuarioNome","Administrador");
-    localStorage.setItem("modoTeste","sim");
-    mostrarAdminBar();
-    window.location.href = "mapa.html";
-    return;
-  }
-
-  try{
-    await setPersistence(auth, browserLocalPersistence);
-    const cred = await signInWithEmailAndPassword(auth, email, senha);
-    await decidirAcesso(cred.user);
-  }catch(error){
-    showError("Não foi possível entrar. Verifique email e senha.");
-  }
-}
-
-window.resetSenha = async function(event){
-  if(event) event.preventDefault();
-  hideError();
-
-  const email = document.getElementById("email").value.trim();
-  if(!email){
-    showError("Digite seu email para receber o link de redefinição.");
-    return;
-  }
-
-  try{
-    await sendPasswordResetEmail(auth, email);
-    alert("Email de redefinição enviado com sucesso.");
-  }catch(error){
-    showError("Não foi possível enviar o email de redefinição.");
-  }
-}
-
-document.getElementById("email").addEventListener("keydown", e => {
-  if(e.key === "Enter") login();
-});
-document.getElementById("senha").addEventListener("keydown", e => {
-  if(e.key === "Enter") login();
-});
 </script>
 </body>
 </html>
