@@ -462,7 +462,21 @@ window.login = async function(){
     const cred = await signInWithEmailAndPassword(auth, email, senha);
     await decidirAcesso(cred.user);
   }catch(error){
-    showError("Não foi possível entrar. Verifique email e senha.");
+    console.error("Erro no login:", error.code, error.message);
+
+    if(error.code === "auth/invalid-credential" || error.code === "auth/wrong-password"){
+      showError("Email ou senha incorretos. Confira se digitou a senha redefinida corretamente.");
+    }else if(error.code === "auth/user-not-found"){
+      showError("Este email não está cadastrado.");
+    }else if(error.code === "auth/invalid-email"){
+      showError("Email inválido. Confira o endereço digitado.");
+    }else if(error.code === "auth/too-many-requests"){
+      showError("Muitas tentativas de login. Aguarde alguns minutos e tente novamente.");
+    }else if(error.code === "auth/network-request-failed"){
+      showError("Falha de conexão. Verifique sua internet e tente novamente.");
+    }else{
+      showError("Erro no login: " + error.code);
+    }
   }
 }
 
