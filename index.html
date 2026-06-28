@@ -460,22 +460,29 @@ window.login = async function(){
   try{
     await setPersistence(auth, browserLocalPersistence);
     const cred = await signInWithEmailAndPassword(auth, email, senha);
-    await decidirAcesso(cred.user);
-  }catch(error){
-    console.error("Erro no login:", error.code, error.message);
 
-    if(error.code === "auth/invalid-credential" || error.code === "auth/wrong-password"){
-      showError("Email ou senha incorretos. Confira se digitou a senha redefinida corretamente.");
-    }else if(error.code === "auth/user-not-found"){
-      showError("Este email não está cadastrado.");
-    }else if(error.code === "auth/invalid-email"){
-      showError("Email inválido. Confira o endereço digitado.");
-    }else if(error.code === "auth/too-many-requests"){
+    try{
+      await decidirAcesso(cred.user);
+    }catch(dbError){
+      console.error("Erro ao verificar acesso no banco:", dbError);
+      showError("Login feito, mas houve erro ao verificar seu acesso no banco. Avise o suporte.");
+    }
+
+  }catch(error){
+    console.error("Erro no login:", error);
+
+    const codigo = error && error.code ? error.code : "erro-desconhecido";
+
+    if(codigo === "auth/invalid-credential" || codigo === "auth/wrong-password"){
+      showError("Email ou senha incorretos. Confira a nova senha e tente novamente.");
+    }else if(codigo === "auth/user-not-found"){
+      showError("Este email não está cadastrado no Matrimap.");
+    }else if(codigo === "auth/invalid-email"){
+      showError("Email inválido. Confira se digitou corretamente.");
+    }else if(codigo === "auth/too-many-requests"){
       showError("Muitas tentativas de login. Aguarde alguns minutos e tente novamente.");
-    }else if(error.code === "auth/network-request-failed"){
-      showError("Falha de conexão. Verifique sua internet e tente novamente.");
     }else{
-      showError("Erro no login: " + error.code);
+      showError("Erro no login: " + codigo);
     }
   }
 }
