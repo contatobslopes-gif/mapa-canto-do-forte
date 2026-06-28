@@ -1,0 +1,8 @@
+{
+  "name": "matrimap",
+  "version": "1.0.0",
+  "dependencies": {
+    "mercadopago": "^2.3.0",
+    "firebase-admin": "^13.0.0"
+  }
+}
