@@ -1,63 +1,67 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt-BR">
 <head>
 <meta charset="utf-8">
 <title>Matrimap - Pagamento</title>
 
 <style>
 body{
-font-family:Arial;
-background:#0b3d91;
-color:white;
-text-align:center;
-padding-top:100px;
+  font-family:Arial;
+  background:#0b3d91;
+  color:white;
+  text-align:center;
+  padding-top:100px;
 }
 
 .container{
-background:white;
-color:#0b3d91;
-width:350px;
-margin:auto;
-padding:30px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
+  background:white;
+  color:#0b3d91;
+  width:350px;
+  margin:auto;
+  padding:30px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
 
 h1{
-margin-bottom:20px;
+  margin-bottom:20px;
 }
 
 .plano{
-border:2px solid #0b3d91;
-border-radius:10px;
-padding:15px;
-margin:15px 0;
+  border:2px solid #0b3d91;
+  border-radius:10px;
+  padding:15px;
+  margin:15px 0;
 }
 
 button{
-padding:12px 20px;
-border:none;
-border-radius:6px;
-background:#0b3d91;
-color:white;
-font-weight:bold;
-cursor:pointer;
-width:100%;
-margin-top:10px;
+  padding:12px 20px;
+  border:none;
+  border-radius:6px;
+  background:#0b3d91;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  width:100%;
+  margin-top:10px;
 }
 
 button:hover{
-background:#062a63;
+  background:#062a63;
 }
 
 .voltar{
-margin-top:20px;
-display:block;
-color:white;
+  margin-top:20px;
+  display:block;
+  color:white;
+}
+
+.erro{
+  color:#b91c1c;
+  font-size:14px;
+  margin-top:12px;
 }
 </style>
-
 </head>
 
 <body>
@@ -69,33 +73,66 @@ color:white;
 <h2>Escolha seu plano</h2>
 
 <div class="plano">
-<h3>Plano Mensal</h3>
-<p>R$ 34,90 / mês</p>
-<button onclick="pagarMensal()">Assinar</button>
+  <h3>Plano Mensal</h3>
+  <p>R$ 34,90 / mês</p>
+  <button onclick="assinar('mensal')">Assinar</button>
 </div>
 
 <div class="plano">
-<h3>Plano Anual</h3>
-<p>R$ 349,00 / ano</p>
-<button onclick="pagarAnual()">Assinar</button>
+  <h3>Plano Anual</h3>
+  <p>R$ 349,00 / ano</p>
+  <button onclick="assinar('anual')">Assinar</button>
 </div>
+
+<div id="erro" class="erro"></div>
 
 </div>
 
 <a class="voltar" href="index.html">Voltar</a>
 
 <script>
+async function assinar(plano){
+  const erro = document.getElementById("erro");
+  erro.textContent = "";
 
-function pagarMensal(){
-  window.location.href = "https://mpago.la/32CJkcN";
+  const uid = localStorage.getItem("uid");
+
+  if(!uid){
+    erro.textContent = "Você precisa estar logado para assinar.";
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1500);
+    return;
+  }
+
+  try{
+    const resposta = await fetch("/api/criar-preferencia", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        uid: uid,
+        plano: plano
+      })
+    });
+
+    const dados = await resposta.json();
+
+    if(!resposta.ok || !dados.init_point){
+      console.error("Erro Mercado Pago:", dados);
+      erro.textContent = "Não foi possível iniciar o pagamento.";
+      return;
+    }
+
+    window.location.href = dados.init_point;
+
+  }catch(error){
+    console.error("Erro ao criar pagamento:", error);
+    erro.textContent = "Erro ao conectar com o pagamento.";
+  }
 }
-
-function pagarAnual(){
-  window.location.href = "https://mpago.la/11oS7PX";
-}
-
 </script>
 
 </body>
-
 </html>
