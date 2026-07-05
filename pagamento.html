@@ -12,7 +12,6 @@ body{
   text-align:center;
   padding-top:100px;
 }
-
 .container{
   background:white;
   color:#0b3d91;
@@ -20,20 +19,13 @@ body{
   margin:auto;
   padding:30px;
   border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
-
-h1{
-  margin-bottom:20px;
-}
-
 .plano{
   border:2px solid #0b3d91;
   border-radius:10px;
   padding:15px;
   margin:15px 0;
 }
-
 button{
   padding:12px 20px;
   border:none;
@@ -45,17 +37,14 @@ button{
   width:100%;
   margin-top:10px;
 }
-
 button:hover{
   background:#062a63;
 }
-
 .voltar{
   margin-top:20px;
   display:block;
   color:white;
 }
-
 .erro{
   color:#b91c1c;
   font-size:14px;
@@ -69,23 +58,21 @@ button:hover{
 <h1>MATRIMAP</h1>
 
 <div class="container">
+  <h2>Escolha seu plano</h2>
 
-<h2>Escolha seu plano</h2>
+  <div class="plano">
+    <h3>Plano Mensal</h3>
+    <p>R$ 34,90 / mês</p>
+    <button onclick="assinar('mensal')">Assinar</button>
+  </div>
 
-<div class="plano">
-  <h3>Plano Mensal</h3>
-  <p>R$ 34,90 / mês</p>
-  <button onclick="assinar('mensal')">Assinar</button>
-</div>
+  <div class="plano">
+    <h3>Plano Anual</h3>
+    <p>R$ 349,00 / ano</p>
+    <button onclick="assinar('anual')">Assinar</button>
+  </div>
 
-<div class="plano">
-  <h3>Plano Anual</h3>
-  <p>R$ 349,00 / ano</p>
-  <button onclick="assinar('anual')">Assinar</button>
-</div>
-
-<div id="erro" class="erro"></div>
-
+  <div id="erro" class="erro"></div>
 </div>
 
 <a class="voltar" href="index.html">Voltar</a>
