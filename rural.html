@@ -131,7 +131,7 @@
 
       <strong>Município</strong>
       <select id="municipioSelect">
-        <option value="Leme">Leme</option>
+        <option value="Leme">leme</option>
         <option value="campinas">Campinas</option>
       </select>
     </div>
@@ -161,13 +161,13 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    const dadosConfig = {
-      sigef: {
-        nome: 'SIGEF - Leme',
-        arquivo: 'sigef_leme.geojson'
-      }
-    };
-    campinas: {
+   const dadosConfig = {
+  leme: {
+    nome: 'SIGEF - Leme',
+    arquivo: 'sigef_leme.geojson',
+    cidade: 'Leme'
+  },
+  campinas: {
     nome: 'SIGEF - Campinas',
     arquivo: 'sigef_campinas.geojson',
     cidade: 'Campinas'
