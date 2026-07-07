@@ -132,6 +132,7 @@
       <strong>Município</strong>
       <select id="municipioSelect">
         <option value="Leme">Leme</option>
+        <option value="campinas">Campinas</option>
       </select>
     </div>
 
@@ -166,6 +167,12 @@
         arquivo: 'sigef_leme.geojson'
       }
     };
+    campinas: {
+    nome: 'SIGEF - Campinas',
+    arquivo: 'sigef_campinas.geojson',
+    cidade: 'Campinas'
+  }
+};
 
     const statusEl = document.getElementById('status');
     const resultadosEl = document.getElementById('resultados');
@@ -173,6 +180,7 @@
     const btnBuscar = document.getElementById('btnBuscar');
     const btnLimpar = document.getElementById('btnLimpar');
     const camadaSelect = document.getElementById('camadaSelect');
+    const municipioSelect = document.getElementById('municipioSelect');
 
     let camadaAtual = null;
     let dadosAtuais = null;
@@ -311,7 +319,7 @@
           camadaAtual = null;
         }
 
-        const chave = camadaSelect.value;
+        const chave = municipioSelect.value;
         const config = dadosConfig[chave];
         const resposta = await fetch(config.arquivo);
         if(!resposta.ok) throw new Error('Não foi possível carregar o arquivo ' + config.arquivo);
@@ -338,7 +346,7 @@
         }
 
         prepararBusca();
-        statusEl.textContent = `Base carregada: ${dadosAtuais.features.length} imóveis rurais em Leme/SP.`;
+        statusEl.textContent = `Base carregada: ${dadosAtuais.features.length} imóveis rurais em ${config.cidade}/SP.`;
       }catch(erro){
         console.error(erro);
         statusEl.textContent = 'Erro ao carregar a base rural.';
@@ -358,6 +366,7 @@
     });
     buscaEl.addEventListener('keydown', function(e){ if(e.key === 'Enter') buscar(); });
     camadaSelect.addEventListener('change', carregarCamada);
+    municipioSelect.addEventListener('change', carregarCamada);
 
     carregarCamada();
   </script>
