@@ -1,516 +1,262 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Matrimap - Login</title>
-<style>
-:root{
-  --azul:#0b3d91;
-  --azul-escuro:#082c68;
-  --azul-claro:#eaf2ff;
-  --branco:#ffffff;
-  --texto:#1f2937;
-  --muted:#667085;
-  --borda:#d9e2f1;
-  --erro:#b91c1c;
-  --sombra:0 30px 60px rgba(0,0,0,.18);
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  min-height:100vh;
-  color:var(--texto);
-  background:
-    linear-gradient(120deg, rgba(8,44,104,.86), rgba(11,61,145,.62)),
-    url('bemvindo.png') center center / cover no-repeat;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matrimap 2.0 — Produtividade Imobiliária</title>
+  
+  <!-- Tailwind CSS para visual limpo e moderno -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Leaflet CSS para o mapa -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Configurações do Supabase -->
+  <script src="supabase-config.js"></script>
 
-.page{
-  min-height:100vh;
-  display:grid;
-  grid-template-columns:minmax(380px, 520px) 1fr;
-  align-items:center;
-  gap:48px;
-  padding:32px 48px;
-}
-.left{
-  display:flex;
-  justify-content:flex-start;
-}
-.form-card{
-  width:100%;
-  max-width:500px;
-  background:rgba(255,255,255,.97);
-  border-radius:30px;
-  box-shadow:var(--sombra);
-  padding:34px 34px 28px;
-  position:relative;
-}
-.logo-wrap{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:20px;
-}
-.logo-badge{
-  width:48px;
-  height:48px;
-  border-radius:16px;
-  background:linear-gradient(135deg, var(--azul), #2a6ae0);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-  font-weight:700;
-}
-.logo-text{
-  display:flex;
-  flex-direction:column;
-}
-.logo-text strong{
-  color:var(--azul);
-  font-size:26px;
-  line-height:1;
-}
-.logo-text span{
-  color:#64748b;
-  font-size:13px;
-  margin-top:4px;
-}
-.title{
-  margin:0 0 8px;
-  font-size:34px;
-  color:#0f172a;
-}
-.subtitle{
-  margin:0 0 22px;
-  font-size:16px;
-  color:var(--muted);
-  line-height:1.6;
-}
-.error{
-  display:none;
-  margin:0 0 14px;
-  padding:12px 14px;
-  border-radius:12px;
-  background:#fef2f2;
-  color:var(--erro);
-  border:1px solid #fecaca;
-  font-size:14px;
-}
-.input-group{margin-bottom:14px}
-label{
-  display:block;
-  color:#344054;
-  font-size:14px;
-  font-weight:700;
-  margin-bottom:8px;
-}
-.input-wrap{
-  position:relative;
-}
-.input-icon{
-  position:absolute;
-  top:50%;
-  left:14px;
-  transform:translateY(-50%);
-  color:#94a3b8;
-  font-size:17px;
-  pointer-events:none;
-}
-input{
-  width:100%;
-  padding:16px 16px 16px 44px;
-  border:1px solid var(--borda);
-  border-radius:16px;
-  font-size:16px;
-  outline:none;
-  background:#fff;
-}
-input:focus{
-  border-color:var(--azul);
-  box-shadow:0 0 0 4px rgba(11,61,145,.10);
-}
-.btn{
-  width:100%;
-  border:none;
-  border-radius:16px;
-  padding:16px;
-  font-size:17px;
-  font-weight:700;
-  cursor:pointer;
-  background:var(--azul);
-  color:#fff;
-  transition:.2s;
-  margin-top:8px;
-}
-.btn:hover{background:var(--azul-escuro)}
-.link-row{
-  display:flex;
-  justify-content:space-between;
-  gap:16px;
-  margin-top:18px;
-  font-size:15px;
-  flex-wrap:wrap;
-}
-.link-row a{
-  color:var(--azul);
-  text-decoration:none;
-  font-weight:700;
-}
-.link-row a:hover{text-decoration:underline}
-.footer{
-  margin-top:24px;
-  padding-top:18px;
-  border-top:1px solid #e7eefb;
-  text-align:center;
-  font-size:14px;
-  color:#667085;
-  line-height:1.9;
-}
-
-.right{
-  display:flex;
-  justify-content:flex-end;
-}
-.hero{
-  width:min(100%, 680px);
-  color:#fff;
-  padding:24px;
-}
-.hero-badge{
-  display:inline-block;
-  padding:10px 18px;
-  border:1px solid rgba(255,255,255,.35);
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  font-size:14px;
-  margin-bottom:22px;
-}
-.hero h2{
-  margin:0 0 16px;
-  font-size:62px;
-  line-height:1.02;
-  max-width:620px;
-}
-.hero p{
-  margin:0;
-  font-size:20px;
-  line-height:1.75;
-  max-width:580px;
-  color:#eef4ff;
-}
-.hero-card{
-  margin-top:30px;
-  width:min(100%, 520px);
-  background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.18);
-  border-radius:28px;
-  padding:20px;
-  backdrop-filter:blur(8px);
-}
-.hero-card-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:16px;
-}
-.hero-brand{
-  font-size:20px;
-  font-weight:700;
-}
-.hero-chip{
-  padding:8px 12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.16);
-  font-size:12px;
-}
-.map-illus{
-  height:280px;
-  border-radius:22px;
-  overflow:hidden;
-  position:relative;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05)),
-    url('bemvindo.png') center center / cover no-repeat;
-}
-.map-illus::before,
-.map-illus::after{
-  content:"";
-  position:absolute;
-  border-radius:999px;
-  background:#fff;
-  box-shadow:0 8px 20px rgba(0,0,0,.18);
-}
-.map-illus::before{
-  width:18px;
-  height:18px;
-  top:72px;
-  left:88px;
-}
-.map-illus::after{
-  width:18px;
-  height:18px;
-  right:120px;
-  bottom:70px;
-}
-.pin{
-  position:absolute;
-  width:22px;
-  height:22px;
-  border-radius:50% 50% 50% 0;
-  background:#fff;
-  transform:rotate(-45deg);
-  box-shadow:0 8px 18px rgba(0,0,0,.22);
-}
-.pin::after{
-  content:"";
-  position:absolute;
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--azul);
-  top:7px;
-  left:7px;
-}
-.pin.p1{top:52px; right:92px}
-.pin.p2{bottom:58px; left:132px}
-.pin.p3{top:132px; left:228px}
-
-@media (max-width: 1100px){
-  .page{
-    grid-template-columns:1fr;
-    gap:24px;
-    padding:24px;
-  }
-  .left,.right{
-    justify-content:center;
-  }
-  .hero{
-    text-align:center;
-    padding:0;
-  }
-  .hero h2{
-    font-size:42px;
-    max-width:none;
-  }
-  .hero p{
-    max-width:none;
-    font-size:18px;
-  }
-  .hero-card{
-    margin-left:auto;
-    margin-right:auto;
-  }
-}
-@media (max-width: 640px){
-  .form-card{
-    padding:24px 20px;
-    border-radius:24px;
-  }
-  .title{font-size:28px}
-  .hero h2{font-size:34px}
-  .hero-card{display:none}
-}
-</style>
+  <style>
+    #mapa { height: calc(100vh - 64px); }
+  </style>
 </head>
-<body>
+<body class="bg-gray-100 font-sans text-gray-900">
 
-<div class="page">
-  <section class="left">
-    <div class="form-card">
-      <div class="logo-wrap">
-        <div class="logo-badge">⌖</div>
-        <div class="logo-text">
-          <strong>MATRIMAP</strong>
-          <span>Pesquisa imobiliária em mapa</span>
-        </div>
-      </div>
+  <!-- Navegação Principal -->
+  <nav class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 shadow-sm">
+    <div class="flex items-center space-x-3">
+      <div class="bg-blue-600 text-white font-bold p-2 rounded-lg text-xl tracking-wider">M</div>
+      <span class="font-bold text-xl text-gray-800">MATRIMAP <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">2.0</span></span>
+    </div>
 
-      <h1 class="title">Entrar</h1>
-      <p class="subtitle">Acesse sua conta para consultar dados no mapa de forma rápida, organizada e profissional.</p>
-
-      <div id="errorBox" class="error"></div>
-
-      <div class="input-group">
-        <label for="email">Email</label>
-        <div class="input-wrap">
-          <span class="input-icon">✉</span>
-          <input id="email" type="email" placeholder="Digite seu email">
-        </div>
-      </div>
-
-      <div class="input-group">
-        <label for="senha">Senha</label>
-        <div class="input-wrap">
-          <span class="input-icon">🔒</span>
-          <input id="senha" type="password" placeholder="Digite sua senha">
-        </div>
-      </div>
-
-      <button class="btn" onclick="login()">Entrar</button>
-
-      <div class="link-row">
-        <a href="cadastro.html">Criar conta</a>
-        <a href="#" onclick="resetSenha(event)">Esqueci minha senha</a>
-      </div>
-
-      <div class="footer">
-        <div>Email: contatomatrimap@gmail.com</div>
-        <div>WhatsApp: 19 99949-3684</div>
+    <!-- Barra de Pesquisa Híbrida (Busca Objetiva) -->
+    <div class="flex-1 max-w-xl mx-6">
+      <div class="relative">
+        <input 
+          type="text" 
+          id="campoBusca"
+          placeholder="Pesquisar por Matrícula, Endereço, Proprietário ou IPTU..." 
+          class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
       </div>
     </div>
-  </section>
 
-  <section class="right">
-    <div class="hero">
-      <div class="hero-badge">Localize matrículas imobiliárias em segundos</div>
-      <h2>Consulte imóveis no mapa com mais clareza e rapidez.</h2>
-      <p>
-        Visualize localizações, organize buscas urbanas e acesse sua plataforma com um visual mais profissional.
-      </p>
+    <!-- Ações e Menu -->
+    <div class="flex items-center space-x-3">
+      <button 
+        onclick="abrirModalNovoProjeto()" 
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-1 shadow-sm transition">
+        <span>+ Novo Projeto</span>
+      </button>
+      <div id="statusAuth" class="text-xs bg-gray-100 border border-gray-300 text-gray-600 px-3 py-1.5 rounded-lg">
+        Carregando...
+      </div>
     </div>
-  </section>
-</div>
+  </nav>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+  <!-- Painel Principal (Mapa + Sidebar do Imóvel) -->
+  <div class="flex h-[calc(100vh-64px)] overflow-hidden">
+    
+    <!-- Mapa Leaflet (Exploração Espacial) -->
+    <div class="flex-1 relative">
+      <div id="mapa" class="w-full h-full"></div>
+    </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC-H3jvvvtlv4g3iuP7rVgr5K-R8YSjMYo",
-  authDomain: "matrimap-899b3.firebaseapp.com",
-  databaseURL: "https://matrimap-899b3-default-rtdb.firebaseio.com",
-  projectId: "matrimap-899b3",
-  storageBucket: "matrimap-899b3.firebasestorage.app",
-  messagingSenderId: "1094066148423",
-  appId: "1:1094066148423:web:260b14f4e2259681554d62"
-};
+    <!-- Sidebar de Detalhes do Projeto do Imóvel -->
+    <div id="sidebarImovel" class="w-96 bg-white border-l border-gray-200 p-6 overflow-y-auto hidden shadow-lg">
+      <div class="flex justify-between items-start mb-4 border-b pb-3">
+        <div>
+          <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Projeto do Imóvel</span>
+          <h2 id="sideTitulo" class="text-xl font-bold text-gray-800">Selecione um imóvel</h2>
+        </div>
+        <button onclick="fecharSidebar()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+      </div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-const errorBox = document.getElementById("errorBox");
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-medium text-gray-500 uppercase">Matrícula</label>
+          <p id="sideMatricula" class="text-sm font-semibold text-gray-800">-</p>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-500 uppercase">Cartório</label>
+          <p id="sideCartorio" class="text-sm text-gray-800">-</p>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-500 uppercase">Inscrição IPTU</label>
+          <p id="sideIPTU" class="text-sm text-gray-800">-</p>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-500 uppercase">Endereço Completo</label>
+          <p id="sideEndereco" class="text-sm text-gray-800">-</p>
+        </div>
 
-function showError(msg){
-  errorBox.textContent = msg;
-  errorBox.style.display = "block";
-}
-function hideError(){
-  errorBox.style.display = "none";
-  errorBox.textContent = "";
-}
-function isExpired(vencimento){
-  if(!vencimento) return true;
-  return new Date(vencimento).getTime() < Date.now();
-}
+        <hr class="my-4 border-gray-200" />
 
-async function decidirAcesso(user){
-  const snap = await get(ref(db, "usuarios/" + user.uid));
-  if(!snap.exists()){
-    window.location.href = "pagamento.html";
-    return;
-  }
+        <!-- Botões de Ação do Cofre Privado -->
+        <div class="space-y-2">
+          <button onclick="alert('Módulo de Conferência em construção!')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm flex items-center justify-center space-x-2">
+            <span>🔎 Iniciar Conferência</span>
+          </button>
+          <button onclick="alert('Módulo de Atos da Matrícula em construção!')" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 rounded-lg text-sm flex items-center justify-center space-x-2">
+            <span>📄 Ver Atos & Gravames</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  const dados = snap.val();
-  localStorage.setItem("tipoUsuario", "usuario");
-  localStorage.setItem("logado", "sim");
-  localStorage.setItem("usuarioNome", dados.nome || "");
-  localStorage.setItem("uid", user.uid);
+  <!-- Modal do "+ Novo Projeto" (Cofre Privado) -->
+  <div id="modalNovoProjeto" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative">
+      <div class="flex justify-between items-center mb-4 border-b pb-3">
+        <h3 class="text-lg font-bold text-gray-800">Cadastrar Novo Projeto de Imóvel</h3>
+        <button onclick="fecharModalNovoProjeto()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+      </div>
 
-  const status = dados.status || "pendente_pagamento";
-  const vencimento = dados.vencimento || "";
-  localStorage.setItem("statusUsuario", status);
-  localStorage.setItem("vencimento", vencimento);
+      <form id="formNovoProjeto" onsubmit="salvarNovoProjeto(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Nome do Projeto *</label>
+          <input type="text" id="inputNomeProjeto" required placeholder="Ex: Terreno João Silva" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Nº da Matrícula</label>
+            <input type="text" id="inputMatricula" placeholder="Ex: 12.345" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Inscrição IPTU</label>
+            <input type="text" id="inputIPTU" placeholder="Ex: 01.02.003" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Endereço Completo</label>
+          <input type="text" id="inputEndereco" placeholder="Ex: Rua Armando Salles de Oliveira, Leme/SP" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Latitude</label>
+            <input type="number" step="any" id="inputLat" placeholder="-22.1856" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 mb-1">Longitude</label>
+            <input type="number" step="any" id="inputLng" placeholder="-47.3889" class="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+          </div>
+        </div>
 
-  if(status === "ativo" && !isExpired(vencimento)){
-    window.location.href = "mapa.html";
-  } else {
-    window.location.href = "pagamento.html";
-  }
-}
+        <div class="flex justify-end space-x-3 pt-3 border-t">
+          <button type="button" onclick="fecharModalNovoProjeto()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Salvar Projeto</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-window.login = async function(){
-  hideError();
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  const email = document.getElementById("email").value.trim();
-  const senha = document.getElementById("senha").value;
+  <!-- Lógica Principal da Aplicação -->
+  <script>
+    let map;
+    let marcadores = [];
 
-  if(!email || !senha){
-    showError("Preencha email e senha para entrar.");
-    return;
-  }
+    // 1. Inicializar o Mapa Leaflet
+    function inicializarMapa() {
+      // Coordenadas padrão centralizadas em Leme/SP
+      map = L.map('mapa').setView([-22.1856, -47.3889], 14);
 
-  if(email === "admin@matrimap.com" && senha === "@Bsl415034"){
-    localStorage.setItem("tipoUsuario","admin");
-    localStorage.setItem("logado","sim");
-    localStorage.setItem("usuarioNome","Administrador");
-    localStorage.removeItem("statusUsuario");
-    localStorage.removeItem("vencimento");
-    localStorage.removeItem("uid");
-    window.location.href = "mapa.html";
-    return;
-  }
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap / Matrimap 2.0'
+      }).addTo(map);
 
-  try{
-    await setPersistence(auth, browserLocalPersistence);
-    const cred = await signInWithEmailAndPassword(auth, email, senha);
-
-    try{
-      await decidirAcesso(cred.user);
-    }catch(dbError){
-      console.error("Erro ao verificar acesso no banco:", dbError);
-      showError("Login feito, mas houve erro ao verificar seu acesso no banco. Avise o suporte.");
+      carregarImoveisDoBanco();
     }
 
-  }catch(error){
-    console.error("Erro no login:", error);
+    // 2. Carregar Imóveis da Base do Supabase
+    async function carregarImoveisDoBanco() {
+      if (typeof supabaseClient === 'undefined') return;
 
-    const codigo = error && error.code ? error.code : "erro-desconhecido";
+      const { data, error } = await supabaseClient
+        .from('base_imoveis_mapa')
+        .select('*');
 
-    if(codigo === "auth/invalid-credential" || codigo === "auth/wrong-password"){
-      showError("Email ou senha incorretos. Confira a nova senha e tente novamente.");
-    }else if(codigo === "auth/user-not-found"){
-      showError("Este email não está cadastrado no Matrimap.");
-    }else if(codigo === "auth/invalid-email"){
-      showError("Email inválido. Confira se digitou corretamente.");
-    }else if(codigo === "auth/too-many-requests"){
-      showError("Muitas tentativas de login. Aguarde alguns minutos e tente novamente.");
-    }else{
-      showError("Erro no login: " + codigo);
+      if (error) {
+        console.error("Erro ao carregar mapa:", error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        data.forEach(imovel => {
+          if (imovel.latitude && imovel.longitude) {
+            const marker = L.marker([imovel.latitude, imovel.longitude])
+              .addTo(map)
+              .bindPopup(`<b>Matrícula ${imovel.matricula_numero}</b><br>${imovel.endereco_completo || ''}`);
+
+            marker.on('click', () => abrirSidebarImovel(imovel));
+            marcadores.push(marker);
+          }
+        });
+      }
     }
-  }
-}
 
-window.resetSenha = async function(event){
-  if(event) event.preventDefault();
-  hideError();
+    // 3. Funções da Sidebar de Detalhes
+    function abrirSidebarImovel(imovel) {
+      document.getElementById('sideTitulo').innerText = `Matrícula ${imovel.matricula_numero || '-'}`;
+      document.getElementById('sideMatricula').innerText = imovel.matricula_numero || '-';
+      document.getElementById('sideCartorio').innerText = imovel.cartorio_nome || '-';
+      document.getElementById('sideIPTU').innerText = imovel.inscricao_iptu || '-';
+      document.getElementById('sideEndereco').innerText = imovel.endereco_completo || '-';
 
-  const email = document.getElementById("email").value.trim();
-  if(!email){
-    showError("Digite seu email para receber o link de redefinição.");
-    return;
-  }
+      document.getElementById('sidebarImovel').classList.remove('hidden');
+    }
 
-  try{
-    await sendPasswordResetEmail(auth, email);
-    alert("Email de redefinição enviado com sucesso.");
-  }catch(error){
-    showError("Não foi possível enviar o email de redefinição.");
-  }
-}
+    function fecharSidebar() {
+      document.getElementById('sidebarImovel').classList.add('hidden');
+    }
 
-document.getElementById("email").addEventListener("keydown", e => {
-  if(e.key === "Enter") login();
-});
-document.getElementById("senha").addEventListener("keydown", e => {
-  if(e.key === "Enter") login();
-});
-</script>
+    // 4. Funções do Modal
+    function abrirModalNovoProjeto() {
+      document.getElementById('modalNovoProjeto').classList.remove('hidden');
+    }
+
+    function fecharModalNovoProjeto() {
+      document.getElementById('modalNovoProjeto').classList.add('hidden');
+    }
+
+    // 5. Salvar Projeto Privado no Supabase
+    async function salvarNovoProjeto(event) {
+      event.preventDefault();
+
+      const novoProjeto = {
+        nome_projeto: document.getElementById('inputNomeProjeto').value,
+        matricula_numero: document.getElementById('inputMatricula').value,
+        inscricao_iptu: document.getElementById('inputIPTU').value,
+        endereco_completo: document.getElementById('inputEndereco').value,
+        latitude: parseFloat(document.getElementById('inputLat').value) || null,
+        longitude: parseFloat(document.getElementById('inputLng').value) || null
+      };
+
+      const { data, error } = await supabaseClient
+        .from('projetos_imoveis')
+        .insert([novoProjeto]);
+
+      if (error) {
+        alert("Erro ao salvar projeto: " + error.message);
+      } else {
+        alert("Projeto criado com sucesso no seu cofre privado!");
+        fecharModalNovoProjeto();
+        document.getElementById('formNovoProjeto').reset();
+      }
+    }
+
+    // Inicialização ao carregar a página
+    window.onload = () => {
+      inicializarMapa();
+      document.getElementById('statusAuth').innerText = "Conectado ao Supabase ✓";
+    };
+  </script>
 </body>
 </html>
